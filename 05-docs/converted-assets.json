@@ -1,0 +1,133 @@
+[
+  {
+    "name": "gothic_mausoleum",
+    "vertices": 48600,
+    "triangles": 16200,
+    "bones": 0,
+    "materials": [
+      {
+        "name": "tripo_mat_d121e030",
+        "color": "cccccc",
+        "map": "base_color_texture"
+      }
+    ],
+    "clips": [],
+    "bounds": {
+      "min": [
+        -0.3059082329273224,
+        -1.9347839498768962e-8,
+        -0.44262701171620766
+      ],
+      "max": [
+        0.3059081733226776,
+        0.9995117380978387,
+        0.4426269382238384
+      ]
+    },
+    "errors": [
+      "/models/tripo_convert_d121e030-26c8-489b-8e91-56463b8f342f.fbm/tripo_image_d121e030-26c8-489b-8e91-56463b8f342f_0_0.jpg"
+    ]
+  },
+  {
+    "name": "gargoyle_3d_model",
+    "vertices": 51945,
+    "triangles": 17315,
+    "bones": 0,
+    "materials": [
+      {
+        "name": "tripo_mat_8a80afe2",
+        "color": "cccccc",
+        "map": "base_color_texture"
+      }
+    ],
+    "clips": [],
+    "bounds": {
+      "min": [
+        -0.479248046875,
+        -1.0831802035990346e-8,
+        -0.2478027780650466
+      ],
+      "max": [
+        0.479248046875,
+        0.9995117295818011,
+        0.24780273437499978
+      ]
+    },
+    "errors": [
+      "/models/tripo_convert_8a80afe2-b234-46fd-b1f3-344a7efa6a82.fbm/tripo_image_8a80afe2-b234-46fd-b1f3-344a7efa6a82_0_0.jpg"
+    ]
+  },
+  {
+    "name": "catgoyle_3d_model",
+    "vertices": 53418,
+    "triangles": 17806,
+    "bones": 0,
+    "materials": [
+      {
+        "name": "tripo_mat_876c70e3",
+        "color": "cccccc",
+        "map": "base_color_texture"
+      }
+    ],
+    "clips": [],
+    "bounds": {
+      "min": [
+        -0.1809082180261612,
+        -1.1621509770633977e-8,
+        -0.26586918431504664
+      ],
+      "max": [
+        0.1809082180261612,
+        0.9995117303715089,
+        0.2658691406249998
+      ]
+    },
+    "errors": [
+      "/models/tripo_convert_876c70e3-1717-4604-a7ce-ebffaf9875d0.fbm/tripo_image_876c70e3-1717-4604-a7ce-ebffaf9875d0_0_0.jpg"
+    ]
+  },
+  {
+    "name": "Skull_Horned_Creature_Rigged",
+    "vertices": 28539,
+    "triangles": 9513,
+    "bones": 65,
+    "materials": [
+      {
+        "name": "tripo_mat_001b695a",
+        "color": "cccccc",
+        "map": "base_color_texture",
+        "normalMap": "normalmap_texture"
+      }
+    ],
+    "clips": [
+      {
+        "name": "angry_01",
+        "duration": 3.5,
+        "tracks": 198
+      },
+      {
+        "name": "agree",
+        "duration": 4,
+        "tracks": 198
+      },
+      {
+        "name": "afraid",
+        "duration": 2.5833332538604736,
+        "tracks": 198
+      }
+    ],
+    "bounds": {
+      "min": [
+        -0.34621607273382665,
+        -0.029475300756370997,
+        -0.3370403338021947
+      ],
+      "max": [
+        0.393040224485179,
+        0.962862281798914,
+        0.33011106818117086
+      ]
+    },
+    "errors": []
+  }
+]

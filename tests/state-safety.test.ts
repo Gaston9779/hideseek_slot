@@ -1,0 +1,4 @@
+import {it,expect} from 'vitest';import {SlotGame} from '../src/engine/game';import {SeededRng} from '../src/math/rng';
+it('rejects a second settlement without crediting twice',()=>{const g=new SlotGame(new SeededRng(5));g.spin();g.settle();const balance=g.balance;expect(()=>g.settle()).toThrow('No unsettled outcome');expect(g.balance).toBe(balance);});
+it('cannot reset or change bet while a result is pending',()=>{const g=new SlotGame(new SeededRng(6));g.spin();const bet=g.bet;g.changeBet(1);expect(g.bet).toBe(bet);expect(()=>g.reset()).toThrow();g.settle();g.reset();expect(g.balance).toBe(100000);});
+it('a retrigger on the final free spin still adds five, not ten',()=>{const g=new SlotGame(new SeededRng(1));g.freeSpins=1;g.featureAwarded=10;g.phase='free-spins';g.spin();g.last!.evaluation.scatterCount=3;g.settle();expect(g.freeSpins).toBe(5);expect(g.featureAwarded).toBe(15);});

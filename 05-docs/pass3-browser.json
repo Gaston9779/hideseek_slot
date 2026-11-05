@@ -1,0 +1,963 @@
+{
+  "errors": [],
+  "console": [],
+  "responses": [
+    {
+      "url": "http://127.0.0.1:5173/?qa=1",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/assets/skull-hunt-logo.png",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/main.ts?t=1793915544034",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/@vite/client",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/style.css?t=1793915101569",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/engine/game.ts?t=1793915345323",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/math/rng.ts",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/vite/dist/client/env.mjs",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/config/game.ts",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/math/slot.ts",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/rendering/scene.ts?t=1793915544034",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/math/evaluate.ts",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/three_examples_jsm_utils_SkeletonUtils__js.js?v=f7512395",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/rendering/geometry.ts?t=1793915288510",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/three.js?v=f7512395",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/three_examples_jsm_loaders_GLTFLoader__js.js?v=f7512395",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/rendering/symbols.ts?t=1793915544034",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/rendering/atmosphere.ts",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/animation/mascot.ts?t=1793915526698",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/three_examples_jsm_utils_BufferGeometryUtils__js.js?v=f7512395",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/three_examples_jsm_geometries_RoundedBoxGeometry__js.js?v=f7512395",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/chunk-KF3ZM4MI.js?v=f7512395",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/chunk-IT3TP6RZ.js?v=f7512395",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/assets/Skull_Horned_Creature.glb",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/assets/scenery/gothic_mausoleum.glb",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/assets/scenery/Skull_Horned_Creature_Rigged.glb",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/assets/scenery/gargoyle_3d_model.glb",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/assets/scenery/catgoyle_3d_model.glb",
+      "status": 200
+    },
+    {
+      "url": "blob:http://127.0.0.1:5173/aa9f6e28-758b-4113-b632-25f4ece5f2aa",
+      "status": 200
+    },
+    {
+      "url": "blob:http://127.0.0.1:5173/b9cb50ff-88b9-4543-9662-29fba5b8def7",
+      "status": 200
+    },
+    {
+      "url": "blob:http://127.0.0.1:5173/d2de1dce-ed24-41f1-9f95-445bba2338e9",
+      "status": 200
+    },
+    {
+      "url": "blob:http://127.0.0.1:5173/b9f708d4-ed89-4e1d-a7c3-0315d7088c31",
+      "status": 200
+    },
+    {
+      "url": "blob:http://127.0.0.1:5173/9b7905cd-0cb3-4654-b499-89cc1758510c",
+      "status": 200
+    }
+  ],
+  "checks": [
+    "Bet increase/decrease",
+    "Real spin, disabled controls, grid equals generated outcome, exact credit accounting",
+    "Supplied agree/afraid/angry clips play through AnimationMixer",
+    "Paytable and menu/reset",
+    "Responsive 1280x720",
+    "Responsive 844x390"
+  ],
+  "initial": {
+    "loaded": [
+      {
+        "id": "mausoleum",
+        "file": "scenery/gothic_mausoleum.glb",
+        "meshes": 1,
+        "triangles": 16200,
+        "clips": []
+      },
+      {
+        "id": "gargoyle",
+        "file": "scenery/gargoyle_3d_model.glb",
+        "meshes": 1,
+        "triangles": 17315,
+        "clips": []
+      },
+      {
+        "id": "catgoyle",
+        "file": "scenery/catgoyle_3d_model.glb",
+        "meshes": 1,
+        "triangles": 17806,
+        "clips": []
+      },
+      {
+        "id": "skull",
+        "file": "Skull_Horned_Creature.glb",
+        "meshes": 1,
+        "triangles": 9513,
+        "clips": []
+      },
+      {
+        "id": "mascot",
+        "file": "scenery/Skull_Horned_Creature_Rigged.glb",
+        "meshes": 1,
+        "triangles": 9513,
+        "clips": [
+          "angry_01",
+          "agree",
+          "afraid"
+        ]
+      }
+    ],
+    "animation": {
+      "state": "idle",
+      "time": 3.4148999999761576,
+      "actionTime": 0.21489999997615675,
+      "pose": {
+        "mixamorigSpine2": [
+          -0.005691182762539761,
+          0.09983161478268725,
+          0.1781837484348685,
+          0.9789033811639472
+        ],
+        "mixamorigHead": [
+          -0.05068468168242607,
+          0.10111226029187044,
+          0.05088872373421434,
+          0.9922790527750045
+        ],
+        "mixamorigRightArm": [
+          0.4718914147061348,
+          0.028301773030146974,
+          0.01872276906740727,
+          0.8810033826770708
+        ]
+      },
+      "clips": [
+        {
+          "name": "angry_01",
+          "duration": 3.5,
+          "tracks": 198
+        },
+        {
+          "name": "agree",
+          "duration": 4,
+          "tracks": 198
+        },
+        {
+          "name": "afraid",
+          "duration": 2.5833332538604736,
+          "tracks": 198
+        },
+        {
+          "name": "idle",
+          "duration": 3.2,
+          "tracks": 2
+        },
+        {
+          "name": "attention",
+          "duration": 1.2,
+          "tracks": 2
+        },
+        {
+          "name": "win",
+          "duration": 1.8,
+          "tracks": 2
+        },
+        {
+          "name": "anticipation",
+          "duration": 1.6,
+          "tracks": 2
+        }
+      ]
+    },
+    "mascotBounds": {
+      "min": [
+        -8.96173196137163,
+        1.0499999999999998,
+        0.6516277030784958
+      ],
+      "max": [
+        -4.7382680386283695,
+        6.200000000000001,
+        4.548372296921505
+      ],
+      "screen": {
+        "left": 0.07992012706030782,
+        "right": 0.2778943797693584,
+        "bottom": 0.8168734047988705,
+        "top": 0.4326205229659616
+      }
+    },
+    "grid": [
+      [
+        "TOMB",
+        "CHEST",
+        "LANTERN"
+      ],
+      [
+        "WILD",
+        "GHOST",
+        "SKULL"
+      ],
+      [
+        "LANTERN",
+        "KEY",
+        "SCATTER"
+      ],
+      [
+        "CHEST",
+        "POTION",
+        "TOMB"
+      ],
+      [
+        "POTION",
+        "SCATTER",
+        "GARGOYLE"
+      ]
+    ],
+    "spinning": false,
+    "drawCalls": 325,
+    "triangles": 303725,
+    "sceneObjects": 338,
+    "elapsed": 3.4148999999761576,
+    "game": {
+      "phase": "ready",
+      "balance": 100000,
+      "bet": 100,
+      "freeSpins": 0
+    }
+  },
+  "during": {
+    "loaded": [
+      {
+        "id": "mausoleum",
+        "file": "scenery/gothic_mausoleum.glb",
+        "meshes": 1,
+        "triangles": 16200,
+        "clips": []
+      },
+      {
+        "id": "gargoyle",
+        "file": "scenery/gargoyle_3d_model.glb",
+        "meshes": 1,
+        "triangles": 17315,
+        "clips": []
+      },
+      {
+        "id": "catgoyle",
+        "file": "scenery/catgoyle_3d_model.glb",
+        "meshes": 1,
+        "triangles": 17806,
+        "clips": []
+      },
+      {
+        "id": "skull",
+        "file": "Skull_Horned_Creature.glb",
+        "meshes": 1,
+        "triangles": 9513,
+        "clips": []
+      },
+      {
+        "id": "mascot",
+        "file": "scenery/Skull_Horned_Creature_Rigged.glb",
+        "meshes": 1,
+        "triangles": 9513,
+        "clips": [
+          "angry_01",
+          "agree",
+          "afraid"
+        ]
+      }
+    ],
+    "animation": {
+      "state": "attention",
+      "time": 4.767300000071522,
+      "actionTime": 0.3802000000476838,
+      "pose": {
+        "mixamorigSpine2": [
+          -0.0008550203407145111,
+          0.09498744016237784,
+          0.1792341849127842,
+          0.9792097762448873
+        ],
+        "mixamorigHead": [
+          -0.04828359908083985,
+          0.08823382163559622,
+          0.04473903261062844,
+          0.9939224979594118
+        ],
+        "mixamorigRightArm": [
+          0.482425232855472,
+          0.029132241487876787,
+          0.01576611064231482,
+          0.875310609247762
+        ]
+      },
+      "clips": [
+        {
+          "name": "angry_01",
+          "duration": 3.5,
+          "tracks": 198
+        },
+        {
+          "name": "agree",
+          "duration": 4,
+          "tracks": 198
+        },
+        {
+          "name": "afraid",
+          "duration": 2.5833332538604736,
+          "tracks": 198
+        },
+        {
+          "name": "idle",
+          "duration": 3.2,
+          "tracks": 2
+        },
+        {
+          "name": "attention",
+          "duration": 1.2,
+          "tracks": 2
+        },
+        {
+          "name": "win",
+          "duration": 1.8,
+          "tracks": 2
+        },
+        {
+          "name": "anticipation",
+          "duration": 1.6,
+          "tracks": 2
+        }
+      ]
+    },
+    "mascotBounds": {
+      "min": [
+        -8.96173196137163,
+        1.0499999999999998,
+        0.6516277030784958
+      ],
+      "max": [
+        -4.7382680386283695,
+        6.200000000000001,
+        4.548372296921505
+      ],
+      "screen": {
+        "left": 0.07992012706030782,
+        "right": 0.2778943797693584,
+        "bottom": 0.8168734047988705,
+        "top": 0.4326205229659616
+      }
+    },
+    "grid": [
+      [
+        "TOMB",
+        "CHEST",
+        "LANTERN"
+      ],
+      [
+        "WILD",
+        "GHOST",
+        "SKULL"
+      ],
+      [
+        "LANTERN",
+        "KEY",
+        "SCATTER"
+      ],
+      [
+        "CHEST",
+        "POTION",
+        "TOMB"
+      ],
+      [
+        "POTION",
+        "SCATTER",
+        "GARGOYLE"
+      ]
+    ],
+    "spinning": true,
+    "drawCalls": 354,
+    "triangles": 400281,
+    "sceneObjects": 448,
+    "elapsed": 4.767300000071522,
+    "game": {
+      "phase": "spinning",
+      "balance": 99900,
+      "bet": 100,
+      "freeSpins": 0,
+      "last": {
+        "stops": [
+          25,
+          83,
+          77,
+          78,
+          9
+        ],
+        "grid": [
+          [
+            "KEY",
+            "KEY",
+            "KEY"
+          ],
+          [
+            "KEY",
+            "KEY",
+            "KEY"
+          ],
+          [
+            "BLASTER",
+            "SKULL",
+            "SKULL"
+          ],
+          [
+            "LANTERN",
+            "LANTERN",
+            "LANTERN"
+          ],
+          [
+            "KEY",
+            "KEY",
+            "KEY"
+          ]
+        ],
+        "evaluation": {
+          "lineWins": [],
+          "scatterCount": 0,
+          "scatterAmount": 0,
+          "totalMultiplier": 0,
+          "capped": false
+        }
+      }
+    }
+  },
+  "after": {
+    "loaded": [
+      {
+        "id": "mausoleum",
+        "file": "scenery/gothic_mausoleum.glb",
+        "meshes": 1,
+        "triangles": 16200,
+        "clips": []
+      },
+      {
+        "id": "gargoyle",
+        "file": "scenery/gargoyle_3d_model.glb",
+        "meshes": 1,
+        "triangles": 17315,
+        "clips": []
+      },
+      {
+        "id": "catgoyle",
+        "file": "scenery/catgoyle_3d_model.glb",
+        "meshes": 1,
+        "triangles": 17806,
+        "clips": []
+      },
+      {
+        "id": "skull",
+        "file": "Skull_Horned_Creature.glb",
+        "meshes": 1,
+        "triangles": 9513,
+        "clips": []
+      },
+      {
+        "id": "mascot",
+        "file": "scenery/Skull_Horned_Creature_Rigged.glb",
+        "meshes": 1,
+        "triangles": 9513,
+        "clips": [
+          "angry_01",
+          "agree",
+          "afraid"
+        ]
+      }
+    ],
+    "animation": {
+      "state": "idle",
+      "time": 6.9226000000834444,
+      "actionTime": 0,
+      "pose": {
+        "mixamorigSpine2": [
+          0.03901885449886322,
+          0.07183724641799927,
+          0.17312060296535492,
+          0.9815019965171814
+        ],
+        "mixamorigHead": [
+          0.0396873287128898,
+          -0.16029175805858736,
+          0.12275291349642586,
+          0.9786026715986061
+        ],
+        "mixamorigRightArm": [
+          0.39296950028543465,
+          0.016671992347256078,
+          -0.12621312546650587,
+          0.9106960462436046
+        ]
+      },
+      "clips": [
+        {
+          "name": "angry_01",
+          "duration": 3.5,
+          "tracks": 198
+        },
+        {
+          "name": "agree",
+          "duration": 4,
+          "tracks": 198
+        },
+        {
+          "name": "afraid",
+          "duration": 2.5833332538604736,
+          "tracks": 198
+        },
+        {
+          "name": "idle",
+          "duration": 3.2,
+          "tracks": 2
+        },
+        {
+          "name": "attention",
+          "duration": 1.2,
+          "tracks": 2
+        },
+        {
+          "name": "win",
+          "duration": 1.8,
+          "tracks": 2
+        },
+        {
+          "name": "anticipation",
+          "duration": 1.6,
+          "tracks": 2
+        }
+      ]
+    },
+    "mascotBounds": {
+      "min": [
+        -8.96173196137163,
+        1.0499999999999998,
+        0.6516277030784958
+      ],
+      "max": [
+        -4.7382680386283695,
+        6.200000000000001,
+        4.548372296921505
+      ],
+      "screen": {
+        "left": 0.07992012706030782,
+        "right": 0.2778943797693584,
+        "bottom": 0.8168734047988705,
+        "top": 0.4326205229659616
+      }
+    },
+    "grid": [
+      [
+        "KEY",
+        "KEY",
+        "KEY"
+      ],
+      [
+        "KEY",
+        "KEY",
+        "KEY"
+      ],
+      [
+        "BLASTER",
+        "SKULL",
+        "SKULL"
+      ],
+      [
+        "LANTERN",
+        "LANTERN",
+        "LANTERN"
+      ],
+      [
+        "KEY",
+        "KEY",
+        "KEY"
+      ]
+    ],
+    "spinning": false,
+    "drawCalls": 335,
+    "triangles": 263956,
+    "sceneObjects": 351,
+    "elapsed": 6.9226000000834444,
+    "game": {
+      "phase": "ready",
+      "balance": 99900,
+      "bet": 100,
+      "freeSpins": 0,
+      "last": {
+        "stops": [
+          25,
+          83,
+          77,
+          78,
+          9
+        ],
+        "grid": [
+          [
+            "KEY",
+            "KEY",
+            "KEY"
+          ],
+          [
+            "KEY",
+            "KEY",
+            "KEY"
+          ],
+          [
+            "BLASTER",
+            "SKULL",
+            "SKULL"
+          ],
+          [
+            "LANTERN",
+            "LANTERN",
+            "LANTERN"
+          ],
+          [
+            "KEY",
+            "KEY",
+            "KEY"
+          ]
+        ],
+        "evaluation": {
+          "lineWins": [],
+          "scatterCount": 0,
+          "scatterAmount": 0,
+          "totalMultiplier": 0,
+          "capped": false
+        }
+      }
+    }
+  },
+  "attention": {
+    "state": "attention",
+    "time": 7.497200000047681,
+    "actionTime": 0.5485000000000001,
+    "pose": {
+      "mixamorigSpine2": [
+        0.005051971143652913,
+        0.0907138304883322,
+        0.17893935271183675,
+        0.9796561474379655
+      ],
+      "mixamorigHead": [
+        -0.045645830590792684,
+        0.07357264320046336,
+        0.041369446816110565,
+        0.9953853846091788
+      ],
+      "mixamorigRightArm": [
+        0.48962747815971963,
+        0.03041107797910306,
+        0.012747900204722938,
+        0.8713079670857318
+      ]
+    },
+    "clips": [
+      {
+        "name": "angry_01",
+        "duration": 3.5,
+        "tracks": 198
+      },
+      {
+        "name": "agree",
+        "duration": 4,
+        "tracks": 198
+      },
+      {
+        "name": "afraid",
+        "duration": 2.5833332538604736,
+        "tracks": 198
+      },
+      {
+        "name": "idle",
+        "duration": 3.2,
+        "tracks": 2
+      },
+      {
+        "name": "attention",
+        "duration": 1.2,
+        "tracks": 2
+      },
+      {
+        "name": "win",
+        "duration": 1.8,
+        "tracks": 2
+      },
+      {
+        "name": "anticipation",
+        "duration": 1.6,
+        "tracks": 2
+      }
+    ]
+  },
+  "win": {
+    "state": "win",
+    "time": 9.713600000083439,
+    "actionTime": 0.5711999999880791,
+    "pose": {
+      "mixamorigSpine2": [
+        0.0060997179633020425,
+        0.08998119271633778,
+        0.17867994854681757,
+        0.979765095859491
+      ],
+      "mixamorigHead": [
+        -0.04517420265091711,
+        0.0709674931190932,
+        0.04073916377663133,
+        0.9956220362948227
+      ],
+      "mixamorigRightArm": [
+        0.49065874201048054,
+        0.030702520831988968,
+        0.012340500803907303,
+        0.8707233034288281
+      ]
+    },
+    "clips": [
+      {
+        "name": "angry_01",
+        "duration": 3.5,
+        "tracks": 198
+      },
+      {
+        "name": "agree",
+        "duration": 4,
+        "tracks": 198
+      },
+      {
+        "name": "afraid",
+        "duration": 2.5833332538604736,
+        "tracks": 198
+      },
+      {
+        "name": "idle",
+        "duration": 3.2,
+        "tracks": 2
+      },
+      {
+        "name": "attention",
+        "duration": 1.2,
+        "tracks": 2
+      },
+      {
+        "name": "win",
+        "duration": 1.8,
+        "tracks": 2
+      },
+      {
+        "name": "anticipation",
+        "duration": 1.6,
+        "tracks": 2
+      }
+    ]
+  },
+  "anticipation": {
+    "state": "anticipation",
+    "time": 11.542000000119202,
+    "actionTime": 0.5867999999523164,
+    "pose": {
+      "mixamorigSpine2": [
+        0.04352694368797168,
+        0.12314933384385211,
+        -0.06840558461644294,
+        0.9890704508233347
+      ],
+      "mixamorigHead": [
+        0.05488055387686385,
+        0.1158513227250422,
+        0.3262142543938531,
+        0.9365633214437499
+      ],
+      "mixamorigRightArm": [
+        0.3881956781185631,
+        -0.04927029551974884,
+        -0.21832223450092156,
+        0.8939865332595544
+      ]
+    },
+    "clips": [
+      {
+        "name": "angry_01",
+        "duration": 3.5,
+        "tracks": 198
+      },
+      {
+        "name": "agree",
+        "duration": 4,
+        "tracks": 198
+      },
+      {
+        "name": "afraid",
+        "duration": 2.5833332538604736,
+        "tracks": 198
+      },
+      {
+        "name": "idle",
+        "duration": 3.2,
+        "tracks": 2
+      },
+      {
+        "name": "attention",
+        "duration": 1.2,
+        "tracks": 2
+      },
+      {
+        "name": "win",
+        "duration": 1.8,
+        "tracks": 2
+      },
+      {
+        "name": "anticipation",
+        "duration": 1.6,
+        "tracks": 2
+      }
+    ]
+  },
+  "lose": {
+    "state": "lose",
+    "time": 15.242500000238419,
+    "actionTime": 0.5763999999761581,
+    "pose": {
+      "mixamorigSpine2": [
+        -0.00001589271352458435,
+        0.1453347258556336,
+        0.14688130666437577,
+        0.9784189655703927
+      ],
+      "mixamorigHead": [
+        -0.12319344305725427,
+        0.004936424752162448,
+        -0.13987086967743825,
+        0.9824638077648843
+      ],
+      "mixamorigRightArm": [
+        0.14731559457308174,
+        0.2961761523082257,
+        -0.4350364192413263,
+        0.8374491531939233
+      ]
+    },
+    "clips": [
+      {
+        "name": "angry_01",
+        "duration": 3.5,
+        "tracks": 198
+      },
+      {
+        "name": "agree",
+        "duration": 4,
+        "tracks": 198
+      },
+      {
+        "name": "afraid",
+        "duration": 2.5833332538604736,
+        "tracks": 198
+      },
+      {
+        "name": "idle",
+        "duration": 3.2,
+        "tracks": 2
+      },
+      {
+        "name": "attention",
+        "duration": 1.2,
+        "tracks": 2
+      },
+      {
+        "name": "win",
+        "duration": 1.8,
+        "tracks": 2
+      },
+      {
+        "name": "anticipation",
+        "duration": 1.6,
+        "tracks": 2
+      }
+    ]
+  }
+}

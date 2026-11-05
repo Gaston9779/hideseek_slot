@@ -1,0 +1,12 @@
+import { chromium } from 'playwright';
+import { writeFileSync } from 'node:fs';
+const browser = await chromium.launch({ executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless: true, args: ['--no-sandbox'] });
+const page = await browser.newPage({ viewport: {width:1920,height:1080} });
+const events={errors:[],requests:[],console:[]};
+page.on('pageerror',e=>events.errors.push(e.message));page.on('console',m=>events.console.push({type:m.type(),text:m.text()}));page.on('response',r=>events.requests.push({url:r.url(),status:r.status()}));
+await page.goto(process.env.GAME_URL || 'http://127.0.0.1:5173/',{waitUntil:'networkidle'});
+await page.waitForTimeout(3000);
+await page.screenshot({path:'05-docs/screenshots/before-1920.png'});
+events.dom=await page.evaluate(()=>({canvas:document.querySelector('canvas')?.getBoundingClientRect().toJSON(),mascot:document.querySelector('.mascot')?.getBoundingClientRect().toJSON(),panel:document.querySelector('.panel')?.getBoundingClientRect().toJSON()}));
+writeFileSync('05-docs/before-browser-audit.json',JSON.stringify(events,null,2));
+await browser.close();

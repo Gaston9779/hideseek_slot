@@ -1,0 +1,340 @@
+{
+  "errors": [],
+  "console": [],
+  "responses": [
+    {
+      "url": "http://127.0.0.1:5173/?qa=1",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/@vite/client",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/vite/dist/client/env.mjs",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/assets/skull-hunt-logo.png",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/main.ts?t=1793915101670",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/style.css?t=1793915101569",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/engine/game.ts",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/math/rng.ts",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/config/game.ts",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/math/slot.ts",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/math/evaluate.ts",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/rendering/scene.ts?t=1793915031973",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/three.js?v=ed89a013",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/rendering/symbols.ts",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/three_examples_jsm_loaders_GLTFLoader__js.js?v=ed89a013",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/rendering/geometry.ts",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/animation/mascot.ts",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/chunk-IT3TP6RZ.js?v=ed89a013",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/three_examples_jsm_utils_SkeletonUtils__js.js?v=254a0c7d",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/three_examples_jsm_geometries_RoundedBoxGeometry__js.js?v=efa74826",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/?qa=1",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/assets/skull-hunt-logo.png",
+      "status": 304
+    },
+    {
+      "url": "http://127.0.0.1:5173/@vite/client",
+      "status": 304
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/main.ts?t=1793915101670",
+      "status": 304
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/vite/dist/client/env.mjs",
+      "status": 304
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/style.css?t=1793915101569",
+      "status": 304
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/config/game.ts",
+      "status": 304
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/engine/game.ts",
+      "status": 304
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/math/rng.ts",
+      "status": 304
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/rendering/scene.ts?t=1793915031973",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/three.js?v=33197440",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/three_examples_jsm_utils_SkeletonUtils__js.js?v=33197440",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/three_examples_jsm_loaders_GLTFLoader__js.js?v=33197440",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/math/slot.ts",
+      "status": 304
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/rendering/geometry.ts",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/animation/mascot.ts",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/rendering/symbols.ts",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/three_examples_jsm_geometries_RoundedBoxGeometry__js.js?v=33197440",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/chunk-IT3TP6RZ.js?v=33197440",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/math/evaluate.ts",
+      "status": 304
+    },
+    {
+      "url": "http://127.0.0.1:5173/assets/scenery/Skull_Horned_Creature_Rigged.glb",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/assets/Skull_Horned_Creature.glb",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/assets/scenery/gothic_mausoleum.glb",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/assets/scenery/gargoyle_3d_model.glb",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/assets/scenery/catgoyle_3d_model.glb",
+      "status": 200
+    },
+    {
+      "url": "blob:http://127.0.0.1:5173/0aa333d6-e344-45df-8ac7-b40477bd90eb",
+      "status": 200
+    },
+    {
+      "url": "blob:http://127.0.0.1:5173/289cad4c-b0c2-4ba3-a372-a923fa9aa86d",
+      "status": 200
+    },
+    {
+      "url": "blob:http://127.0.0.1:5173/a486708c-2030-4e3a-b5eb-5771208389aa",
+      "status": 200
+    }
+  ],
+  "checks": [],
+  "initial": {
+    "loaded": [
+      {
+        "id": "mausoleum",
+        "file": "scenery/gothic_mausoleum.glb",
+        "meshes": 1,
+        "triangles": 16200,
+        "clips": []
+      },
+      {
+        "id": "gargoyle",
+        "file": "scenery/gargoyle_3d_model.glb",
+        "meshes": 1,
+        "triangles": 17315,
+        "clips": []
+      },
+      {
+        "id": "catgoyle",
+        "file": "scenery/catgoyle_3d_model.glb",
+        "meshes": 1,
+        "triangles": 17806,
+        "clips": []
+      },
+      {
+        "id": "mascot",
+        "file": "scenery/Skull_Horned_Creature_Rigged.glb",
+        "meshes": 1,
+        "triangles": 9513,
+        "clips": [
+          "angry_01",
+          "agree",
+          "afraid"
+        ]
+      },
+      {
+        "id": "skull",
+        "file": "Skull_Horned_Creature.glb",
+        "meshes": 1,
+        "triangles": 9513,
+        "clips": []
+      }
+    ],
+    "animation": {
+      "state": "idle",
+      "time": 2.419999999999999,
+      "actionTime": 2.419999999999999,
+      "clips": [
+        {
+          "name": "angry_01",
+          "duration": 3.5,
+          "tracks": 198
+        },
+        {
+          "name": "agree",
+          "duration": 4,
+          "tracks": 198
+        },
+        {
+          "name": "afraid",
+          "duration": 2.5833332538604736,
+          "tracks": 198
+        },
+        {
+          "name": "idle",
+          "duration": 3.2,
+          "tracks": 2
+        },
+        {
+          "name": "attention",
+          "duration": 1.2,
+          "tracks": 2
+        },
+        {
+          "name": "win",
+          "duration": 1.8,
+          "tracks": 2
+        },
+        {
+          "name": "anticipation",
+          "duration": 1.6,
+          "tracks": 2
+        }
+      ]
+    },
+    "mascotBounds": {
+      "min": [
+        -8.943740969580237,
+        0.24999999999999994,
+        0.5759627595087284
+      ],
+      "max": [
+        -4.556259030419763,
+        5.6000000000000005,
+        4.624037240491271
+      ],
+      "screen": {
+        "left": 0.08076345216513842,
+        "right": 0.2864260253677443,
+        "bottom": 0.8821917126982679,
+        "top": 0.4830163888524306
+      }
+    },
+    "grid": [
+      [
+        "TOMB",
+        "CHEST",
+        "LANTERN"
+      ],
+      [
+        "WILD",
+        "GHOST",
+        "SKULL"
+      ],
+      [
+        "LANTERN",
+        "KEY",
+        "SCATTER"
+      ],
+      [
+        "CHEST",
+        "POTION",
+        "TOMB"
+      ],
+      [
+        "POTION",
+        "SCATTER",
+        "GARGOYLE"
+      ]
+    ],
+    "spinning": false,
+    "drawCalls": 775,
+    "triangles": 300129,
+    "sceneObjects": 801,
+    "elapsed": 2.419999999999999,
+    "game": {
+      "phase": "ready",
+      "balance": 100000,
+      "bet": 100,
+      "freeSpins": 0
+    }
+  }
+}

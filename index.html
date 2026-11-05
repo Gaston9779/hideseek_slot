@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#181124"><link rel="icon" href="data:,"><title>Hide & Seek · Skull Hunt</title></head>
+<body><main id="app"><section id="stage" aria-label="Hide and Seek Skull Hunt virtual slot">
+<canvas id="scene" aria-label="3D cemetery slot with five reels"></canvas>
+<div id="vignette"></div><div id="flash"></div>
+<img id="logo" src="./assets/skull-hunt-logo.png" alt="Hide and Seek: Skull Hunt" draggable="false">
+<div id="mode">20 PAYLINES <span>✦</span> VIRTUAL CREDIT DEMO</div>
+<div id="status" role="status" aria-live="polite">Opening the crypt…</div>
+<div id="controls" aria-label="Game controls">
+<button id="info" class="round" data-anchor="info" aria-label="Open paytable">i</button>
+<div class="meter" data-anchor="balance"><span>BALANCE</span><b id="balance">1,000.00</b></div>
+<button id="bet-down" class="round" data-anchor="bet-down" aria-label="Decrease bet" disabled>−</button>
+<div class="meter" data-anchor="bet"><span>BET</span><b id="bet">1.00</b></div>
+<button id="bet-up" class="round" data-anchor="bet-up" aria-label="Increase bet" disabled>+</button>
+<button id="spin" data-anchor="spin" aria-label="Spin reels" disabled><svg class="arrow" viewBox="0 0 80 34" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 28C16 10 44 4 66 14"/><path d="M52 4l15 10-14 11"/></svg><strong>SPIN</strong><svg class="arrow bottom" viewBox="0 0 80 34" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 28C16 10 44 4 66 14"/><path d="M52 4l15 10-14 11"/></svg></button>
+<div class="meter win-meter" data-anchor="win"><span>WIN</span><b id="win">0.00</b></div>
+<button id="menu" class="round" data-anchor="menu" aria-label="Open game menu">☰</button>
+</div>
+<div id="bigwin" aria-hidden="true"><h2>BIG WIN</h2><p>0.00</p></div>
+<div id="loading"><span class="loading-ring"></span><p>Lighting the lanterns…</p></div>
+<p id="reel-description" class="sr-only" aria-live="polite"></p>
+</section><p id="orientation">For the best view, turn your device sideways.</p>
+<dialog id="paytable"><button class="close" aria-label="Close paytable">×</button><h1>The crypt’s treasures</h1><p>20 fixed paylines · left-to-right wins · virtual credits only</p><div id="paytable-content"></div><p>Wild substitutes for regular symbols. Three or more Scatters start 10 Free Spins. Bonus wins with a Wild have a 2× multiplier. Retriggers add 5 spins, up to 30 awarded in one feature.</p><small>Development math model. RTP is unverified. No real-money play.</small></dialog>
+<dialog id="menu-dialog"><button class="close" aria-label="Close menu">×</button><h1>Rest by the lantern</h1><p>Your credits exist only in this demo session.</p><button id="reset" class="menu-action">Reset virtual balance</button><button class="menu-action" disabled>Hide & Seek crate bonus — coming later</button><p class="fine">SPACE to spin · no audio</p></dialog>
+</main><script type="module" src="/src/main.ts"></script></body></html>

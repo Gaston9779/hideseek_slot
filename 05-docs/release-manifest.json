@@ -1,0 +1,162 @@
+{
+  "buildBytes": 11960537,
+  "files": [
+    {
+      "path": "assets/Skull_Horned_Creature.glb",
+      "bytes": 1021108,
+      "sha256": "392d3912b6ff03e32f7588f4f71e3639254d3f9dbe721ea1f04a7f7674048a5d",
+      "model": {
+        "meshes": 1,
+        "materials": 1,
+        "embeddedImages": [
+          {
+            "mimeType": "image/jpeg",
+            "embedded": true
+          },
+          {
+            "mimeType": "image/jpeg",
+            "embedded": true
+          },
+          {
+            "mimeType": "image/jpeg",
+            "embedded": true
+          }
+        ],
+        "joints": 65
+      }
+    },
+    {
+      "path": "assets/index-BALz3a1g.js",
+      "bytes": 641136,
+      "sha256": "fa173813b1b470bacecbb2ca2d80491d40e85a4b57e922517f17d98519dbad59"
+    },
+    {
+      "path": "assets/index-w_kC04zT.css",
+      "bytes": 4216,
+      "sha256": "2bb7505fcee30fc2d6b8735b2af957bd0379e0c8d4783a027f382e8ebf5324f7"
+    },
+    {
+      "path": "assets/scenery/Skull_Horned_Creature_Rigged.glb",
+      "bytes": 3422896,
+      "sha256": "e0ac3dff097f69daf6eb02ae8b9e8546ef9d0bd8f254084f0820cfdab91cbc05",
+      "model": {
+        "meshes": 1,
+        "materials": 1,
+        "embeddedImages": [
+          {
+            "mimeType": "image/png",
+            "embedded": true
+          },
+          {
+            "mimeType": "image/png",
+            "embedded": true
+          }
+        ],
+        "animations": [
+          "angry_01",
+          "agree",
+          "afraid"
+        ],
+        "joints": 65
+      }
+    },
+    {
+      "path": "assets/scenery/catgoyle_3d_model.glb",
+      "bytes": 1711172,
+      "sha256": "7e398fce57928d021ae11cbf1b084930ee96435852016f35ecd3eba800ce29da",
+      "model": {
+        "meshes": 1,
+        "materials": 1,
+        "joints": 0
+      }
+    },
+    {
+      "path": "assets/scenery/gargoyle_3d_model.glb",
+      "bytes": 1663992,
+      "sha256": "3e95d0cf2bad0a6710de12ebe45c3fcaa78c9c907f2ac8fd40cea0a9d6c5d6c5",
+      "model": {
+        "meshes": 1,
+        "materials": 1,
+        "joints": 0
+      }
+    },
+    {
+      "path": "assets/scenery/gothic_mausoleum.glb",
+      "bytes": 1556992,
+      "sha256": "adc3e3cd0302a00c97fdf11222df0dcc1b2164cf762dee30077a668f15ccbe5a",
+      "model": {
+        "meshes": 1,
+        "materials": 1,
+        "joints": 0
+      }
+    },
+    {
+      "path": "assets/skull-hunt-logo.png",
+      "bytes": 1936206,
+      "sha256": "1d474b7e88bdabd81afbc8d8a48b9e55855d4d6f40a5410dc8270fab698f1236"
+    },
+    {
+      "path": "index.html",
+      "bytes": 2819,
+      "sha256": "853b191650fff92ec14a5ff310cdf3d43d56e3c2ef4ff4681c21593fc725b88b"
+    }
+  ],
+  "source": [
+    {
+      "path": "src/animation/mascot.ts",
+      "sha256": "e6e0e7d4caeb8176a157f3bccf751fc72f02ada2e75110c0b8dcfadad776ad6b"
+    },
+    {
+      "path": "src/config/game.ts",
+      "sha256": "fad359d7ffab3b99bc7b5fcde2949bb725a8dd826ab5cefb9c01403b3b960d26"
+    },
+    {
+      "path": "src/engine/game.ts",
+      "sha256": "22f988ecbe1851807a913fb5dc4f58025a245d6e4957a180cc0132a7ed9a5901"
+    },
+    {
+      "path": "src/main.ts",
+      "sha256": "e031fc60e3a8f4e11eab7a5a03676cc51dddc783904f59c611fc40cd78dd48c1"
+    },
+    {
+      "path": "src/math/evaluate.ts",
+      "sha256": "040b282f7b9028a17c42d2e18ca793388474f9ceaf7bb6d15187e48a0569d3f1"
+    },
+    {
+      "path": "src/math/rng.ts",
+      "sha256": "070d39a6f2b19b71d3b4cdd23b7143962278e883fa0713f6b18801def6dd74a5"
+    },
+    {
+      "path": "src/math/slot.ts",
+      "sha256": "4f55894e86ff60cea11488806bd3b11d6b22ce9a2b111601260d09deeece580c"
+    },
+    {
+      "path": "src/rendering/atmosphere.ts",
+      "sha256": "e13b6f1334791c2b8e6d38fcf0bb42be7880097333d33cea9c08e713de7e5773"
+    },
+    {
+      "path": "src/rendering/geometry.ts",
+      "sha256": "ee8dcd6cef15fe3a7ed80b8ca791fc1605d67869771fe8bbd59df68f6ab0f38f"
+    },
+    {
+      "path": "src/rendering/scene.ts",
+      "sha256": "8f911563560d489aacb735891ebaf8e1238041402d3a797586d70b2d86940a30"
+    },
+    {
+      "path": "src/rendering/symbols.ts",
+      "sha256": "0bce731528105ebc08e77d27cfc720c26c666f1580f8e6675439d255ae3062a2"
+    },
+    {
+      "path": "src/style.css",
+      "sha256": "d0ba8091d5c3f0c86fdee2b7abc7d761ffbfb95ac80c6377225432bf16c95a54"
+    },
+    {
+      "path": "src/ui/touch.css",
+      "sha256": "39999239aa881bdb86116cfc783a8830c7847b864d62d3bf9d8dc0fc073ca14b"
+    },
+    {
+      "path": "src/vite-env.d.ts",
+      "sha256": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5"
+    }
+  ]
+}

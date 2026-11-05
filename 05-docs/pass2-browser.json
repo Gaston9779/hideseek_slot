@@ -1,0 +1,819 @@
+{
+  "errors": [],
+  "console": [],
+  "responses": [
+    {
+      "url": "http://127.0.0.1:5173/?qa=1",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/assets/skull-hunt-logo.png",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/@vite/client",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/main.ts?t=1793915345323",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/vite/dist/client/env.mjs",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/style.css?t=1793915101569",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/math/rng.ts",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/config/game.ts",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/engine/game.ts?t=1793915345323",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/rendering/scene.ts?t=1793915289005",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/math/slot.ts",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/three_examples_jsm_utils_SkeletonUtils__js.js?v=f7512395",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/rendering/geometry.ts?t=1793915288510",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/rendering/symbols.ts?t=1793915288510",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/three.js?v=f7512395",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/animation/mascot.ts",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/three_examples_jsm_loaders_GLTFLoader__js.js?v=f7512395",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/src/math/evaluate.ts",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/three_examples_jsm_geometries_RoundedBoxGeometry__js.js?v=f7512395",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/three_examples_jsm_utils_BufferGeometryUtils__js.js?v=f7512395",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/chunk-KF3ZM4MI.js?v=f7512395",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/chunk-IT3TP6RZ.js?v=f7512395",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/assets/scenery/gothic_mausoleum.glb",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/assets/scenery/gargoyle_3d_model.glb",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/assets/Skull_Horned_Creature.glb",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/assets/scenery/Skull_Horned_Creature_Rigged.glb",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/assets/scenery/catgoyle_3d_model.glb",
+      "status": 200
+    },
+    {
+      "url": "blob:http://127.0.0.1:5173/c5d52207-46a5-4a48-ad70-539673f4ef7f",
+      "status": 200
+    },
+    {
+      "url": "blob:http://127.0.0.1:5173/3f490aaf-6006-485c-bc76-034f4e2ffe46",
+      "status": 200
+    },
+    {
+      "url": "blob:http://127.0.0.1:5173/32732741-e280-466b-9dd3-20654caaa43c",
+      "status": 200
+    },
+    {
+      "url": "blob:http://127.0.0.1:5173/dd393cb4-1f29-4272-9ce1-4f2cdfbf6a56",
+      "status": 200
+    },
+    {
+      "url": "blob:http://127.0.0.1:5173/56f25d7c-b8b6-414d-af6d-49b643c2d982",
+      "status": 200
+    }
+  ],
+  "checks": [
+    "Bet increase/decrease",
+    "Real spin, disabled controls, grid equals generated outcome, exact credit accounting",
+    "Supplied agree/afraid/angry clips play through AnimationMixer",
+    "Paytable and menu/reset",
+    "Responsive 1280x720",
+    "Responsive 844x390"
+  ],
+  "initial": {
+    "loaded": [
+      {
+        "id": "mausoleum",
+        "file": "scenery/gothic_mausoleum.glb",
+        "meshes": 1,
+        "triangles": 16200,
+        "clips": []
+      },
+      {
+        "id": "gargoyle",
+        "file": "scenery/gargoyle_3d_model.glb",
+        "meshes": 1,
+        "triangles": 17315,
+        "clips": []
+      },
+      {
+        "id": "catgoyle",
+        "file": "scenery/catgoyle_3d_model.glb",
+        "meshes": 1,
+        "triangles": 17806,
+        "clips": []
+      },
+      {
+        "id": "skull",
+        "file": "Skull_Horned_Creature.glb",
+        "meshes": 1,
+        "triangles": 9513,
+        "clips": []
+      },
+      {
+        "id": "mascot",
+        "file": "scenery/Skull_Horned_Creature_Rigged.glb",
+        "meshes": 1,
+        "triangles": 9513,
+        "clips": [
+          "angry_01",
+          "agree",
+          "afraid"
+        ]
+      }
+    ],
+    "animation": {
+      "state": "idle",
+      "time": 3.234499999999999,
+      "actionTime": 0.03449999999999878,
+      "clips": [
+        {
+          "name": "angry_01",
+          "duration": 3.5,
+          "tracks": 198
+        },
+        {
+          "name": "agree",
+          "duration": 4,
+          "tracks": 198
+        },
+        {
+          "name": "afraid",
+          "duration": 2.5833332538604736,
+          "tracks": 198
+        },
+        {
+          "name": "idle",
+          "duration": 3.2,
+          "tracks": 2
+        },
+        {
+          "name": "attention",
+          "duration": 1.2,
+          "tracks": 2
+        },
+        {
+          "name": "win",
+          "duration": 1.8,
+          "tracks": 2
+        },
+        {
+          "name": "anticipation",
+          "duration": 1.6,
+          "tracks": 2
+        }
+      ]
+    },
+    "mascotBounds": {
+      "min": [
+        -8.96173196137163,
+        1.0499999999999998,
+        0.6516277030784958
+      ],
+      "max": [
+        -4.7382680386283695,
+        6.200000000000001,
+        4.548372296921505
+      ],
+      "screen": {
+        "left": 0.07992012706030782,
+        "right": 0.2778943797693584,
+        "bottom": 0.8168734047988705,
+        "top": 0.4326205229659616
+      }
+    },
+    "grid": [
+      [
+        "TOMB",
+        "CHEST",
+        "LANTERN"
+      ],
+      [
+        "WILD",
+        "GHOST",
+        "SKULL"
+      ],
+      [
+        "LANTERN",
+        "KEY",
+        "SCATTER"
+      ],
+      [
+        "CHEST",
+        "POTION",
+        "TOMB"
+      ],
+      [
+        "POTION",
+        "SCATTER",
+        "GARGOYLE"
+      ]
+    ],
+    "spinning": false,
+    "drawCalls": 310,
+    "triangles": 311269,
+    "sceneObjects": 328,
+    "elapsed": 3.234499999999999,
+    "game": {
+      "phase": "ready",
+      "balance": 100000,
+      "bet": 100,
+      "freeSpins": 0
+    }
+  },
+  "during": {
+    "loaded": [
+      {
+        "id": "mausoleum",
+        "file": "scenery/gothic_mausoleum.glb",
+        "meshes": 1,
+        "triangles": 16200,
+        "clips": []
+      },
+      {
+        "id": "gargoyle",
+        "file": "scenery/gargoyle_3d_model.glb",
+        "meshes": 1,
+        "triangles": 17315,
+        "clips": []
+      },
+      {
+        "id": "catgoyle",
+        "file": "scenery/catgoyle_3d_model.glb",
+        "meshes": 1,
+        "triangles": 17806,
+        "clips": []
+      },
+      {
+        "id": "skull",
+        "file": "Skull_Horned_Creature.glb",
+        "meshes": 1,
+        "triangles": 9513,
+        "clips": []
+      },
+      {
+        "id": "mascot",
+        "file": "scenery/Skull_Horned_Creature_Rigged.glb",
+        "meshes": 1,
+        "triangles": 9513,
+        "clips": [
+          "angry_01",
+          "agree",
+          "afraid"
+        ]
+      }
+    ],
+    "animation": {
+      "state": "attention",
+      "time": 3.7202999999523145,
+      "actionTime": 0.06589999997615814,
+      "clips": [
+        {
+          "name": "angry_01",
+          "duration": 3.5,
+          "tracks": 198
+        },
+        {
+          "name": "agree",
+          "duration": 4,
+          "tracks": 198
+        },
+        {
+          "name": "afraid",
+          "duration": 2.5833332538604736,
+          "tracks": 198
+        },
+        {
+          "name": "idle",
+          "duration": 3.2,
+          "tracks": 2
+        },
+        {
+          "name": "attention",
+          "duration": 1.2,
+          "tracks": 2
+        },
+        {
+          "name": "win",
+          "duration": 1.8,
+          "tracks": 2
+        },
+        {
+          "name": "anticipation",
+          "duration": 1.6,
+          "tracks": 2
+        }
+      ]
+    },
+    "mascotBounds": {
+      "min": [
+        -8.96173196137163,
+        1.0499999999999998,
+        0.6516277030784958
+      ],
+      "max": [
+        -4.7382680386283695,
+        6.200000000000001,
+        4.548372296921505
+      ],
+      "screen": {
+        "left": 0.07992012706030782,
+        "right": 0.2778943797693584,
+        "bottom": 0.8168734047988705,
+        "top": 0.4326205229659616
+      }
+    },
+    "grid": [
+      [
+        "TOMB",
+        "CHEST",
+        "LANTERN"
+      ],
+      [
+        "WILD",
+        "GHOST",
+        "SKULL"
+      ],
+      [
+        "LANTERN",
+        "KEY",
+        "SCATTER"
+      ],
+      [
+        "CHEST",
+        "POTION",
+        "TOMB"
+      ],
+      [
+        "POTION",
+        "SCATTER",
+        "GARGOYLE"
+      ]
+    ],
+    "spinning": true,
+    "drawCalls": 310,
+    "triangles": 311269,
+    "sceneObjects": 328,
+    "elapsed": 3.7202999999523145,
+    "game": {
+      "phase": "spinning",
+      "balance": 99900,
+      "bet": 100,
+      "freeSpins": 0,
+      "last": {
+        "stops": [
+          67,
+          70,
+          98,
+          79,
+          57
+        ],
+        "grid": [
+          [
+            "POTION",
+            "POTION",
+            "POTION"
+          ],
+          [
+            "GARGOYLE",
+            "GARGOYLE",
+            "GARGOYLE"
+          ],
+          [
+            "TOMB",
+            "CHEST",
+            "CHEST"
+          ],
+          [
+            "LANTERN",
+            "LANTERN",
+            "LANTERN"
+          ],
+          [
+            "BLASTER",
+            "SKULL",
+            "SKULL"
+          ]
+        ],
+        "evaluation": {
+          "lineWins": [],
+          "scatterCount": 0,
+          "scatterAmount": 0,
+          "totalMultiplier": 0,
+          "capped": false
+        }
+      }
+    }
+  },
+  "after": {
+    "loaded": [
+      {
+        "id": "mausoleum",
+        "file": "scenery/gothic_mausoleum.glb",
+        "meshes": 1,
+        "triangles": 16200,
+        "clips": []
+      },
+      {
+        "id": "gargoyle",
+        "file": "scenery/gargoyle_3d_model.glb",
+        "meshes": 1,
+        "triangles": 17315,
+        "clips": []
+      },
+      {
+        "id": "catgoyle",
+        "file": "scenery/catgoyle_3d_model.glb",
+        "meshes": 1,
+        "triangles": 17806,
+        "clips": []
+      },
+      {
+        "id": "skull",
+        "file": "Skull_Horned_Creature.glb",
+        "meshes": 1,
+        "triangles": 9513,
+        "clips": []
+      },
+      {
+        "id": "mascot",
+        "file": "scenery/Skull_Horned_Creature_Rigged.glb",
+        "meshes": 1,
+        "triangles": 9513,
+        "clips": [
+          "angry_01",
+          "agree",
+          "afraid"
+        ]
+      }
+    ],
+    "animation": {
+      "state": "idle",
+      "time": 5.885299999952313,
+      "actionTime": 0.025399999976158143,
+      "clips": [
+        {
+          "name": "angry_01",
+          "duration": 3.5,
+          "tracks": 198
+        },
+        {
+          "name": "agree",
+          "duration": 4,
+          "tracks": 198
+        },
+        {
+          "name": "afraid",
+          "duration": 2.5833332538604736,
+          "tracks": 198
+        },
+        {
+          "name": "idle",
+          "duration": 3.2,
+          "tracks": 2
+        },
+        {
+          "name": "attention",
+          "duration": 1.2,
+          "tracks": 2
+        },
+        {
+          "name": "win",
+          "duration": 1.8,
+          "tracks": 2
+        },
+        {
+          "name": "anticipation",
+          "duration": 1.6,
+          "tracks": 2
+        }
+      ]
+    },
+    "mascotBounds": {
+      "min": [
+        -8.96173196137163,
+        1.0499999999999998,
+        0.6516277030784958
+      ],
+      "max": [
+        -4.7382680386283695,
+        6.200000000000001,
+        4.548372296921505
+      ],
+      "screen": {
+        "left": 0.07992012706030782,
+        "right": 0.2778943797693584,
+        "bottom": 0.8168734047988705,
+        "top": 0.4326205229659616
+      }
+    },
+    "grid": [
+      [
+        "POTION",
+        "POTION",
+        "POTION"
+      ],
+      [
+        "GARGOYLE",
+        "GARGOYLE",
+        "GARGOYLE"
+      ],
+      [
+        "TOMB",
+        "CHEST",
+        "CHEST"
+      ],
+      [
+        "LANTERN",
+        "LANTERN",
+        "LANTERN"
+      ],
+      [
+        "BLASTER",
+        "SKULL",
+        "SKULL"
+      ]
+    ],
+    "spinning": false,
+    "drawCalls": 307,
+    "triangles": 307329,
+    "sceneObjects": 328,
+    "elapsed": 5.885299999952313,
+    "game": {
+      "phase": "ready",
+      "balance": 99900,
+      "bet": 100,
+      "freeSpins": 0,
+      "last": {
+        "stops": [
+          67,
+          70,
+          98,
+          79,
+          57
+        ],
+        "grid": [
+          [
+            "POTION",
+            "POTION",
+            "POTION"
+          ],
+          [
+            "GARGOYLE",
+            "GARGOYLE",
+            "GARGOYLE"
+          ],
+          [
+            "TOMB",
+            "CHEST",
+            "CHEST"
+          ],
+          [
+            "LANTERN",
+            "LANTERN",
+            "LANTERN"
+          ],
+          [
+            "BLASTER",
+            "SKULL",
+            "SKULL"
+          ]
+        ],
+        "evaluation": {
+          "lineWins": [],
+          "scatterCount": 0,
+          "scatterAmount": 0,
+          "totalMultiplier": 0,
+          "capped": false
+        }
+      }
+    }
+  },
+  "attention": {
+    "state": "attention",
+    "time": 6.61919999992847,
+    "actionTime": 0.5910999999642373,
+    "clips": [
+      {
+        "name": "angry_01",
+        "duration": 3.5,
+        "tracks": 198
+      },
+      {
+        "name": "agree",
+        "duration": 4,
+        "tracks": 198
+      },
+      {
+        "name": "afraid",
+        "duration": 2.5833332538604736,
+        "tracks": 198
+      },
+      {
+        "name": "idle",
+        "duration": 3.2,
+        "tracks": 2
+      },
+      {
+        "name": "attention",
+        "duration": 1.2,
+        "tracks": 2
+      },
+      {
+        "name": "win",
+        "duration": 1.8,
+        "tracks": 2
+      },
+      {
+        "name": "anticipation",
+        "duration": 1.6,
+        "tracks": 2
+      }
+    ]
+  },
+  "win": {
+    "state": "win",
+    "time": 9.62159999996423,
+    "actionTime": 0.5653999999761583,
+    "clips": [
+      {
+        "name": "angry_01",
+        "duration": 3.5,
+        "tracks": 198
+      },
+      {
+        "name": "agree",
+        "duration": 4,
+        "tracks": 198
+      },
+      {
+        "name": "afraid",
+        "duration": 2.5833332538604736,
+        "tracks": 198
+      },
+      {
+        "name": "idle",
+        "duration": 3.2,
+        "tracks": 2
+      },
+      {
+        "name": "attention",
+        "duration": 1.2,
+        "tracks": 2
+      },
+      {
+        "name": "win",
+        "duration": 1.8,
+        "tracks": 2
+      },
+      {
+        "name": "anticipation",
+        "duration": 1.6,
+        "tracks": 2
+      }
+    ]
+  },
+  "anticipation": {
+    "state": "anticipation",
+    "time": 13.534099999964234,
+    "actionTime": 0.8914999999999997,
+    "clips": [
+      {
+        "name": "angry_01",
+        "duration": 3.5,
+        "tracks": 198
+      },
+      {
+        "name": "agree",
+        "duration": 4,
+        "tracks": 198
+      },
+      {
+        "name": "afraid",
+        "duration": 2.5833332538604736,
+        "tracks": 198
+      },
+      {
+        "name": "idle",
+        "duration": 3.2,
+        "tracks": 2
+      },
+      {
+        "name": "attention",
+        "duration": 1.2,
+        "tracks": 2
+      },
+      {
+        "name": "win",
+        "duration": 1.8,
+        "tracks": 2
+      },
+      {
+        "name": "anticipation",
+        "duration": 1.6,
+        "tracks": 2
+      }
+    ]
+  },
+  "lose": {
+    "state": "lose",
+    "time": 18.239399999976136,
+    "actionTime": 0.633600000023842,
+    "clips": [
+      {
+        "name": "angry_01",
+        "duration": 3.5,
+        "tracks": 198
+      },
+      {
+        "name": "agree",
+        "duration": 4,
+        "tracks": 198
+      },
+      {
+        "name": "afraid",
+        "duration": 2.5833332538604736,
+        "tracks": 198
+      },
+      {
+        "name": "idle",
+        "duration": 3.2,
+        "tracks": 2
+      },
+      {
+        "name": "attention",
+        "duration": 1.2,
+        "tracks": 2
+      },
+      {
+        "name": "win",
+        "duration": 1.8,
+        "tracks": 2
+      },
+      {
+        "name": "anticipation",
+        "duration": 1.6,
+        "tracks": 2
+      }
+    ]
+  }
+}
