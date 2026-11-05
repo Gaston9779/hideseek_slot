@@ -22,7 +22,7 @@ export const SYMBOL_SIZE = 184;                       // drawn size of a 512px s
 export const PLAY_AREA: Rect = { x: CELLS[0][0].x - 8, y: CELLS[0][0].y - 8, w: CELLS[4][0].x + CELLS[4][0].w - CELLS[0][0].x + 16, h: CELLS[0][2].y + CELLS[0][2].h - CELLS[0][0].y + 16 };
 
 /** Logo (cropped derived copy, 1200x862 source) */
-export const LOGO = { cx: 958, top: -46, w: 510 };
+export const LOGO = { cx: 958, top: 16, w: 410 };
 
 /** Control panel art is 2172x724; field coordinates below are in the 2000px-wide inspection view ×1.086. */
 export const PANEL = { src: [2172, 724], scale: 0.8103, x: 80, y: 608 };
@@ -40,6 +40,7 @@ export const HUD = {
 };
 
 /** Real 3D Skull gets a bounded transparent canvas on the left foreground. */
-export const SKULL = { x: -60, y: 270, w: 660, h: 620, height: 430, foot: 72 };
+export const SKULL_ANCHOR = { x: 420, y: 831 };   // where the feet touch the stone (design px)
+export const SKULL = { w: 400, h: 400, height: 190, foot: 40, x: SKULL_ANCHOR.x - 200, y: SKULL_ANCHOR.y - (400 - 40) };
 
 export const OVERLAY = { bonus: { cx: 960, cy: 500, w: 1440 }, freeSpins: { cx: 960, cy: 500, w: 1380 } };
