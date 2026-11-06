@@ -18,8 +18,8 @@ button:focus-visible{outline:3px solid #fff1bb;outline-offset:3px}
 #panel{z-index:4;filter:drop-shadow(0 -6px 22px #0a042088)}
 #hud{z-index:6;left:0;top:0;width:1920px;height:1080px;pointer-events:none}
 #hud>*{position:absolute}
-.field{display:grid;place-items:center;pointer-events:none}
-.field b{font:700 1em/1 var(--font);color:var(--cream);text-shadow:0 2px 0 #3a1608,0 0 12px #ffb34a55;font-variant-numeric:tabular-nums;white-space:nowrap}
+.field{display:flex;align-items:center;justify-content:center;pointer-events:none;overflow:visible}
+.field b{display:block;font:700 1em/1 var(--font);text-align:center;transform:translateY(var(--ink-dy,0em));color:var(--cream);text-shadow:0 2px 0 #3a1608,0 0 12px #ffb34a55;font-variant-numeric:tabular-nums;white-space:nowrap}
 #win-field b{color:#ffe7a0}
 #win-field.pop b{animation:winPop .55s cubic-bezier(.2,1.6,.4,1)}
 #win-field.hot{filter:drop-shadow(0 0 22px #ffb02a)}

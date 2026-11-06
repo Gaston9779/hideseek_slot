@@ -3,6 +3,9 @@
 .bc-glow.purple{background:radial-gradient(ellipse at 50% 50%,#b05cff 0%,#7a3aff 55%,#4a1aa8 100%)}
 .bc-glow.gold{background:radial-gradient(ellipse at 50% 50%,#ffd36a 0%,#ff9a2a 55%,#a24a0a 100%)}
 .bc-glow.dual{background:linear-gradient(110deg,#ffd36a,#b05cff 50%,#ffd36a)}
+.bc-glow{transition:opacity .35s}
+.bc-glow.hold{opacity:.3;animation:bcHold 1.1s ease-in-out infinite}
+@keyframes bcHold{50%{opacity:.42}}
 .bc-glow.on{animation:bcGlow var(--bc-ms,1100ms) ease-out forwards}
 @keyframes bcGlow{0%{opacity:0}25%{opacity:.5}100%{opacity:0}}
 .bc-flash{position:absolute;z-index:7;inset:0;pointer-events:none;opacity:0}

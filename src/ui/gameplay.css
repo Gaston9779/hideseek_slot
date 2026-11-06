@@ -32,7 +32,7 @@
 /* ---- keep legacy badge out of the way (replaced by the Free Spins HUD) ---- */
 #free-badge{display:none!important}
 /* ---- Buy Bonus widget: lower-right plinth, clear of reels/SPIN/BET/BALANCE/WIN ---- */
-.buy-widget{position:absolute;z-index:5;left:1648px;top:624px;width:240px;height:232px;transition:opacity .25s}
+.buy-widget{position:absolute;z-index:5;left:1567px;top:620px;width:240px;height:232px;transition:opacity .25s}
 .buy-widget[hidden]{display:none}
 .buy-widget.away{opacity:0;pointer-events:none}
 .buy-hit{position:relative;width:100%;height:100%;padding:0;border:0;background:transparent;pointer-events:auto;display:block;cursor:pointer;-webkit-tap-highlight-color:transparent}

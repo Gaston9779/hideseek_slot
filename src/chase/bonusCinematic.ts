@@ -63,6 +63,17 @@ export function createBonusCinematic(d:BonusCinematicDeps){
   else live.textContent=kind==='FREE_SPINS'?`${(ev as Extract<GameEvent,{type:'FREE_SPINS_TRIGGERED'}>).awardedSpins} Free Spins`:'Hide and Seek Bonus';
   return kind==='DUAL'?(quick?900:1500):(quick?250:800);
  }
+// ---- anticipation / suspense (follows the REAL reveal state; never touches outcomes) ------------------------------------------------
+ const sus={scatter:false,chest:false};
+ const tone=():Tone=>sus.scatter&&sus.chest?'dual':sus.scatter?'purple':'gold';
+ function suspense(e:{phase:'start'|'resolve'|'miss';kind:'scatter'|'chest';col:number;active:{scatter:boolean;chest:boolean}}){
+  sus.scatter=e.active.scatter;sus.chest=e.active.chest;
+  if(e.phase==='start'){glow.className=`bc-glow ${tone()} hold`;return;}
+  const k:Tone=e.kind==='scatter'?'purple':'gold';
+  if(e.phase==='resolve'){glow.className=`bc-glow ${sus.scatter||sus.chest?tone():k}`;glow.style.setProperty('--bc-ms','700ms');void glow.offsetWidth;glow.classList.add('on');flashFx(k,DESIGN.w/2,DESIGN.h*.42);if(!d.reduced)burst(k,DESIGN.w/2,DESIGN.h*.42,.7);return;}
+  if(!sus.scatter&&!sus.chest)glow.classList.remove('hold');else glow.className=`bc-glow ${tone()} hold`;    // miss: effects fade out, back to the normal UI
+ }
+ function suspenseAbort(){sus.scatter=sus.chest=false;glow.classList.remove('hold');}
  // ---- the shared chase intro -----------------------------------------------------------------------
  async function playIntro(p:Pending){
   let skipped=false,endingMs=0,impactAt={x:1790,y:760},started=false,startTs=0;
@@ -96,6 +107,7 @@ export function createBonusCinematic(d:BonusCinematicDeps){
    window.addEventListener('keydown',key,true);maxEl.addEventListener('pointerdown',close);window.setTimeout(close,d.reduced?1800:4600);});
  }
  return {
+  suspense,suspenseAbort,
   /** Arm for one player-initiated spin; events are only consumed between beginSpin() and endSpin(). */
   beginSpin(){armed=true;pending=null;best=null;maxCoordinated=false;maxStandalone=false;},
   endSpin(){armed=false;pending=null;best=null;maxCoordinated=false;maxStandalone=false;},

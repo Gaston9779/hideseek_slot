@@ -26,7 +26,7 @@ export async function createView(onProgress:(s:string)=>void){
  const logo=$<HTMLImageElement>('#logo');logo.src=logoImg.src;place(logo,LOGO.cx-LOGO.w/2,LOGO.top,LOGO.w);
  box($('#balance-field'),HUD.balance);box($('#bet-field'),HUD.bet);box($('#win-field'),HUD.win);
  circle($('#spin'),HUD.spin);circle($('#info'),HUD.info);circle($('#bet-down'),HUD.minus);circle($('#bet-up'),HUD.plus);circle($('#menu'),HUD.menu);circle($('#quick'),HUD.quick);
- for(const [id,s] of [['balance-field',.62],['bet-field',.56],['win-field',.66]] as const)$(`#${id}`).style.fontSize=`${HUD[id.split('-')[0] as 'balance'].h*s}px`;
+ for(const [id,s] of [['balance-field',.62],['bet-field',.56],['win-field',.66]] as const)$(`#${id}`).style.fontSize=`${72*PANEL.scale*s}px`;   // same type size for all three fields (reference pill height 72 art px)
  // ---- scaling
  const hitBase=new Map<HTMLElement,{x:number,y:number,w:number}>();let scale=1;const canvases=[...document.querySelectorAll<HTMLCanvasElement>('canvas.layer')];
  const rs=()=>Math.max(.6,Math.min(2,scale*(window.devicePixelRatio||1)));
@@ -43,6 +43,7 @@ export async function createView(onProgress:(s:string)=>void){
  // ---- real 3D skull
  onProgress('Waking the Skull…');
  skull=await createSkull(sk,`${import.meta.env.BASE_URL}assets/scenery/Skull_Horned_Creature_Rigged.glb`,rs);fit();
+ let suspHook:((e:import('./reels').SuspenseEvent)=>void)|undefined;reels.onSuspense=e=>suspHook?.(e);
  reels.onAnticipate=on=>{if(on&&skull!.controller.state!=='anticipation')skull!.set('anticipation');};
  // ---- atmosphere: lantern flicker glows over the art + fireflies + slow mist (all subtle)
  const bgPt=(x:number,y:number)=>({x:BG.x+x*BG.scale,y:BG.y+y*BG.scale});
@@ -66,7 +67,7 @@ export async function createView(onProgress:(s:string)=>void){
  chase=createChase({world,skullCanvas:sk,renderScale:rs,skullTemplate:()=>skull!.template(),frameImg,panelImg,seekerUrl:`${import.meta.env.BASE_URL}assets/scenery/Skull_Seeker.glb`,crateUrl:`${import.meta.env.BASE_URL}bonus-chest/bonus-chest-animated.glb`,skullHeight:SKULL.height});
  let celebHook:((b:HTMLElement)=>number)|undefined;let chestClosed:(()=>void)|undefined;let bannerTimer=0,fsResolve:(()=>void)|undefined;
  const api={
-  reels,skull:skull!,chase:chase!,onFrame(cb:(dt:number)=>void){frameHooks.push(cb);},
+  reels,skull:skull!,chase:chase!,setSuspenseHook(f:((e:import('./reels').SuspenseEvent)=>void)|undefined){suspHook=f;},onFrame(cb:(dt:number)=>void){frameHooks.push(cb);},
   /** hooks for the bonus cinematic controller (presentation only) */
   emitFx:(x:number,y:number,color:string,n:number,speed?:number,size?:number,opt?:{up?:number,gravity?:number,star?:boolean,spread?:number})=>fx.emit(x,y,color,n,speed,size,opt),
   setCelebrationHook(f:((b:HTMLElement)=>number)|undefined){celebHook=f;},
