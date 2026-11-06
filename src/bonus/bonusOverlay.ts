@@ -3,8 +3,8 @@ import {PreviewAdapter,TestRoundProvider} from './provider';
 import {createBonusScene,type BonusScene} from './bonusScene';
 import {BONUS_IMG,LABEL_UP,PEDESTALS,SUMMARY_RECT} from './bonusLayout';
 
-/** DOM glue + real ports for the chest bonus. Preview only: values are explicit TEST data and never reach the slot balance. */
-export function createBonusOverlay(d:{root:HTMLElement,chestUrl:string,skullUrl:string,renderScale:()=>number,reduced:boolean,onClosed:()=>void,burst?:()=>void}){
+/** DOM glue for both the production engine-backed chest round and the explicit no-credit visual preview. */
+export function createBonusOverlay(d:{celebration?:(banner:HTMLElement)=>number,root:HTMLElement,chestUrl:string,skullUrl:string,renderScale:()=>number,reduced:boolean,onClosed:()=>void,burst?:()=>void}){
  const $=<T extends HTMLElement>(s:string)=>d.root.querySelector<T>(s)!;
  const canvas=$('#bonus-canvas') as HTMLCanvasElement,prizesEl=$('#bonus-prizes'),banner=$('#bonus-banner'),summary=$('#bonus-summary'),live=$('#bonus-live'),loading=$('#bonus-loading');
  const previewProvider=new TestRoundProvider(),previewAdapter=new PreviewAdapter();let provider:{nextRound():ChestBonusRound}=previewProvider,adapter:{award(id:string,prize:number):boolean;awards?:{roundId:string,prize:number}[]}=previewAdapter;let real=false;
@@ -22,8 +22,8 @@ export function createBonusOverlay(d:{root:HTMLElement,chestUrl:string,skullUrl:
    showPrize:(i,kind,value)=>{const el=labels[i];el.className=`bprize ${kind}`;el.querySelector('i')!.textContent=kind==='selected'?'YOU WON':'NOT PICKED';el.querySelector('b')!.textContent=fmt(value);el.querySelector('small')!.textContent=real?'TOTAL BET':'TEST VALUE';
     void el.offsetWidth;el.classList.add('show');live.textContent=kind==='selected'?`You won ${fmt(value)} your bet`:`Chest ${i+1} held ${fmt(value)}, not awarded`;
     return new Promise<void>(res=>{track(res,anim);});},     // resolves once the plaque has finished appearing → value is really visible
-   celebrate:()=>{const sel=round.selectedIndex!;scene!.highlightBest(sel);scene!.skullAppear('bigwin');d.burst?.();banner.classList.remove('show');void banner.offsetWidth;banner.classList.add('show');live.textContent='Best pick!';
-    return new Promise<void>(res=>{track(()=>{banner.classList.remove('show');scene?.skullHide();res();},d.reduced?1200:celebrateMs);});},
+   celebrate:()=>{const sel=round.selectedIndex!;scene!.highlightBest(sel);scene!.skullAppear('bigwin');d.burst?.();const extra=d.celebration?.(banner)??0;banner.style.animationDuration=extra?`${extra}ms`:'';banner.classList.remove('show');void banner.offsetWidth;banner.classList.add('show');live.textContent=extra?'Max win!':'Best pick!';
+    return new Promise<void>(res=>{track(()=>{banner.classList.remove('show');scene?.skullHide();res();},d.reduced?1200:Math.max(celebrateMs,extra));});},
    showSummary:(r,best)=>{const others=r.prizes.map((p,i)=>({p,i})).filter(x=>x.i!==r.selectedIndex).map(x=>fmt(x.p)).join(' · ');
     summary.innerHTML=`<div class="sum-main">${best?'BEST PICK! ':''}YOU WON <b>${fmt(r.prizes[r.selectedIndex!])}</b></div><div class="sum-sub">Other chests: ${others} — not awarded</div><div class="sum-note">${real?'VIRTUAL CREDITS · DEMO · PRIZE WAS DECIDED BEFORE YOU PICKED':'DEVELOPMENT PREVIEW · TEST VALUES · NO CREDITS ADDED'}</div><button id="bonus-done" class="sum-btn">BACK TO SLOT</button>`;
     summary.classList.add('show');summary.querySelector<HTMLButtonElement>('#bonus-done')!.onclick=()=>api.close();live.textContent=real?`Bonus complete. You won ${fmt(r.prizes[r.selectedIndex!])} your bet.`:`Bonus complete. You won ${fmt(r.prizes[r.selectedIndex!])} (test value, not credited).`;},

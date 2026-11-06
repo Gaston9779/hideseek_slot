@@ -37,6 +37,8 @@ export const HUD = {
   minus: { cx: px(579), cy: py(395), r: ps(38) },
   plus: { cx: px(782), cy: py(395), r: ps(38) },
   menu: { cx: px(1771), cy: py(395), r: ps(54) },
+  /** Lightning button drawn in control-panel.png (measured on the rendered art: ring 1228–1314 × 911–996) — a transparent hit area sits exactly on it, nothing is redrawn. */
+  quick: { cx: 1271, cy: 953, r: 43 },
 };
 
 /** Real 3D Skull gets a bounded transparent canvas on the left foreground. */

@@ -1,0 +1,87 @@
+{
+  "schema": "skull-hunt-math-v3-simulation-1",
+  "mathVersion": "3.0.0",
+  "engine": "src/engine/game.ts",
+  "basePaidRounds": 1000000,
+  "seed": 20261116,
+  "workers": 8,
+  "seconds": 0.966,
+  "rtp": 0.966263199999976,
+  "rtpPercent": 96.6263199999976,
+  "rtpCI95": [
+    0.9438371122973832,
+    0.9886892877025688
+  ],
+  "rtpCI99_9": [
+    0.9286133831340925,
+    1.0039130168658597
+  ],
+  "variancePerRound": 130.91665182329805,
+  "standardError": 0.011441881480914668,
+  "standardDeviationPerRound": 11.441881480914669,
+  "components": {
+    "base": 0.6093829999998904,
+    "freeSpins": 0.3207401999999997,
+    "chestBonus": 0.03614
+  },
+  "baseHitFrequency": 0.443692,
+  "triggers": {
+    "freeSpins": {
+      "count": 7111,
+      "probability": 0.007111,
+      "oneIn": 140.6271972999578
+    },
+    "chestBonus": {
+      "count": 338,
+      "probability": 0.000338,
+      "oneIn": 2958.579881656805
+    },
+    "simultaneous": {
+      "count": 114,
+      "probability": 0.000114,
+      "oneIn": 8771.929824561403
+    }
+  },
+  "averageFreeSpinsPerTrigger": 12.614259597806216,
+  "averageFreeSpinsWinX": 45.10479538742789,
+  "averageSelectedChestPrizeX": 106.94082840236686,
+  "averageCreditedChestWinX": 106.92307692307692,
+  "totalPhysicalSpins": 1089700,
+  "selected5000Count": 4,
+  "capHitCount": 4,
+  "maxRoundWinX": 5000,
+  "percentilesX": {
+    "50%": 0,
+    "75%": 0.6,
+    "90%": 1.85,
+    "95%": 3,
+    "99%": 11,
+    "99.9%": 81.4,
+    "99.99%": 172.6
+  },
+  "roundTailProbability": {
+    "1x": 0.167251,
+    "10x": 0.011319,
+    "20x": 0.006786,
+    "50x": 0.002885,
+    "100x": 0.000582,
+    "250x": 0.000027,
+    "500x": 0.000014,
+    "1000x": 0.000004,
+    "2000x": 0.000004,
+    "5000x": 0.000004
+  },
+  "roundTailCounts": {
+    "1x": 167251,
+    "10x": 11319,
+    "20x": 6786,
+    "50x": 2885,
+    "100x": 582,
+    "250x": 27,
+    "500x": 14,
+    "1000x": 4,
+    "2000x": 4,
+    "5000x": 4
+  },
+  "conservationFailures": 0
+}

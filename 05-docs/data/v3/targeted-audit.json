@@ -1,0 +1,129 @@
+{
+  "schema": "skull-hunt-v3-final-targeted-audit-1",
+  "mathVersion": "3.0.0",
+  "configurationSha256": "da885592c42997c45058c61a08327dc008e2744ac9e9e3e6740939fa32789aba",
+  "baseStopCombinations": "8153726976",
+  "exactCounts": {
+    "freeSpinsTrigger": "58091094",
+    "chestTrigger": "2373138",
+    "dualTrigger": "868572"
+  },
+  "probabilities": {
+    "freeSpins": {
+      "fraction": "119529/16777216",
+      "decimal": 0.007124483585357,
+      "oneIn": 140.36105045638772
+    },
+    "chest": {
+      "fraction": "4883/16777216",
+      "decimal": 0.000291049480438,
+      "oneIn": 3435.8419004737652
+    },
+    "dual": {
+      "fraction": "24127/226492416",
+      "decimal": 0.00010652453811,
+      "oneIn": 9387.50843460475
+    },
+    "dualGivenChest": {
+      "fraction": "48254/131841",
+      "decimal": 0.366001471469421,
+      "percent": 36.6001471469421
+    },
+    "selected5000": {
+      "fraction": "83011/25165824000",
+      "decimal": 0.000003298560778,
+      "oneIn": 303162.5206573653
+    },
+    "selected5000GivenChest": {
+      "fraction": "17/1500",
+      "decimal": 0.011333333333333
+    }
+  },
+  "dualExample": {
+    "seed": 693,
+    "stops": [
+      75,
+      11,
+      13,
+      21,
+      16
+    ],
+    "grid": [
+      [
+        "SCATTER",
+        "GHOST",
+        "POTION"
+      ],
+      [
+        "WILD",
+        "GHOST",
+        "CHEST_BONUS"
+      ],
+      [
+        "GHOST",
+        "CHEST_BONUS",
+        "SCATTER"
+      ],
+      [
+        "KEY",
+        "CHEST",
+        "MAUSOLEUM"
+      ],
+      [
+        "CHEST_BONUS",
+        "SCATTER",
+        "GHOST"
+      ]
+    ],
+    "scatterCount": 3,
+    "chestBonusCount": 3,
+    "baseWinX": 3.9,
+    "committedChestPrizes": [
+      10,
+      24,
+      40
+    ]
+  },
+  "rtp": {
+    "baseLines": 0.580239754032205,
+    "baseScatter": 0.028026401996612,
+    "baseTotal": 0.608266156028818,
+    "freeSpins": 0.320746149179128,
+    "nonJackpotChest": 0.014564504067103,
+    "selected5000Gross": 0.016492803891499,
+    "selected5000CapCorrection": 0.000063124399085,
+    "selected5000Net": 0.016429679492414,
+    "chestNet": 0.030994183559517,
+    "total": 0.960006488767464
+  },
+  "stripFacts": {
+    "baseLengths": [
+      96,
+      96,
+      96,
+      96,
+      96
+    ],
+    "freeLengths": [
+      96,
+      96,
+      96,
+      96,
+      96
+    ],
+    "chestBonusPositions": [
+      9,
+      12,
+      13,
+      15,
+      15
+    ],
+    "freeChestBonusCount": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  }
+}

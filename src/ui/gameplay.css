@@ -1,0 +1,51 @@
+/* ---- Free Spins HUD (top-right, over the sky: never over reels, logo, Skull or controls) ---- */
+.fs-hud{position:absolute;z-index:6;left:1478px;top:22px;width:420px;padding:12px 22px 14px;border-radius:22px;background:linear-gradient(160deg,#5a2a8aee,#24103ef2);border:3px solid #ffc457;box-shadow:0 0 30px #b04bffaa,inset 0 0 22px #ffffff14;pointer-events:none;color:#fff0b0;font-family:var(--ui)}
+.fs-hud[hidden]{display:none}
+.fh-title{font:900 34px/1 var(--font);letter-spacing:.14em;text-align:center;color:#ffd36a;-webkit-text-stroke:3px #4a1470;paint-order:stroke fill;text-shadow:0 4px 0 #3a0e5a,0 0 22px #c06cff}
+.fh-row{display:flex;justify-content:space-between;align-items:baseline;margin-top:8px;font:700 17px var(--ui);letter-spacing:.12em;color:#e8d6ff}
+.fh-row b{font:900 34px/1 var(--font);color:#fff3c4;text-shadow:0 3px 0 #5a2608,0 0 14px #ffb02a88;font-variant-numeric:tabular-nums;display:inline-block}
+.fh-row b.bump{animation:fhBump .45s ease-out}
+@keyframes fhBump{0%{transform:scale(1)}35%{transform:scale(1.3);color:#fff}100%{transform:scale(1)}}
+.fh-sub{margin-top:6px;text-align:center;font:700 13px var(--ui);letter-spacing:.2em;color:#c7a8ff}
+.fh-toast{position:absolute;left:50%;top:100%;transform:translate(-50%,6px) scale(.6);opacity:0;white-space:nowrap;padding:6px 22px;border-radius:30px;background:linear-gradient(#ff9a2a,#c2470a);border:2px solid #ffe08a;font:900 28px/1 var(--font);color:#fff6dc;text-shadow:0 2px 0 #7a2608;box-shadow:0 0 26px #ffb02aaa}
+.fh-toast.show{animation:fhToast 1.5s cubic-bezier(.2,1.4,.4,1) forwards}
+@keyframes fhToast{0%{opacity:0;transform:translate(-50%,6px) scale(.6)}15%{opacity:1;transform:translate(-50%,6px) scale(1.08)}80%{opacity:1;transform:translate(-50%,6px) scale(1)}100%{opacity:0;transform:translate(-50%,0) scale(1)}}
+/* ---- Free Spins summary (reuses the approved Free Spins art) ---- */
+.fs-summary{position:absolute;z-index:9;left:270px;top:112px;width:1380px;height:776px;opacity:0;visibility:hidden;pointer-events:none;transform:scale(.8);transition:opacity .3s,transform .5s cubic-bezier(.2,1.4,.4,1),visibility 0s .5s}
+.fs-summary.show{opacity:1;visibility:visible;pointer-events:auto;transform:scale(1);transition:opacity .3s,transform .5s cubic-bezier(.2,1.4,.4,1)}
+.fs-summary img{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;filter:drop-shadow(0 20px 40px #000a)}
+.fsm-plaque{position:absolute;left:38.4%;top:35.6%;width:23%;height:39.5%;display:grid;place-content:center;gap:10px;text-align:center;border-radius:46% 46% 6% 6%/22% 22% 6% 6%;background:radial-gradient(ellipse at 50% 30%,#7a4a56,#5c3646 80%);box-shadow:inset 0 0 40px #2a102a99}
+.fsm-plaque small{font:900 19px/1.15 var(--ui);letter-spacing:.14em;color:#ffe7b0;max-width:240px}
+.fsm-plaque b{font:900 66px/1 var(--font);color:#ffd53a;-webkit-text-stroke:4px #7a3a08;paint-order:stroke fill;text-shadow:0 6px 0 #8a4a10,0 0 26px #ffb02a88;font-variant-numeric:tabular-nums}
+.fsm-plaque i{font:900 24px/1 var(--ui);font-style:normal;letter-spacing:.12em;color:#ffe7b0}
+.fs-summary.zero .fsm-plaque b{font-size:44px;color:#cdb9e8;-webkit-text-stroke-color:#3a2a52;text-shadow:none}
+.fsm-go{position:absolute;left:50%;bottom:64px;transform:translateX(-50%);font:900 30px/1 var(--ui);letter-spacing:.14em;padding:18px 54px;border-radius:18px;border:3px solid #ffc457;background:linear-gradient(#ff9a2a,#c2470a);color:#fff6dc;text-shadow:0 2px 0 #7a2608;box-shadow:0 0 30px #ffb02a88;cursor:pointer}
+.fsm-go:hover{filter:brightness(1.12)}
+/* ---- Quick Spin ---- */
+#quick{border-radius:50%}
+#quick.on{background:none;box-shadow:0 0 20px 4px #ffb53acc,inset 0 0 0 3px #ffe08aaa;animation:qsGlow 1.8s ease-in-out infinite}
+#quick.on:hover{background:none}
+@keyframes qsGlow{50%{box-shadow:0 0 30px 8px #ffc65a,inset 0 0 0 3px #fff0b0}}
+#quick.unavailable,#quick:disabled{cursor:not-allowed;background:radial-gradient(circle,#10061c55,#10061c99 70%)}
+.qs-tip{position:absolute;z-index:11;transform:translate(-50%,-100%);padding:10px 16px;border-radius:12px;background:#1b0d2ff2;border:2px solid #e9a33f;color:#ffe7bb;font:700 15px/1.4 var(--ui);white-space:pre-line;text-align:center;pointer-events:none;box-shadow:0 6px 24px #000a}
+.qs-tip[hidden]{display:none}
+/* ---- keep legacy badge out of the way (replaced by the Free Spins HUD) ---- */
+#free-badge{display:none!important}
+/* ---- Buy Bonus widget: lower-right plinth, clear of reels/SPIN/BET/BALANCE/WIN ---- */
+.buy-widget{position:absolute;z-index:5;left:1648px;top:624px;width:240px;height:232px;transition:opacity .25s}
+.buy-widget[hidden]{display:none}
+.buy-widget.away{opacity:0;pointer-events:none}
+.buy-hit{position:relative;width:100%;height:100%;padding:0;border:0;background:transparent;pointer-events:auto;display:block;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.buy-title{position:absolute;left:50%;top:0;transform:translateX(-50%) scale(calc(1 + var(--hover,0)*.06));white-space:nowrap;padding:5px 18px;border-radius:14px;background:linear-gradient(#5a2a8aee,#2a1048ee);border:2px solid #ffc457;font:900 22px/1 var(--font);letter-spacing:.14em;color:#ffe08a;text-shadow:0 2px 0 #3a0e5a;box-shadow:0 0 calc(10px + var(--hover,0)*20px) #ffb02aaa}
+.buy-glow{position:absolute;left:50%;top:92px;width:200px;height:120px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse,#ffd36a88,#ffb02a22 55%,transparent 72%);opacity:calc(.55 + var(--hover,0)*.45);animation:buyPulse 2.6s ease-in-out infinite;pointer-events:none}
+@keyframes buyPulse{50%{transform:translateX(-50%) scale(1.12)}}
+.buy-canvas{position:absolute;left:0;top:56px;width:240px;height:150px;pointer-events:none}
+.buy-price{position:absolute;left:50%;bottom:0;transform:translateX(-50%);white-space:nowrap;padding:4px 16px;border-radius:12px;background:#1b0d2fee;border:2px solid #7a6a90;font:700 15px/1 var(--ui);letter-spacing:.14em;color:#d9c8ee}
+.buy-widget:not(.unavailable) .buy-price{border-color:#ffc457;color:#ffe7a0}
+.buy-widget.unavailable .buy-canvas{filter:saturate(.8)}
+.buy-hit:focus-visible{outline:3px solid #fff1bb;outline-offset:2px;border-radius:14px}
+body[data-cine="1"] .buy-widget{opacity:0;pointer-events:none}
+#buy-dialog .bd-actions{display:flex;gap:12px;margin:18px 0 10px}
+#buy-dialog .bd-actions button{flex:1;margin:0}
+#buy-dialog .bd-ok:disabled{opacity:.45;cursor:not-allowed}
+#buy-dialog b{color:#ffd083}

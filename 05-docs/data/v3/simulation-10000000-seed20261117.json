@@ -1,0 +1,87 @@
+{
+  "schema": "skull-hunt-math-v3-simulation-1",
+  "mathVersion": "3.0.0",
+  "engine": "src/engine/game.ts",
+  "basePaidRounds": 10000000,
+  "seed": 20261117,
+  "workers": 8,
+  "seconds": 4.848,
+  "rtp": 0.9596990549981982,
+  "rtpPercent": 95.96990549981982,
+  "rtpCI95": [
+    0.9531268617423033,
+    0.966271248254093
+  ],
+  "rtpCI99_9": [
+    0.9486653929625757,
+    0.9707327170338207
+  ],
+  "variancePerRound": 112.43680808212898,
+  "standardError": 0.0033531598244361835,
+  "standardDeviationPerRound": 10.603622403788668,
+  "components": {
+    "base": 0.60871716499854,
+    "freeSpins": 0.32055896999999944,
+    "chestBonus": 0.030422919999999996
+  },
+  "baseHitFrequency": 0.4437882,
+  "triggers": {
+    "freeSpins": {
+      "count": 71117,
+      "probability": 0.0071117,
+      "oneIn": 140.61335545650127
+    },
+    "chestBonus": {
+      "count": 2944,
+      "probability": 0.0002944,
+      "oneIn": 3396.7391304347825
+    },
+    "simultaneous": {
+      "count": 1048,
+      "probability": 0.0001048,
+      "oneIn": 9541.984732824427
+    }
+  },
+  "averageFreeSpinsPerTrigger": 12.616561441005667,
+  "averageFreeSpinsWinX": 45.07487239337985,
+  "averageSelectedChestPrizeX": 103.3913043478261,
+  "averageCreditedChestWinX": 103.33872282608694,
+  "totalPhysicalSpins": 10897252,
+  "selected5000Count": 33,
+  "capHitCount": 33,
+  "maxRoundWinX": 5000,
+  "percentilesX": {
+    "50%": 0,
+    "75%": 0.6,
+    "90%": 1.8,
+    "95%": 3,
+    "99%": 10.85,
+    "99.9%": 81.9,
+    "99.99%": 169.2
+  },
+  "roundTailProbability": {
+    "1x": 0.1671738,
+    "10x": 0.0112949,
+    "20x": 0.006742,
+    "50x": 0.0028441,
+    "100x": 0.0005724,
+    "250x": 0.0000223,
+    "500x": 0.0000098,
+    "1000x": 0.0000033,
+    "2000x": 0.0000033,
+    "5000x": 0.0000033
+  },
+  "roundTailCounts": {
+    "1x": 1671738,
+    "10x": 112949,
+    "20x": 67420,
+    "50x": 28441,
+    "100x": 5724,
+    "250x": 223,
+    "500x": 98,
+    "1000x": 33,
+    "2000x": 33,
+    "5000x": 33
+  },
+  "conservationFailures": 0
+}

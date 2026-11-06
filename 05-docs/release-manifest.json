@@ -1,39 +1,95 @@
 {
-  "buildBytes": 11960537,
+  "buildBytes": 22121778,
   "files": [
     {
-      "path": "assets/Skull_Horned_Creature.glb",
-      "bytes": 1021108,
-      "sha256": "392d3912b6ff03e32f7588f4f71e3639254d3f9dbe721ea1f04a7f7674048a5d",
-      "model": {
-        "meshes": 1,
-        "materials": 1,
-        "embeddedImages": [
-          {
-            "mimeType": "image/jpeg",
-            "embedded": true
-          },
-          {
-            "mimeType": "image/jpeg",
-            "embedded": true
-          },
-          {
-            "mimeType": "image/jpeg",
-            "embedded": true
-          }
-        ],
-        "joints": 65
-      }
+      "path": "assets/book-B4r9TyjJ.png",
+      "bytes": 270066,
+      "sha256": "b5d91cf381f413381e9ae5a235a865eb210f55c647e3d194ac79bc3fd86e0876"
     },
     {
-      "path": "assets/index-BALz3a1g.js",
-      "bytes": 641136,
-      "sha256": "fa173813b1b470bacecbb2ca2d80491d40e85a4b57e922517f17d98519dbad59"
+      "path": "assets/cemetery-background-DIRSzmMX.png",
+      "bytes": 1969564,
+      "sha256": "652978efd98cdf86832ae021f1977956931824fbf6985c0e5f66bc804f931f0d"
     },
     {
-      "path": "assets/index-w_kC04zT.css",
-      "bytes": 4216,
-      "sha256": "2bb7505fcee30fc2d6b8735b2af957bd0379e0c8d4783a027f382e8ebf5324f7"
+      "path": "assets/chest-D-S-BLwF.png",
+      "bytes": 239477,
+      "sha256": "5a39d8b57a4651b85eafb11223f24f0d3fb9e9e442bcb486f0fd0de3641cde5e"
+    },
+    {
+      "path": "assets/chest-bonus-B1WC6HKm.png",
+      "bytes": 1828899,
+      "sha256": "941da7a86a0333832f511fb0d92e460f1b4af8bb8438e9604a252a97f305ffcf"
+    },
+    {
+      "path": "assets/coin-DGLYFvMX.png",
+      "bytes": 259878,
+      "sha256": "3155319b22e8642712a0576a472feb9ef83b06c76168123f27a418ff8424d0c5"
+    },
+    {
+      "path": "assets/control-panel-DaJ1-qET.png",
+      "bytes": 1315603,
+      "sha256": "03d8f83bf430bbc8acf5df70e9c8c25d1c4f4df4a1b83284151d464ca12cdb24"
+    },
+    {
+      "path": "assets/free-spins-u9hr9goD.png",
+      "bytes": 1594646,
+      "sha256": "2225bdee9de75c759ae7be4448dc43e8a12e52aceddfc39963e7a1fc4b61a0f8"
+    },
+    {
+      "path": "assets/gargoyle-KsX9Dgiz.png",
+      "bytes": 282569,
+      "sha256": "11c13b1c596903a9a37b69e6526f55c527b8934eed73fc0ae7a671262900c459"
+    },
+    {
+      "path": "assets/ghost-EQ9ATj--.png",
+      "bytes": 172694,
+      "sha256": "79e0fdfd66803d737fb57fc66ac32d3fb6695871d78fb407e5dfd70606b19075"
+    },
+    {
+      "path": "assets/ghost-tomb-CF3_OtNO.png",
+      "bytes": 257485,
+      "sha256": "7965e73bce3ace0625095e55b98d64718c7660eb34e9a829cd3cbe454b80f75e"
+    },
+    {
+      "path": "assets/hide-seek-bonus-BNCbznmk.png",
+      "bytes": 2334820,
+      "sha256": "5b391581f5855644092e21fc01a76754949126e1372195ccb3a481a867600e71"
+    },
+    {
+      "path": "assets/index-Dn4Fe_xY.js",
+      "bytes": 673066,
+      "sha256": "ca07dce7cc207a051bb6756adde09826f802f5c543df838b5c1e7f7134f5bbee"
+    },
+    {
+      "path": "assets/index-c6XJdQBB.css",
+      "bytes": 14211,
+      "sha256": "844c604a092dc9ac9b9737344f1afe136635f003281a5710dad28023cc174c15"
+    },
+    {
+      "path": "assets/key-C_ClJusd.png",
+      "bytes": 175118,
+      "sha256": "ea02b8e411296dc5ace0c744274f3abdb35a94eae2f347bb2729d78bdaffff24"
+    },
+    {
+      "path": "assets/lantern-CWXbmMac.png",
+      "bytes": 144602,
+      "sha256": "4fff42eadd542ffd838cc91f91c4cffbbb264bf44758b5206873965b1093ff35"
+    },
+    {
+      "path": "assets/potion-C2Gl01fa.png",
+      "bytes": 192520,
+      "sha256": "a02559e5f216ed09a56ede8e38f01f86edaebc29f13bdd1fca1a7d94384b94c1"
+    },
+    {
+      "path": "assets/reel-frame-DpTHjPp5.png",
+      "bytes": 1589185,
+      "sha256": "0e4bfde5bd78c92d4e963895869a9c2e880efb95a4255b2cb8092cced9016fcc"
+    },
+    {
+      "path": "assets/scatter-CSjHhZJ_.png",
+      "bytes": 271841,
+      "sha256": "76c8a43e6c236e5d3e962254bd18ddb0b656e8a9a7842ff544e09cb03b0895d3"
     },
     {
       "path": "assets/scenery/Skull_Horned_Creature_Rigged.glb",
@@ -61,98 +117,253 @@
       }
     },
     {
-      "path": "assets/scenery/catgoyle_3d_model.glb",
-      "bytes": 1711172,
-      "sha256": "7e398fce57928d021ae11cbf1b084930ee96435852016f35ecd3eba800ce29da",
+      "path": "assets/scenery/Skull_Seeker.glb",
+      "bytes": 1050872,
+      "sha256": "313eb52b623fe4297e8062c70699492dc1b99bc13eacf51d316e0a32f58feaa9",
       "model": {
         "meshes": 1,
         "materials": 1,
+        "embeddedImages": [
+          {
+            "mimeType": "image/jpeg",
+            "embedded": true
+          }
+        ],
+        "joints": 65
+      }
+    },
+    {
+      "path": "assets/skull-hunt-logo-cropped-CPVDYWa9.png",
+      "bytes": 1576382,
+      "sha256": "df6090f688c81f91063f1650fcb8147429343c114a6b2527027c6e6bd8cc426b"
+    },
+    {
+      "path": "assets/tombstone-LNBBJxvG.png",
+      "bytes": 246321,
+      "sha256": "ad2b321367e9dd4df7e2ed6e828b971419620cb2c75d658287913f9b06455412"
+    },
+    {
+      "path": "assets/wild-BsBXOuzT.png",
+      "bytes": 252311,
+      "sha256": "9efa087c5a0ef957a3a97b4aface3d18f830ea7dfa4f66744ddd6886a92c87ff"
+    },
+    {
+      "path": "bonus-chest/bonus-chest-animated.glb",
+      "bytes": 316752,
+      "sha256": "1f3f4060a4781aa21a9e3c39b6ee1f18f90ef1b0dea9b86d217f7b56f01083c3",
+      "model": {
+        "meshes": 2,
+        "materials": 1,
+        "embeddedImages": [
+          {
+            "mimeType": "image/jpeg",
+            "embedded": true
+          }
+        ],
         "joints": 0
       }
     },
     {
-      "path": "assets/scenery/gargoyle_3d_model.glb",
-      "bytes": 1663992,
-      "sha256": "3e95d0cf2bad0a6710de12ebe45c3fcaa78c9c907f2ac8fd40cea0a9d6c5d6c5",
+      "path": "bonus-chest/chest-original.glb",
+      "bytes": 274088,
+      "sha256": "98f350adf7c8956e0fdf3a3ee72db6e250ad52df15ee870721b6c9f9b49f292d",
       "model": {
         "meshes": 1,
         "materials": 1,
+        "embeddedImages": [
+          {
+            "mimeType": "image/jpeg",
+            "embedded": true
+          }
+        ],
         "joints": 0
       }
     },
     {
-      "path": "assets/scenery/gothic_mausoleum.glb",
-      "bytes": 1556992,
-      "sha256": "adc3e3cd0302a00c97fdf11222df0dcc1b2164cf762dee30077a668f15ccbe5a",
-      "model": {
-        "meshes": 1,
-        "materials": 1,
-        "joints": 0
-      }
+      "path": "cinematics/skull-hunt-intro-poster.webp",
+      "bytes": 94224,
+      "sha256": "41fec77bdfb38cd9b2e65f442f305f610802e3e9deb594c7fa7d06d6af891110"
     },
     {
-      "path": "assets/skull-hunt-logo.png",
-      "bytes": 1936206,
-      "sha256": "1d474b7e88bdabd81afbc8d8a48b9e55855d4d6f40a5410dc8270fab698f1236"
+      "path": "cinematics/skull-hunt-intro.mp4",
+      "bytes": 619052,
+      "sha256": "46b187d216becaa0a30237b0ef953cda2e5d2a2ef9b1011f3865ee169ba4e22c"
+    },
+    {
+      "path": "cinematics/skull-hunt-intro.webm",
+      "bytes": 678021,
+      "sha256": "634137b15d437a50e8b1e32dc11d4fe9942485d30adb3f94ea9ec54b4fb0ece1"
     },
     {
       "path": "index.html",
-      "bytes": 2819,
-      "sha256": "853b191650fff92ec14a5ff310cdf3d43d56e3c2ef4ff4681c21593fc725b88b"
+      "bytes": 4615,
+      "sha256": "1f22b81d6cfcec0048070e5eb9e056a930cf4d5deb30d246244a45b3dd56d414"
     }
   ],
   "source": [
     {
       "path": "src/animation/mascot.ts",
-      "sha256": "e6e0e7d4caeb8176a157f3bccf751fc72f02ada2e75110c0b8dcfadad776ad6b"
+      "sha256": "b1c8e2acc34b65e24e8d212488e70e6130cc8cfb752bcc0e86c35f26d0e2419f"
+    },
+    {
+      "path": "src/bonus-chest/chest-test.ts",
+      "sha256": "b6583d1dc1f049cdd1153930ff3a00141959e75b337f58a4c3d31503e79bfdce"
+    },
+    {
+      "path": "src/bonus-chest/chest.ts",
+      "sha256": "f3c63277d61f52fa90fa6e989a9454657894f5d3d1606d29328c4fafabe9e354"
+    },
+    {
+      "path": "src/bonus/bonusLayout.ts",
+      "sha256": "d309f75cadd4643ef9abb359ba961671e9b487dbda24f4abc08cd9391e9e290b"
+    },
+    {
+      "path": "src/bonus/bonusOverlay.ts",
+      "sha256": "1d3d009aedcd8332648d0a256b583b3c9639ff3e333e8407b501a8667f24c45e"
+    },
+    {
+      "path": "src/bonus/bonusScene.ts",
+      "sha256": "a756ba7b575ac9335a4b0c1e000170fee752f82f99f9351d3285d07487524256"
+    },
+    {
+      "path": "src/bonus/controller.ts",
+      "sha256": "1b0ebb1450e12b88a67b737f76ede477545d58611bdf981a7e4677f2047dfbfc"
+    },
+    {
+      "path": "src/bonus/provider.ts",
+      "sha256": "d11fd374704dc4f1646afc611e21deb17875398875b3e55281e597db0a9f9517"
+    },
+    {
+      "path": "src/chase/director.ts",
+      "sha256": "5e7b2906a310605972c39fbe1769cffe897510980231124197d05b08aa07446a"
+    },
+    {
+      "path": "src/chase/poses.ts",
+      "sha256": "da94a668cdec20aca03ada1666c62c49cf3ec99cc8fe2e4075ff817ffe7f108e"
+    },
+    {
+      "path": "src/chase/rigPose.ts",
+      "sha256": "ee5ca76980bcd5d5e7091b21a01c53ad29edab1abe2dc81103e5e49ffee25295"
+    },
+    {
+      "path": "src/chase/scheduler.ts",
+      "sha256": "ef18db6f04bba074af483c45f9c749fe0d02e16146d2973ee9e83828aeda9811"
+    },
+    {
+      "path": "src/config/chase.ts",
+      "sha256": "03bedf1f7d1b31f47b4cbc8954e2afa9fd78836bbfba7e6b3404cd2ec5ae543e"
     },
     {
       "path": "src/config/game.ts",
-      "sha256": "fad359d7ffab3b99bc7b5fcde2949bb725a8dd826ab5cefb9c01403b3b960d26"
+      "sha256": "793a8c4e47727b8d7d7a0b2eb621b04ecc86e11ad7430ebfba40ec860f51dbde"
+    },
+    {
+      "path": "src/config/markets.ts",
+      "sha256": "bd2c3d81c88c32d8aa291c3953489b1e93635919434b15df76d426892932521f"
+    },
+    {
+      "path": "src/config/presentation.ts",
+      "sha256": "b01edb48eddde851cc067dd15d45626c806609926b571d5159d30058d4995a65"
+    },
+    {
+      "path": "src/engine/events.ts",
+      "sha256": "0ab48e10f16db197625b258128cefe86c7814d2eca21ca5b34015699a19efa60"
     },
     {
       "path": "src/engine/game.ts",
-      "sha256": "22f988ecbe1851807a913fb5dc4f58025a245d6e4957a180cc0132a7ed9a5901"
+      "sha256": "73f2608eea4c9beec5dfb965fd2c8c8cbfbd2cf819072ea12adb7f7546dd059b"
+    },
+    {
+      "path": "src/layout.ts",
+      "sha256": "140053690a2f2eb6ed257e7a3981929abfe298139c72c297741b2f772d9b5d28"
     },
     {
       "path": "src/main.ts",
-      "sha256": "e031fc60e3a8f4e11eab7a5a03676cc51dddc783904f59c611fc40cd78dd48c1"
+      "sha256": "ecc29161202836870cc251b9dd82133e268acd70dbf46d4e3f8b0ad3a4512d65"
     },
     {
       "path": "src/math/evaluate.ts",
-      "sha256": "040b282f7b9028a17c42d2e18ca793388474f9ceaf7bb6d15187e48a0569d3f1"
+      "sha256": "f051045e590cabd50fcef847338ac3a2b478a63a61756c9afcb89210b5506bcf"
     },
     {
       "path": "src/math/rng.ts",
-      "sha256": "070d39a6f2b19b71d3b4cdd23b7143962278e883fa0713f6b18801def6dd74a5"
+      "sha256": "806be28ca296ab9fa59a76f6ecd684473a5d7df8f8e85fbf1f356750e0cb9c70"
     },
     {
       "path": "src/math/slot.ts",
-      "sha256": "4f55894e86ff60cea11488806bd3b11d6b22ce9a2b111601260d09deeece580c"
+      "sha256": "99f5107d6baf44dc8a0ca809d94c6c0c748b8e14ba2df34f15b0439eea89c49c"
     },
     {
-      "path": "src/rendering/atmosphere.ts",
-      "sha256": "e13b6f1334791c2b8e6d38fcf0bb42be7880097333d33cea9c08e713de7e5773"
+      "path": "src/math/v2/config.ts",
+      "sha256": "4829a45d878a39170f26f2ca567d5385cb27213f42a64f78ad814bd9778d538e"
     },
     {
-      "path": "src/rendering/geometry.ts",
-      "sha256": "ee8dcd6cef15fe3a7ed80b8ca791fc1605d67869771fe8bbd59df68f6ab0f38f"
+      "path": "src/math/v2/evaluate.ts",
+      "sha256": "d07fb7eaab4c593c0b33a8dd0d6be5ff0d6f65ab543e9ae5047775ec4513315e"
     },
     {
-      "path": "src/rendering/scene.ts",
-      "sha256": "8f911563560d489aacb735891ebaf8e1238041402d3a797586d70b2d86940a30"
+      "path": "src/math/v2/rng.ts",
+      "sha256": "0967959f0529739ea1acd532a8c1036ed48c7b3483fb04b64d28b137beba4057"
     },
     {
-      "path": "src/rendering/symbols.ts",
-      "sha256": "0bce731528105ebc08e77d27cfc720c26c666f1580f8e6675439d255ae3062a2"
+      "path": "src/math/v2/spin.ts",
+      "sha256": "65e58ad5edc1fab39fdceb3cb21dc5e6f7f146ff9e4406b8425639a65d6b8bc5"
+    },
+    {
+      "path": "src/math/v2/strips.ts",
+      "sha256": "f01d62d00128cab4a2f2224b93b2a0e22f86dea18e6acb738d7743037c930135"
+    },
+    {
+      "path": "src/math/v3/config.ts",
+      "sha256": "15030c442617a47a0a2f384cc1417f58137a4fb7c6bff1eeb201cd4ceae9d1d4"
+    },
+    {
+      "path": "src/math/v3/evaluate.ts",
+      "sha256": "f176f6af6cec26e5bdf966cd92afde856f42aa4b85360736f003274e7ae593df"
+    },
+    {
+      "path": "src/math/v3/spin.ts",
+      "sha256": "1a869d53a9fdd61564216fcebbcf1c76229cee6d0ef75d8f360be0917d1ad619"
+    },
+    {
+      "path": "src/math/v3/strips.ts",
+      "sha256": "4a8dc8227032b684bfa7ebe057096bd11a4e1361c593ea9cccaf7898773e22cf"
     },
     {
       "path": "src/style.css",
-      "sha256": "d0ba8091d5c3f0c86fdee2b7abc7d761ffbfb95ac80c6377225432bf16c95a54"
+      "sha256": "69e0ae32877968bcc5496c0b9906bb26ee2e322ea7bbd6280959000b8cf6278e"
+    },
+    {
+      "path": "src/ui/cinematic.css",
+      "sha256": "8da610c274693b2efe249f74531e4968c767e6c439d759d55640d160caaed2eb"
+    },
+    {
+      "path": "src/ui/cinematicPlayer.ts",
+      "sha256": "3221cca60373744f7570ee5ba5c69853fc724f43a7dbd38ad370890a540a766e"
     },
     {
       "path": "src/ui/touch.css",
-      "sha256": "39999239aa881bdb86116cfc783a8830c7847b864d62d3bf9d8dc0fc073ca14b"
+      "sha256": "e7191e3a7902fef76da3210c388e3260aa268c12f58073cfc15b818c72e2810d"
+    },
+    {
+      "path": "src/view/assets.ts",
+      "sha256": "4247cde72c91f942ca0b0ec0ff9d07c435f89f7b54228395541b690a040cbc01"
+    },
+    {
+      "path": "src/view/particles.ts",
+      "sha256": "7484e65a86639a7a013b7e0bdd168db9785e15d0e68845eaa46a0a4ca0035aec"
+    },
+    {
+      "path": "src/view/reels.ts",
+      "sha256": "ea01a7bff139aa031233bb2ca3363d816aabf83cf3a8d9cfa6fcbdc4cd66bfab"
+    },
+    {
+      "path": "src/view/skull.ts",
+      "sha256": "d1728057f051f3e6f33b3348e284d9ec587ec3e98841e74317da40224bb32452"
+    },
+    {
+      "path": "src/view/view.ts",
+      "sha256": "8687caffdf4ee61a193f10f4655bbb598b955bb84940b4194efdb6c8753ae57b"
     },
     {
       "path": "src/vite-env.d.ts",

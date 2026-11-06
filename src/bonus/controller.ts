@@ -1,13 +1,13 @@
 /**
  * Hide & Seek chest bonus — pure state machine (no DOM, no Three.js, no balance access).
  * The UI only displays/selects/animates; prize values come from an explicit data object (ChestBonusRound).
- * DEVELOPMENT PREVIEW: nothing here touches credits; crediting goes through a BonusAdapter that the host provides.
+ * Crediting is isolated behind a BonusAdapter; the production host uses the engine's idempotent pick operation.
  */
 export type BonusStatus='READY'|'OPENING_SELECTED'|'REVEAL_SELECTED'|'WAITING_3_SECONDS'|'REVEALING_UNSELECTED'|'CELEBRATION'|'COMPLETE'|'CLOSED';
 export interface ChestBonusRound{roundId:string;prizes:[number,number,number];selectedIndex:number|null;awardedPrize:number|null;status:BonusStatus}
-/** Source of rounds. A verified bonus engine will implement this; the demo uses fixed TEST data. */
+/** Source of a prize round already committed by the math engine (or explicit TEST data in preview mode). */
 export interface BonusRoundProvider{nextRound():ChestBonusRound}
-/** Accounting boundary. Returns true only the first time a round is awarded. The preview adapter never touches the slot balance. */
+/** Accounting boundary. Returns true only the first time a round is awarded. */
 export interface BonusAdapter{award(roundId:string,prize:number):boolean}
 export interface BonusPorts{
  setInteractive(on:boolean):void;

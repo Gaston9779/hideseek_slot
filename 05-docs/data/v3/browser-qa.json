@@ -1,0 +1,153 @@
+{
+  "schema": "skull-hunt-math-v3-browser-qa-1",
+  "url": "http://127.0.0.1:5175/",
+  "checks": [
+    "client receives FREE_SPINS_TRIGGERED",
+    "client receives CHEST_BONUS_TRIGGERED and BEST_CHEST_PICK",
+    "client receives one DUAL_BONUS_TRIGGERED; resolution base → chest → Free Spins",
+    "real 5,000× is visible, credited once, and emits MAX_WIN"
+  ],
+  "errors": [],
+  "console": [],
+  "freeSpinsEvents": [
+    {
+      "type": "FREE_SPINS_TRIGGERED",
+      "roundId": "R1",
+      "spinNo": 1,
+      "source": "BASE",
+      "scatterCount": 3,
+      "awardedSpins": 12
+    }
+  ],
+  "chestOnly": {
+    "before": {
+      "phase": "ready",
+      "balance": 100000,
+      "bet": 100,
+      "freeSpins": 0,
+      "chest": null,
+      "roundWinUnits": 0,
+      "conserved": true
+    },
+    "opened": {
+      "phase": "chest",
+      "scatterCount": 1,
+      "chestBonusCount": 3,
+      "freeSpins": 0,
+      "prizes": [
+        40,
+        24,
+        10
+      ]
+    },
+    "events": [
+      {
+        "type": "CHEST_BONUS_TRIGGERED",
+        "roundId": "R1",
+        "spinNo": 1,
+        "chestBonusCount": 3
+      },
+      {
+        "type": "BEST_CHEST_PICK",
+        "roundId": "R1",
+        "spinNo": 1,
+        "selectedIndex": 0,
+        "prizeX": 40
+      }
+    ],
+    "selectedIndex": 0,
+    "selectedPrize": 40,
+    "closedPhase": "ready",
+    "balance": 103900
+  },
+  "simultaneous": {
+    "before": {
+      "phase": "ready",
+      "balance": 100000,
+      "bet": 100,
+      "freeSpins": 0,
+      "chest": null,
+      "roundWinUnits": 0,
+      "conserved": true
+    },
+    "opened": {
+      "phase": "chest",
+      "scatterCount": 3,
+      "chestBonusCount": 3,
+      "freeSpins": 12,
+      "prizes": [
+        10,
+        24,
+        40
+      ]
+    },
+    "events": [
+      {
+        "type": "DUAL_BONUS_TRIGGERED",
+        "roundId": "R1",
+        "spinNo": 1,
+        "scatterCount": 3,
+        "chestBonusCount": 3,
+        "awardedSpins": 12
+      },
+      {
+        "type": "BEST_CHEST_PICK",
+        "roundId": "R1",
+        "spinNo": 1,
+        "selectedIndex": 2,
+        "prizeX": 40
+      }
+    ],
+    "selectedIndex": 2,
+    "selectedPrize": 40,
+    "closedPhase": "free-spins",
+    "balance": 104290
+  },
+  "jackpot": {
+    "before": {
+      "phase": "ready",
+      "balance": 100000,
+      "bet": 100,
+      "freeSpins": 0,
+      "chest": null,
+      "roundWinUnits": 0,
+      "conserved": true
+    },
+    "opened": {
+      "phase": "chest",
+      "scatterCount": 1,
+      "chestBonusCount": 3,
+      "freeSpins": 0,
+      "prizes": [
+        100,
+        500,
+        5000
+      ]
+    },
+    "events": [
+      {
+        "type": "CHEST_BONUS_TRIGGERED",
+        "roundId": "R1",
+        "spinNo": 1,
+        "chestBonusCount": 3
+      },
+      {
+        "type": "BEST_CHEST_PICK",
+        "roundId": "R1",
+        "spinNo": 1,
+        "selectedIndex": 2,
+        "prizeX": 5000
+      },
+      {
+        "type": "MAX_WIN",
+        "roundId": "R1",
+        "spinNo": 1,
+        "totalWinX": 5000
+      }
+    ],
+    "selectedIndex": 2,
+    "selectedPrize": 5000,
+    "closedPhase": "ready",
+    "balance": 599900
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "schema": "skull-hunt-math-v3-cap-bound-1",
+  "method": "Chernoff bound over 30 iid potential Free Spins, using exhaustive per-spin histogram",
+  "maxBaseUnits": 2140,
+  "maxNonJackpotChestUnits": 10000,
+  "freeSpinsPadded": 30,
+  "requiredFreeSpinUnits": 87860,
+  "optimizingT": 0.001541814767133839,
+  "naturalLogProbabilityBound": -115.19065267776327,
+  "probabilityBound": 9.404488402418567e-51,
+  "rtpEffectUpperBound": 4.702244201209283e-47
+}

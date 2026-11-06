@@ -1,0 +1,101 @@
+{
+  "schema": "skull-hunt-math-v3-simulation-1",
+  "mathVersion": "3.0.0",
+  "engine": "src/engine/game.ts",
+  "basePaidRounds": 100000000,
+  "seed": 20261118,
+  "workers": 8,
+  "seconds": 54.086,
+  "rtp": 0.9595450564775516,
+  "rtpPercent": 95.95450564775516,
+  "rtpCI95": [
+    0.9574533001139208,
+    0.9616368128411824
+  ],
+  "rtpCI99_9": [
+    0.9560333318707831,
+    0.9630567810843201
+  ],
+  "variancePerRound": 113.89641516008376,
+  "standardError": 0.0010672226345054894,
+  "standardDeviationPerRound": 10.672226345054895,
+  "components": {
+    "base": 0.6081986845014585,
+    "freeSpins": 0.3199758880000012,
+    "chestBonus": 0.031370484
+  },
+  "baseHitFrequency": 0.44352314,
+  "roundReturnVsBet": {
+    "below": {
+      "count": 83284320,
+      "probability": 0.8328432
+    },
+    "equal": {
+      "count": 1197109,
+      "probability": 0.01197109
+    },
+    "above": {
+      "count": 15518571,
+      "probability": 0.15518571
+    }
+  },
+  "triggers": {
+    "freeSpins": {
+      "count": 711975,
+      "probability": 0.00711975,
+      "oneIn": 140.4543698865831
+    },
+    "chestBonus": {
+      "count": 29166,
+      "probability": 0.00029166,
+      "oneIn": 3428.649797709662
+    },
+    "simultaneous": {
+      "count": 10633,
+      "probability": 0.00010633,
+      "oneIn": 9404.683532399134
+    }
+  },
+  "averageFreeSpinsPerTrigger": 12.615506162435478,
+  "averageFreeSpinsWinX": 44.942011727940056,
+  "averageSelectedChestPrizeX": 107.58019611876843,
+  "averageCreditedChestWinX": 107.55840362065419,
+  "totalPhysicalSpins": 108981925,
+  "selected5000Count": 335,
+  "capHitCount": 335,
+  "maxRoundWinX": 5000,
+  "percentilesX": {
+    "50%": 0,
+    "75%": 0.6,
+    "90%": 1.8,
+    "95%": 3,
+    "99%": 10.85,
+    "99.9%": 82,
+    "99.99%": 171.05
+  },
+  "roundTailProbability": {
+    "1x": 0.1671568,
+    "10x": 0.0112786,
+    "20x": 0.00674421,
+    "50x": 0.00283366,
+    "100x": 0.00057259,
+    "250x": 0.00002429,
+    "500x": 0.00001055,
+    "1000x": 0.00000335,
+    "2000x": 0.00000335,
+    "5000x": 0.00000335
+  },
+  "roundTailCounts": {
+    "1x": 16715680,
+    "10x": 1127860,
+    "20x": 674421,
+    "50x": 283366,
+    "100x": 57259,
+    "250x": 2429,
+    "500x": 1055,
+    "1000x": 335,
+    "2000x": 335,
+    "5000x": 335
+  },
+  "conservationFailures": 0
+}

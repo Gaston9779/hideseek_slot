@@ -23,13 +23,13 @@ interface Seg{t0:number;t1:number;x0:number;x1:number;l0:number;l1:number;yaw0:n
 const S=(t0:number,t1:number,x0:number,x1:number,l0:number,l1:number,yaw0:number,yaw1:number,anim:Anim,cad?:number,amp?:number):Seg=>({t0,t1,x0,x1,l0,l1,yaw0,yaw1,anim,cad,amp});
 // ---- storyboard (seconds). lane 0 = front, 1 = back (hidden behind the machine for x∈[385,1535]) -------------------------------------------------
 const SEEKER:Seg[]=[
- S(0,.8,2100,1480,0,0,FACE_L,FACE_L,'run',3.2,1),         // A: bursts in from the right, blaster forward
- S(.8,2.5,1480,1060,0,0,FACE_L,FACE_L,'scan'),             //    searching
- S(2.5,3.4,1060,330,0,0,FACE_L,FACE_L,'lunge'),             // C: spots Skull fleeing, gives chase (same route, ~0.6 s later)
- S(3.4,3.7,330,250,0,1,FACE_L,FACE_R,'run',3.2,1),         //    steps back behind the left side and turns
- S(3.7,4.85,250,1620,1,1,FACE_R,FACE_R,'run',3.6,1.05),    //    behind the machine (occluded by the frame art)
- S(4.85,5.1,1620,1720,1,0,FACE_R,FACE_R,'run',3.4,1),      // E: re-emerges on the right, still launched
- S(5.1,5.5,1720,1790,0,0,FACE_R,FACE_R,'trip'),            //    trips on the plinth step
+ S(0,.75,2100,1640,0,0,FACE_L,FACE_L,'run',3.2,1),        // A: bursts in from the right (stays on the right slab, clear of the reels), blaster forward
+ S(.75,2.5,1640,1520,0,0,FACE_L,FACE_L,'scan'),            //    searching on the slab
+ S(2.5,3.5,1520,330,0,0,FACE_L,FACE_L,'lunge'),             // C: spots Skull fleeing, gives chase (same route, ~0.6 s later)
+ S(3.5,3.8,330,250,0,1,FACE_L,FACE_R,'run',3.2,1),         //    steps back behind the left side and turns
+ S(3.8,5.4,250,1620,1,1,FACE_R,FACE_R,'run',3.6,1.0),     //    behind the machine (occluded by the frame art)
+ S(5.4,5.65,1620,1710,1,0,FACE_R,FACE_R,'run',3.4,1),      // E: re-emerges on the right, still launched
+ S(5.65,6.1,1710,1780,0,0,FACE_R,FACE_R,'trip'),           //    trips on the plinth step (after Skull is home)
 ];
 const SKULLSEG:Seg[]=[
  S(0,1.5,HOME.x,HOME.x,0,0,HOME.yaw,HOME.yaw,'idle'),
@@ -39,12 +39,16 @@ const SKULLSEG:Seg[]=[
  S(2.95,3.2,335,260,0,1,FACE_L,FACE_R,'run',3.4,1),        // C: steps behind the left side
  S(3.2,4.1,260,1600,1,1,FACE_R,FACE_R,'run',3.8,1.05),     //    behind the machine
  S(4.1,4.4,1600,1670,1,0,FACE_R,FACE_L,'run',3.4,1),       // D: pops out on the right, spins around
- S(4.4,5.7,1670,420,0,0,FACE_L,FACE_L,'run',3.6,1.05),     //    dashes home along the front of the plinth
- S(5.7,6.1,420,HOME.x,0,0,FACE_L,HOME.yaw,'brake'),
- S(6.1,6.6,HOME.x,HOME.x,0,0,HOME.yaw,HOME.yaw,'settle'),
+ S(4.4,5.5,1670,420,0,0,FACE_L,FACE_L,'run',3.6,1.05),     //    dashes home along the front of the plinth
+ S(5.5,5.8,420,HOME.x,0,0,FACE_L,HOME.yaw,'brake'),
+ S(5.8,6.2,HOME.x,HOME.x,0,0,HOME.yaw,HOME.yaw,'settle'),
+ S(6.2,7.0,HOME.x,HOME.x,0,0,HOME.yaw,HOME.yaw,'idle'),
 ];
-const TUMBLE={t0:5.5,t1:6.35,x0:1790,vx:380,v0:420,g:1000,turns:1.2};
-export const CHASE_END=6.6;
+const TUMBLE={t0:6.1,t1:6.95,x0:1780,vx:380,v0:420,g:1000,turns:1.2};
+export const CHASE_END=7.0;
+/** Story-time marks reported to the caller (bonus endings hook their effects here). */
+export const CHASE_MARKS={crateDrop:5.35,impact:6.1,skullHome:5.8};
+const CRATE_X=1812;
 class Actor{
  readonly root=new T.Group();private mid=new T.Group();readonly mdl=new T.Group();readonly shadow:T.Mesh;
  poser:RigPoser;mixer?:T.AnimationMixer;alert?:T.AnimationAction;height:number;gun:boolean;
@@ -62,13 +66,15 @@ class Actor{
  }
  setVisible(v:boolean){this.root.visible=v;this.shadow.visible=v;}
 }
+export type ChaseMark='crateDrop'|'impact'|'skullHome';
+export interface StartOpts{speed?:number;crate?:boolean;onMark?:(m:ChaseMark,at:{x:number,y:number})=>void}
 export interface Chase{
  /** Loads models (once) and plays the gag. Resolves true when it ran to completion, false if aborted/unavailable. */
- start():Promise<boolean>;abort():void;readonly running:boolean;ready():Promise<void>;
+ start(opts?:StartOpts):Promise<boolean>;abort():void;readonly running:boolean;ready():Promise<void>;
   /** DEV/QA: render the gag at an exact time (frame-accurate screenshots); stays paused until abort(). */
- scrub(time:number,dt?:number):Promise<void>;update(dt:number):void;resize():void;inspect():unknown;dispose():void;
+ scrub(time:number,dt?:number,crate?:boolean):Promise<void>;update(dt:number):void;resize():void;inspect():unknown;dispose():void;
 }
-export function createChase(d:{world:HTMLElement,skullCanvas:HTMLCanvasElement,renderScale:()=>number,skullTemplate:()=>{scene:T.Object3D,animations:T.AnimationClip[]},frameImg:HTMLImageElement,panelImg:HTMLImageElement,seekerUrl:string,skullHeight:number}):Chase{
+export function createChase(d:{world:HTMLElement,skullCanvas:HTMLCanvasElement,renderScale:()=>number,skullTemplate:()=>{scene:T.Object3D,animations:T.AnimationClip[]},frameImg:HTMLImageElement,panelImg:HTMLImageElement,seekerUrl:string,skullHeight:number,crateUrl?:string}):Chase{
  const canvas=document.createElement('canvas');canvas.id='chase';canvas.setAttribute('aria-hidden','true');d.world.appendChild(canvas);
  const hole=HUD.spin;const R=hole.r*1.04;const mask=`radial-gradient(circle at ${hole.cx}px ${hole.cy}px, transparent ${R}px, #000 ${R+1.5}px)`;
  canvas.style.cssText=`position:absolute;left:0;top:0;width:${DESIGN.w}px;height:${DESIGN.h}px;z-index:5;pointer-events:none;visibility:hidden;-webkit-mask-image:${mask};mask-image:${mask}`;
@@ -94,6 +100,7 @@ export function createChase(d:{world:HTMLElement,skullCanvas:HTMLCanvasElement,r
   skull=new Actor(SkeletonUtils.clone(tpl.scene),d.skullHeight,false,tpl.animations,shTex);
   seeker=new Actor(gltf.scene,d.skullHeight*CHASE.seekerHeightRatio,true,[],shTex);
   for(const a of [skull,seeker]){scene.add(a.root,a.shadow);}
+  if(d.crateUrl){try{const cg=await new GLTFLoader().loadAsync(d.crateUrl);const m=cg.scene;m.traverse(o=>{if((o as T.Mesh).isMesh)o.frustumCulled=false;});const b=new T.Box3().setFromObject(m),sz=b.getSize(new T.Vector3()),c=b.getCenter(new T.Vector3()),k=140/sz.y;m.scale.multiplyScalar(k);m.position.sub(new T.Vector3(c.x,b.min.y,c.z).multiplyScalar(k));m.rotation.y=0;crate=new T.Group();const w=new T.Group();w.add(m);w.rotation.y=-.35;crate.add(w);crate.visible=false;scene.add(crate);}catch(e){console.warn('[chase] crate prop unavailable',e);}}
   loaded=true;resize();
  }
  function resize(){if(!renderer)return;const s=d.renderScale();renderer.setPixelRatio(1);renderer.setSize(Math.round(DESIGN.w*s),Math.round(DESIGN.h*s),false);}
@@ -134,27 +141,36 @@ export function createChase(d:{world:HTMLElement,skullCanvas:HTMLCanvasElement,r
   if(seg.anim==='panic'){squash=.03*Math.sin(lt*17);}
   place(a,x,lane,yaw,bounce,squash+o.squash);
  }
- let alertStarted=false,alertFaded=false,scrubbing=false;
- function end(ok:boolean){running=false;scrubbing=false;canvas.style.visibility='hidden';d.skullCanvas.style.visibility='';skull?.setVisible(false);seeker?.setVisible(false);for(const a of [skull,seeker]){a?.poser.reset();a?.alert?.stop();a?.mixer?.stopAllAction();}alertStarted=false;alertFaded=false;const r=resolveRun;resolveRun=undefined;r?.(ok);}
+ let alertStarted=false,alertFaded=false,scrubbing=false,opts:StartOpts={},speed=1;const fired=new Set<ChaseMark>();
+ let crate:T.Group|undefined;
+ function driveCrate(time:number){
+  if(!crate)return;if(!opts.crate||time<CHASE_MARKS.crateDrop||time>=CHASE_END){crate.visible=false;return;}
+  crate.visible=true;const u=Math.min(1,(time-CHASE_MARKS.crateDrop)/.3),landed=time-CHASE_MARKS.crateDrop-.3;let y=0,sq=0,rz=0;
+  if(u<1)y=480*(1-u*u);else if(landed<.22){const k=landed/.22;y=22*Math.sin(k*Math.PI);sq=-.1*(1-k)*Math.cos(k*Math.PI*2);}
+  if(time>=CHASE_MARKS.impact){const w=time-CHASE_MARKS.impact;y+=Math.max(0,60*Math.sin(Math.min(1,w/.35)*Math.PI));rz=.35*Math.exp(-w*4)*Math.sin(w*22);}
+  crate.position.set(CRATE_X,DESIGN.h-YF+y,ZF+60);crate.rotation.z=rz;crate.scale.set(1-sq*.5,1+sq,1-sq*.5);
+ }
+ function marks(){const at={crateDrop:{x:CRATE_X,y:YF-20},impact:{x:CRATE_X-30,y:YF-70},skullHome:{x:HOME.x,y:HOME.y-120}};for(const k of Object.keys(CHASE_MARKS) as ChaseMark[])if(!fired.has(k)&&t>=CHASE_MARKS[k]){fired.add(k);opts.onMark?.(k,at[k]);}}
+ function end(ok:boolean){running=false;if(crate)crate.visible=false;scrubbing=false;canvas.style.visibility='hidden';d.skullCanvas.style.visibility='';skull?.setVisible(false);seeker?.setVisible(false);for(const a of [skull,seeker]){a?.poser.reset();a?.alert?.stop();a?.mixer?.stopAllAction();}alertStarted=false;alertFaded=false;const r=resolveRun;resolveRun=undefined;r?.(ok);}
  const api:Chase={
   ready(){if(!loading)loading=load().catch(e=>{console.error('[chase] load failed',e);loading=undefined;});return loading;},
-  async start(){
+  async start(o={}){
    if(running||reduced)return false;await api.ready();if(!loaded||running)return false;
-   running=true;t=0;runs++;alertStarted=false;alertFaded=false;resize();d.skullCanvas.style.visibility='hidden';canvas.style.visibility='visible';
+   opts=o;speed=o.speed??1;fired.clear();running=true;t=0;runs++;alertStarted=false;alertFaded=false;resize();d.skullCanvas.style.visibility='hidden';canvas.style.visibility='visible';
    for(const a of [skull,seeker]){a.poser.reset();a.mixer?.stopAllAction();}
    return new Promise<boolean>(res=>{resolveRun=res;});
   },
-  async scrub(time,dt=1/60){await api.ready();if(!loaded)return;if(!running){running=true;scrubbing=true;t=0;resize();d.skullCanvas.style.visibility='hidden';canvas.style.visibility='visible';for(const a of [skull,seeker]){a.poser.reset();a.mixer?.stopAllAction();}alertStarted=false;alertFaded=false;}
-   scrubbing=true;while(t<time-1e-6){t=Math.min(time,t+dt);const seg=pick(SKULLSEG,t);if(seg?.anim==='alert'&&skull.alert&&!alertStarted){skull.alert.reset().fadeIn(.15).play();alertStarted=true;}if(seg?.anim==='panic'&&skull.alert&&alertStarted&&!alertFaded){skull.alert.fadeOut(.25);alertFaded=true;}skull.mixer?.update(dt);drive(skull,SKULLSEG,t,true);drive(seeker,SEEKER,t,false);}renderer!.render(scene,cam);},
+  async scrub(time,dt=1/60,crate=false){opts={crate};await api.ready();if(!loaded)return;if(!running){running=true;scrubbing=true;t=0;resize();d.skullCanvas.style.visibility='hidden';canvas.style.visibility='visible';for(const a of [skull,seeker]){a.poser.reset();a.mixer?.stopAllAction();}alertStarted=false;alertFaded=false;}
+   scrubbing=true;while(t<time-1e-6){t=Math.min(time,t+dt);const seg=pick(SKULLSEG,t);if(seg?.anim==='alert'&&skull.alert&&!alertStarted){skull.alert.reset().fadeIn(.15).play();alertStarted=true;}if(seg?.anim==='panic'&&skull.alert&&alertStarted&&!alertFaded){skull.alert.fadeOut(.25);alertFaded=true;}skull.mixer?.update(dt);drive(skull,SKULLSEG,t,true);drive(seeker,SEEKER,t,false);}driveCrate(t);renderer!.render(scene,cam);},
   abort(){if(running){scrubbing=false;end(false);}},
   get running(){return running;},
   update(dt){
-   if(!running||!renderer||scrubbing)return;t+=Math.min(dt,.05);
+   if(!running||!renderer||scrubbing)return;const sdt=Math.min(dt,.05)*speed;t+=sdt;
    // skull's alert clip runs through the AnimationMixer (real GLB clip "afraid"); procedural poses take over afterwards
    const seg=pick(SKULLSEG,t);if(seg?.anim==='alert'&&skull.alert&&!alertStarted){skull.alert.reset().fadeIn(.15).play();alertStarted=true;}
    if(seg?.anim==='panic'&&skull.alert&&alertStarted&&!alertFaded){skull.alert.fadeOut(.25);alertFaded=true;}
-   skull.mixer?.update(Math.min(dt,.05));
-   drive(skull,SKULLSEG,t,true);drive(seeker,SEEKER,t,false);
+   skull.mixer?.update(sdt);
+   drive(skull,SKULLSEG,t,true);drive(seeker,SEEKER,t,false);driveCrate(t);marks();
    renderer.render(scene,cam);
    if(t>=CHASE_END)end(true);
   },
