@@ -11,8 +11,6 @@ export function tierFor(multiplier: number, capped = false): WinTier {
   return 'small';
 }
 /** Symbol-art mapping. Math IDs and payouts are untouched; only the artwork shown per ID is chosen here. */
-/** Visual-only hierarchy remap (see 05-docs/MAGIC_BOOK_MATH_REQUEST.md, Option A). false = Magic Book art stays on the ordinary `CHEST` id (5th highest). true = Magic Book art on the top ordinary id, coin art on `CHEST`. Math is identical either way. */
-export const SYMBOL_HIERARCHY_REMAP = false;
 export const SYMBOL_ART: Record<string, { file: string; label: string }> = {
   TOMB: { file: 'tombstone', label: 'Tombstone' },
   WILD: { file: 'wild', label: 'Wild Skull' },
@@ -28,8 +26,3 @@ export const SYMBOL_ART: Record<string, { file: string; label: string }> = {
   BLASTER: { file: 'ghost-tomb', label: 'Ghost Tombstone' },
   CHEST_BONUS: { file: 'chest-bonus', label: 'Chest Bonus' },
 };
-if (SYMBOL_HIERARCHY_REMAP) {
-  const book = SYMBOL_ART.CHEST!, coin = SYMBOL_ART.SKULL!;
-  SYMBOL_ART.SKULL = { ...book, label: 'Gothic Magic Book' };
-  SYMBOL_ART.CHEST = { ...coin, label: 'Skull Coin' };
-}

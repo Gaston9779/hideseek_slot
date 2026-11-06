@@ -1,7 +1,7 @@
 import './bonusCinematic.css';
 import {GAME_EVENT_NAME,type GameEvent} from '../engine/events';
 import {FRAME,DESIGN} from '../layout';
-import {urls} from '../view/assets';
+import {urls} from '../view/assets';import {keys} from '../ui/keyboard';
 import type {Chase} from './director';
 /**
  * BonusCinematicController — the single owner of every bonus cinematic. Presentation only: it READS engine events (`skull-hunt:game-event`),
@@ -79,8 +79,8 @@ export function createBonusCinematic(d:BonusCinematicDeps){
   let skipped=false,endingMs=0,impactAt={x:1790,y:760},started=false,startTs=0;
   const doEnding=(quick:boolean)=>{if(started)return;started=true;endingMs=ending(p.kind,impactAt,quick,p.ev);startTs=performance.now();};
   skip.hidden=false;const onSkip=()=>{skipped=true;d.chase.abort();};
-  const onKey=(e:KeyboardEvent)=>{if(e.code==='Escape'||e.code==='Space'||e.code==='Enter'){e.preventDefault();e.stopImmediatePropagation();onSkip();}};
-  skip.addEventListener('click',onSkip);window.addEventListener('keydown',onKey,true);
+  const releaseKeys=keys.push({id:'bonus-cinematic',handle:e=>{if(e.code==='Escape'||e.code==='Space'||e.code==='Enter'||e.code==='NumpadEnter'){onSkip();return true;}}});
+  skip.addEventListener('click',onSkip);
   const q=new URLSearchParams(location.search);const spd=import.meta.env.DEV&&q.has('chaseSpeed')?Number(q.get('chaseSpeed')):(d.speed??1.25);
   try{
    if(d.reduced){doEnding(true);}
@@ -93,7 +93,7 @@ export function createBonusCinematic(d:BonusCinematicDeps){
     doEnding(skipped);                                  // skipped (or unavailable) → short ending, never skip the transition into the bonus
    }
    {const remaining=Math.max(0,endingMs-(performance.now()-startTs));await wait(skipped?Math.min(remaining,400):Math.max(0,remaining-150));}
-  }finally{skip.hidden=true;skip.removeEventListener('click',onSkip);window.removeEventListener('keydown',onKey,true);}
+  }finally{skip.hidden=true;skip.removeEventListener('click',onSkip);releaseKeys();}
  }
  // ---- MAX WIN (standalone: no chest pick involved) -------------------------------------------------
  async function playMaxWin(cents=d.roundWinCents()){
@@ -102,9 +102,9 @@ export function createBonusCinematic(d:BonusCinematicDeps){
   const t0=performance.now(),dur=d.reduced?0:1900,cnt=maxEl.querySelector('p')!;
   const tick=(now:number)=>{const k=dur?Math.min(1,(now-t0)/dur):1;cnt.textContent=d.money(Math.round(cents*(1-Math.pow(1-k,3))));if(k<1&&maxEl.classList.contains('on'))requestAnimationFrame(tick);};requestAnimationFrame(tick);
   await new Promise<void>(res=>{let n=0;const iv=window.setInterval(()=>{if(!d.reduced&&n<8){burst('dual',300+Math.random()*1320,380+Math.random()*260,1.2);n++;}},380);
-   const close=()=>{clearInterval(iv);maxEl.removeEventListener('pointerdown',close);window.removeEventListener('keydown',key,true);maxEl.classList.remove('on');d.world.classList.remove('bc-max-open');res();};
-   const key=(e:KeyboardEvent)=>{if(e.code==='Escape'||e.code==='Space'||e.code==='Enter'){e.preventDefault();e.stopImmediatePropagation();close();}};
-   window.addEventListener('keydown',key,true);maxEl.addEventListener('pointerdown',close);window.setTimeout(close,d.reduced?1800:4600);});
+   let closed=false,release=()=>{};const close=()=>{if(closed)return;closed=true;clearInterval(iv);maxEl.removeEventListener('pointerdown',close);release();maxEl.classList.remove('on');d.world.classList.remove('bc-max-open');res();};
+   release=keys.push({id:'max-win',handle:e=>{if(e.code==='Escape'||e.code==='Space'||e.code==='Enter'||e.code==='NumpadEnter'){close();return true;}}});
+   maxEl.addEventListener('pointerdown',close);window.setTimeout(close,d.reduced?1800:4600);});
  }
  return {
   suspense,suspenseAbort,

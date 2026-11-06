@@ -1,0 +1,287 @@
+{
+  "pack": "Skull Hunt ORIGINAL audio prototype pack",
+  "license": "Original procedural synthesis created for this request; no third-party source samples",
+  "format": "32kHz 16-bit mono WAV master; OGG Vorbis deploy",
+  "items": [
+    {
+      "id": "amb_spooky_graveyard_loop",
+      "category": "ambient",
+      "duration": 20.0,
+      "description": "Original 20s atmospheric eerie loop, soft and non-intrusive",
+      "wav": "ambient/amb_spooky_graveyard_loop.wav",
+      "ogg": "ambient/amb_spooky_graveyard_loop.ogg"
+    },
+    {
+      "id": "amb_bonus_chest_loop",
+      "category": "ambient",
+      "duration": 20.0,
+      "description": "20s mysterious sustained chest ambience",
+      "wav": "ambient/amb_bonus_chest_loop.wav",
+      "ogg": "ambient/amb_bonus_chest_loop.ogg"
+    },
+    {
+      "id": "ui_click",
+      "category": "ui",
+      "duration": 0.14,
+      "description": "Menu / button click",
+      "wav": "ui/ui_click.wav",
+      "ogg": "ui/ui_click.ogg"
+    },
+    {
+      "id": "ui_confirm",
+      "category": "ui",
+      "duration": 0.4,
+      "description": "Confirm purchase or selection",
+      "wav": "ui/ui_confirm.wav",
+      "ogg": "ui/ui_confirm.ogg"
+    },
+    {
+      "id": "ui_cancel",
+      "category": "ui",
+      "duration": 0.25,
+      "description": "Cancel / close",
+      "wav": "ui/ui_cancel.wav",
+      "ogg": "ui/ui_cancel.ogg"
+    },
+    {
+      "id": "ui_bet_change",
+      "category": "ui",
+      "duration": 0.17,
+      "description": "Stake adjustment",
+      "wav": "ui/ui_bet_change.wav",
+      "ogg": "ui/ui_bet_change.ogg"
+    },
+    {
+      "id": "ui_error",
+      "category": "ui",
+      "duration": 0.42,
+      "description": "Insufficient credits / unavailable",
+      "wav": "ui/ui_error.wav",
+      "ogg": "ui/ui_error.ogg"
+    },
+    {
+      "id": "reel_start",
+      "category": "reels",
+      "duration": 0.8,
+      "description": "Reels begin movement",
+      "wav": "reels/reel_start.wav",
+      "ogg": "reels/reel_start.ogg"
+    },
+    {
+      "id": "reel_tick",
+      "category": "reels",
+      "duration": 0.13,
+      "description": "Subtle reel motion/tick",
+      "wav": "reels/reel_tick.wav",
+      "ogg": "reels/reel_tick.ogg"
+    },
+    {
+      "id": "reel_stop",
+      "category": "reels",
+      "duration": 0.38,
+      "description": "Reel stop thunk",
+      "wav": "reels/reel_stop.wav",
+      "ogg": "reels/reel_stop.ogg"
+    },
+    {
+      "id": "anticipation_scatter",
+      "category": "reels",
+      "duration": 1.8,
+      "description": "Purple suspense riser when two scatters visible",
+      "wav": "reels/anticipation_scatter.wav",
+      "ogg": "reels/anticipation_scatter.ogg"
+    },
+    {
+      "id": "anticipation_chest",
+      "category": "reels",
+      "duration": 1.8,
+      "description": "Golden suspense riser when two chest symbols visible",
+      "wav": "reels/anticipation_chest.wav",
+      "ogg": "reels/anticipation_chest.ogg"
+    },
+    {
+      "id": "cash_coin",
+      "category": "wins",
+      "duration": 0.38,
+      "description": "Single coin pay",
+      "wav": "wins/cash_coin.wav",
+      "ogg": "wins/cash_coin.ogg"
+    },
+    {
+      "id": "cash_drop",
+      "category": "wins",
+      "duration": 1.15,
+      "description": "Coin cascade / payout drop",
+      "wav": "wins/cash_drop.wav",
+      "ogg": "wins/cash_drop.ogg"
+    },
+    {
+      "id": "win_small",
+      "category": "wins",
+      "duration": 0.75,
+      "description": "Small win, modest acknowledgement",
+      "wav": "wins/win_small.wav",
+      "ogg": "wins/win_small.ogg"
+    },
+    {
+      "id": "win_big",
+      "category": "wins",
+      "duration": 1.7,
+      "description": "Big win magical arpeggio",
+      "wav": "wins/win_big.wav",
+      "ogg": "wins/win_big.ogg"
+    },
+    {
+      "id": "win_max",
+      "category": "wins",
+      "duration": 2.8,
+      "description": "Max win celebratory fanfare",
+      "wav": "wins/win_max.wav",
+      "ogg": "wins/win_max.ogg"
+    },
+    {
+      "id": "scatter_trigger",
+      "category": "bonus",
+      "duration": 1.5,
+      "description": "Three scatters activate free spins",
+      "wav": "bonus/scatter_trigger.wav",
+      "ogg": "bonus/scatter_trigger.ogg"
+    },
+    {
+      "id": "chest_trigger",
+      "category": "bonus",
+      "duration": 1.65,
+      "description": "Three chest symbols activate chest bonus",
+      "wav": "bonus/chest_trigger.wav",
+      "ogg": "bonus/chest_trigger.ogg"
+    },
+    {
+      "id": "dual_trigger",
+      "category": "bonus",
+      "duration": 1.9,
+      "description": "Both features triggered in one spin",
+      "wav": "bonus/dual_trigger.wav",
+      "ogg": "bonus/dual_trigger.ogg"
+    },
+    {
+      "id": "chest_open",
+      "category": "bonus",
+      "duration": 0.95,
+      "description": "Chest lid opens with magical shimmer",
+      "wav": "bonus/chest_open.wav",
+      "ogg": "bonus/chest_open.ogg"
+    },
+    {
+      "id": "chest_reveal_x1",
+      "category": "bonus",
+      "duration": 0.9,
+      "description": "Normal twelve free spins reveal",
+      "wav": "bonus/chest_reveal_x1.wav",
+      "ogg": "bonus/chest_reveal_x1.ogg"
+    },
+    {
+      "id": "chest_reveal_x2",
+      "category": "bonus",
+      "duration": 1.15,
+      "description": "Doubled free spins reveal",
+      "wav": "bonus/chest_reveal_x2.wav",
+      "ogg": "bonus/chest_reveal_x2.ogg"
+    },
+    {
+      "id": "chest_reveal_x5",
+      "category": "bonus",
+      "duration": 1.8,
+      "description": "Legendary five times feature reveal",
+      "wav": "bonus/chest_reveal_x5.wav",
+      "ogg": "bonus/chest_reveal_x5.ogg"
+    },
+    {
+      "id": "free_spin_retrigger",
+      "category": "bonus",
+      "duration": 1.1,
+      "description": "Additional free spins",
+      "wav": "bonus/free_spin_retrigger.wav",
+      "ogg": "bonus/free_spin_retrigger.ogg"
+    },
+    {
+      "id": "bonus_complete",
+      "category": "bonus",
+      "duration": 1.7,
+      "description": "Feature completed summary",
+      "wav": "bonus/bonus_complete.wav",
+      "ogg": "bonus/bonus_complete.ogg"
+    },
+    {
+      "id": "hologram_beam",
+      "category": "cinematic",
+      "duration": 1.7,
+      "description": "Seeker materializes in beam",
+      "wav": "cinematic/hologram_beam.wav",
+      "ogg": "cinematic/hologram_beam.ogg"
+    },
+    {
+      "id": "skull_land",
+      "category": "cinematic",
+      "duration": 0.6,
+      "description": "Seeker lands on stone",
+      "wav": "cinematic/skull_land.wav",
+      "ogg": "cinematic/skull_land.ogg"
+    },
+    {
+      "id": "skull_run",
+      "category": "cinematic",
+      "duration": 1.2,
+      "description": "Light footfalls, one-second repeating cue",
+      "wav": "cinematic/skull_run.wav",
+      "ogg": "cinematic/skull_run.ogg"
+    },
+    {
+      "id": "skull_fall",
+      "category": "cinematic",
+      "duration": 1.1,
+      "description": "Cartoon tumble and exit",
+      "wav": "cinematic/skull_fall.wav",
+      "ogg": "cinematic/skull_fall.ogg"
+    },
+    {
+      "id": "baby_skull_happy",
+      "category": "voice",
+      "duration": 0.95,
+      "description": "Cute happy squeal, synthetic nonverbal",
+      "wav": "voice/baby_skull_happy.wav",
+      "ogg": "voice/baby_skull_happy.ogg"
+    },
+    {
+      "id": "baby_skull_scared",
+      "category": "voice",
+      "duration": 0.95,
+      "description": "Startled squeak, synthetic nonverbal",
+      "wav": "voice/baby_skull_scared.wav",
+      "ogg": "voice/baby_skull_scared.ogg"
+    },
+    {
+      "id": "baby_skull_angry",
+      "category": "voice",
+      "duration": 0.9,
+      "description": "Grumpy tiny growl, synthetic nonverbal",
+      "wav": "voice/baby_skull_angry.wav",
+      "ogg": "voice/baby_skull_angry.ogg"
+    },
+    {
+      "id": "baby_skull_searching",
+      "category": "voice",
+      "duration": 1.1,
+      "description": "Curious searching chirps, synthetic nonverbal",
+      "wav": "voice/baby_skull_searching.wav",
+      "ogg": "voice/baby_skull_searching.ogg"
+    },
+    {
+      "id": "baby_skull_win",
+      "category": "voice",
+      "duration": 1.2,
+      "description": "Victory voice chirp, synthetic nonverbal",
+      "wav": "voice/baby_skull_win.wav",
+      "ogg": "voice/baby_skull_win.ogg"
+    }
+  ]
+}

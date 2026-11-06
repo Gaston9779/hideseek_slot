@@ -1,4 +1,5 @@
 import './cinematic.css';
+import {keys} from './keyboard';
 /**
  * Single reusable cinematic player (presentation only — never touches game state, balance or math).
  * play() always resolves, never rejects: 'ended' | 'skipped' | 'failed'. Callers continue the game on any result.
@@ -38,7 +39,8 @@ export function createCinematicPlayer(o:CinematicOptions):CinematicPlayer{
   const on=(t:EventTarget,e:string,f:EventListener,c?:boolean)=>{t.addEventListener(e,f,c);listeners.push([t,e,f,c]);};
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;let fxRaf=0,transStarted=false;
   const FADE={ended:reduced?250:480,skipped:300,failed:0};
-  const done=(r:CinematicResult)=>{if(settled)return;settled=true;finish=undefined;timers.forEach(clearTimeout);clearInterval(watch);cancelAnimationFrame(watchRaf);listeners.forEach(([t,e,f,c])=>t.removeEventListener(e,f,c));
+  let releaseKeys=()=>{};
+  const done=(r:CinematicResult)=>{if(settled)return;settled=true;releaseKeys();finish=undefined;timers.forEach(clearTimeout);clearInterval(watch);cancelAnimationFrame(watchRaf);listeners.forEach(([t,e,f,c])=>t.removeEventListener(e,f,c));
    try{video.pause();}catch{/* ignore */}
    playBtn.hidden=true;try{prevFocus?.focus?.({preventScroll:true});}catch{/* ignore */}
    const ms=FADE[r];root.style.setProperty('--cine-fade',`${ms}ms`);root.classList.add('out');root.classList.remove('on','playing');
@@ -56,7 +58,7 @@ export function createCinematicPlayer(o:CinematicOptions):CinematicPlayer{
   // Overlay appears at once on the poster (= first frame): no black flash, no waiting for the network.
   root.hidden=false;void root.offsetWidth;root.classList.add('on');skipBtn.focus({preventScroll:true});
   on(skipBtn,'click',()=>done('skipped'));
-  on(window,'keydown',e=>{const k=(e as KeyboardEvent).code;if(k==='Escape'||k==='Space'||k==='Enter'){e.preventDefault();e.stopImmediatePropagation();done('skipped');}},true);
+  releaseKeys=keys.push({id:'intro-video',handle:e=>{if(e.code==='Escape'||e.code==='Space'||e.code==='Enter'||e.code==='NumpadEnter'){done('skipped');return true;}}});
   on(video,'ended',()=>{startTransition();done('ended');});
   const lastSource=video.lastElementChild;
   on(video,'error',e=>{if(e.target===video||e.target===lastSource)done('failed');},true); // <source> errors don't bubble: capture; fail only when the last fallback fails

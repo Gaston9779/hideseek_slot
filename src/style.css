@@ -112,3 +112,9 @@ dialog small,.fine{color:#bda4c3}
 #bonus-close{position:absolute;right:calc(20px*var(--k));top:calc(40px*var(--k));width:calc(60px*var(--k));height:calc(60px*var(--k));border-radius:50%;border:3px solid #ffc457;background:#2a1048;font-size:calc(36px*var(--k));line-height:1;color:#ffe2a8;cursor:pointer}
 /* real (engine-driven) chest round: no preview badge, no way to abandon the pick */
 #bonus-overlay.real #bonus-badge,#bonus-overlay.real #bonus-close{display:none}
+
+/* ---- Hide & Seek chest screen: Italian prompt plaque laid over the art's banner (same rect as the result bar) ---- */
+#bonus-title{position:absolute;left:calc(200px*var(--k));top:calc(834px*var(--k));width:calc(1050px*var(--k));height:calc(96px*var(--k));display:grid;align-content:center;justify-items:center;text-align:center;border-radius:calc(30px*var(--k));background:linear-gradient(#4a2a22,#2a1612);border:calc(4px*var(--k)) solid #c58a3a;box-shadow:0 0 calc(24px*var(--k)) #000a,inset 0 0 calc(20px*var(--k)) #0008;pointer-events:none}
+#bonus-title p{margin:0;font:900 calc(36px*var(--k))/1.1 var(--font);letter-spacing:.06em;color:#ffe7a0;text-shadow:0 calc(3px*var(--k)) 0 #5a2608,0 0 calc(16px*var(--k)) #b57cff88}
+#bonus-title small{display:block;margin-top:calc(4px*var(--k));font:700 calc(16px*var(--k))/1.25 var(--ui);color:#e8d6ff}
+#bonus-title .post,#bonus-title.picked .pre{display:none}#bonus-title.picked .post{display:block}

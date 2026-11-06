@@ -1,4 +1,4 @@
-import type {SymbolId} from '../config/game';
+import type {SymbolId} from '../config/game';import {keys} from '../ui/keyboard';
 import type {Outcome} from '../math/slot';
 import type {WinTier} from '../config/presentation';
 import {createBonusOverlay} from '../bonus/bonusOverlay';import {BONUS_IMG} from '../bonus/bonusLayout';
@@ -87,9 +87,9 @@ export async function createView(onProgress:(s:string)=>void){
    return new Promise<void>(resolve=>{fsResolve=resolve;const patch=$('#fs-patch');patch.hidden=count===10&&!retrigger;$('#fs-count').textContent=(retrigger?'+':'')+count;$('#fs-sub').textContent=retrigger?'MORE SPINS':'FREE SPINS';
     fsOverlay.classList.remove('out');fsOverlay.classList.add('show');backdrop.classList.add('on');skull!.set('bonus');
     if(!reduced){fx.emit(DESIGN.w/2,OVERLAY.freeSpins.cy,'#ffd36a',40,420,40,{gravity:80});fx.emit(DESIGN.w/2,OVERLAY.freeSpins.cy,'#c06cff',26,360,36,{gravity:60});}
-    const close=()=>{removeEventListener('keydown',key);fsOverlay.removeEventListener('pointerdown',close);clearTimeout(t);fsOverlay.classList.add('out');backdrop.classList.remove('on');setTimeout(()=>{fsOverlay.classList.remove('show','out');fsResolve=undefined;resolve();},reduced?0:350);};
-    const key=(e:KeyboardEvent)=>{if(e.code==='Space'||e.code==='Enter'||e.code==='Escape'){e.preventDefault();e.stopImmediatePropagation();close();}};
-    const t=setTimeout(close,reduced?1500:2900);addEventListener('keydown',key,true);fsOverlay.addEventListener('pointerdown',close);});
+    let closed=false;const close=()=>{if(closed)return;closed=true;releaseKeys();fsOverlay.removeEventListener('pointerdown',close);clearTimeout(t);fsOverlay.classList.add('out');backdrop.classList.remove('on');setTimeout(()=>{fsOverlay.classList.remove('show','out');fsResolve=undefined;resolve();},reduced?0:350);};
+    const releaseKeys=keys.push({id:'fs-intro',handle:e=>{if(e.code==='Space'||e.code==='Enter'||e.code==='NumpadEnter'||e.code==='Escape'){close();return true;}}});
+    const t=setTimeout(close,reduced?1500:2900);fsOverlay.addEventListener('pointerdown',close);});
   },
   showBonusPreview(){bonus.usePreview();backdrop.classList.add('on');void bonus.open();},
   /** Real chest round from the math engine. Resolves when the player has picked, the reveal finished and the overlay was closed. */
@@ -103,9 +103,12 @@ export async function createView(onProgress:(s:string)=>void){
   flash.classList.remove('go');void flash.offsetWidth;flash.classList.add('go');}
  function hideBanner(){clearTimeout(bannerTimer);banner.classList.remove('show');banner.style.animation='';banner.style.opacity='';banner.style.scale='';shower=0;}
  function showBanner(tier:WinTier,cents:number,fmt:(c:number)=>string){const title={big:'BIG WIN',mega:'MEGA WIN',max:'MAX WIN'}[tier as 'big']!;banner.dataset.tier=tier;banner.querySelector('h2')!.textContent=title;const p=banner.querySelector<HTMLElement>('p')!;const ms=reduced?0:1500;const t0=performance.now();const step=(now:number)=>{const k=ms?Math.min(1,(now-t0)/ms):1;p.textContent=fmt(Math.round(cents*(1-Math.pow(1-k,3))));if(k<1&&banner.classList.contains('show'))requestAnimationFrame(step);};
-  banner.classList.remove('show');void banner.offsetWidth;banner.classList.add('show');requestAnimationFrame(step);if(!new URLSearchParams(location.search).has('hold'))bannerTimer=window.setTimeout(()=>banner.classList.remove('show'),tier==='big'?2800:tier==='mega'?3400:4200);else banner.style.animation='none',banner.style.opacity='1',banner.style.scale='1';}
+  banner.classList.remove('show');void banner.offsetWidth;banner.classList.add('show');requestAnimationFrame(step);if(!(import.meta.env.DEV&&new URLSearchParams(location.search).has('hold')))bannerTimer=window.setTimeout(()=>banner.classList.remove('show'),tier==='big'?2800:tier==='mega'?3400:4200);else banner.style.animation='none',banner.style.opacity='1',banner.style.scale='1';}
  $('#bonus-close').onclick=()=>{if(!bonus.isReal)bonus.close();};
- addEventListener('keydown',e=>{if(!bonus.isOpen)return;if(e.code==='Escape'){if(!bonus.isReal)bonus.close();}else if(['Digit1','Digit2','Digit3'].includes(e.code))bonus.pick(+e.code.slice(-1)-1);});
+
+ // Chest screen owns the keyboard while open: Enter/Space/Escape are inert (real round), 1/2/3 pick, Escape closes only the no-credit preview.
+ let releaseBonusKeys:(()=>void)|undefined;
+ bonus.onOpenChange=open=>{releaseBonusKeys?.();releaseBonusKeys=undefined;if(!open)return;releaseBonusKeys=keys.push({id:'chest-bonus',handle:e=>{if(e.code==='Escape'){if(!bonus.isReal)bonus.close();return true;}if((e.code==='Enter'||e.code==='NumpadEnter'||e.code==='Space')&&!e.repeat){bonus.activateSummary();return true;}if(['Digit1','Digit2','Digit3'].includes(e.code)){bonus.pick(+e.code.slice(-1)-1);return true;}}});};
  return api;
 }
 export type View=Awaited<ReturnType<typeof createView>>;

@@ -1,49 +1,65 @@
 import './gameplay.css';
-import {urls} from '../view/assets';
+import {urls} from '../view/assets';import {keys} from './keyboard';
 /** Presentation-only widgets: Free Spins HUD, Free Spins summary, Quick Spin control. They display numbers handed in by main.ts from the engine; they compute nothing economic. */
 const mk=(tag:string,cls:string,parent:HTMLElement,html='')=>{const e=document.createElement(tag);e.className=cls;if(html)e.innerHTML=html;parent.appendChild(e);return e as HTMLElement;};
 const wait=(ms:number)=>new Promise<void>(r=>setTimeout(r,ms));
 
-export interface FsHudState{remaining:number;played:number;awarded:number;winCents:number;featureType:'scatter'|'chest';multiplier:number;baseBonusWinCents:number;grossMultipliedBonusWinCents:number;effectiveBonusWinCents:number;status:'READY'|'ACTIVE'|'COMPLETED'}
+export interface FsHudState{remaining:number;played:number;awarded:number;winCents:number;featureType:'scatter'|'chest';multiplier:number;baseBonusWinCents:number;grossMultipliedBonusWinCents:number;effectiveBonusWinCents:number;status:'READY'|'ACTIVE'|'COMPLETED';retriggerAwarded?:number;wildMultiplier?:number}
+/**
+ * Feature HUD. Chest and Scatter features each have their own identity (gold vs. spectral violet) and their own counters; nothing is computed here:
+ * every number is handed in from the engine's FeatureState (base / gross multiplied / effective / credited are never re-multiplied).
+ */
 export function createFsHud(world:HTMLElement,money:(c:number)=>string,reduced:boolean){
- const root=mk('div','fs-hud',world,`<div class="fh-title">FREE SPINS</div><div class="fh-row"><span>GIRI RIMANENTI</span><b data-k="rem">0</b></div><div class="fh-row"><span>VINCITA BONUS</span><b data-k="win">0.00</b></div><div class="fh-sub" data-k="sub"></div><div class="fh-toast" aria-hidden="true"></div>`);
+ const root=mk('div','fs-hud',world,`<div class="fh-mult" data-k="multBox" hidden><i>MOLTIPLICATORE</i><b data-k="mult">×1</b></div><div class="fh-title" data-k="title">FREE SPINS</div><div class="fh-row"><span>GIRI RIMANENTI</span><b data-k="rem">0</b></div><div class="fh-row alt" data-k="baseRow" hidden><span>VINCITA BASE</span><b data-k="base">0.00</b></div><div class="fh-row"><span data-k="winLbl">VINCITA BONUS</span><b data-k="win">0.00</b></div><div class="fh-sub" data-k="sub"></div><div class="fh-toast" aria-hidden="true"></div>`);
  root.hidden=true;root.setAttribute('role','status');root.setAttribute('aria-live','polite');
  const q=(k:string)=>root.querySelector<HTMLElement>(`[data-k="${k}"]`)!,toast=root.querySelector<HTMLElement>('.fh-toast')!;
- let last={remaining:-1,win:-1};
+ let last={remaining:-1,win:-1,type:''};
  const bump=(el:HTMLElement)=>{if(reduced)return;el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump');};
  return {
   get visible(){return !root.hidden;},
-  show(){root.hidden=false;},hide(){root.hidden=true;last={remaining:-1,win:-1};},
+  show(){root.hidden=false;},hide(){root.hidden=true;last={remaining:-1,win:-1,type:''};root.classList.remove('chest','scatter');},
   /** Never negative; "played" counts only completed spins; remaining excludes them. */
   set(s:FsHudState){
-   const rem=Math.max(0,s.remaining),win=Math.max(0,s.winCents);
-   q('rem').textContent=String(rem);q('win').textContent=money(win);q('sub').textContent=s.featureType==='chest'?`CHEST BONUS — ${s.awarded} FREE SPINS — ×${s.multiplier} · BASE ${money(s.baseBonusWinCents)} · TOTALE ${money(s.effectiveBonusWinCents)}`:`GIRO ${Math.min(s.played,s.awarded)} / ${s.awarded}`;root.querySelector<HTMLElement>('.fh-title')!.textContent=s.featureType==='chest'?`CHEST BONUS — ${s.awarded} FREE SPINS — ×${s.multiplier}`:'FREE SPINS';
-   if(rem!==last.remaining&&last.remaining>=0)bump(q('rem'));if(win!==last.win&&last.win>=0)bump(q('win'));last={remaining:rem,win};
+   const rem=Math.max(0,s.remaining),win=Math.max(0,s.winCents),chest=s.featureType==='chest';
+   root.classList.toggle('chest',chest);root.classList.toggle('scatter',!chest);
+   q('rem').textContent=String(rem);q('win').textContent=money(win);q('title').textContent=chest?'CHEST FREE SPINS':'FREE SPINS';
+   q('multBox').hidden=!chest;q('baseRow').hidden=!chest;
+   if(chest){q('mult').textContent=`×${s.multiplier}`;q('base').textContent=money(Math.max(0,s.baseBonusWinCents));q('winLbl').textContent='TOTALE BONUS';q('sub').textContent=`${s.awarded} FREE SPINS · ×${s.multiplier} SULLE VINCITE DEL BONUS`;}
+   else{q('winLbl').textContent='VINCITA BONUS';const extra=s.retriggerAwarded?` · +${s.retriggerAwarded} EXTRA`:'';q('sub').textContent=`GIRO ${Math.min(s.played,s.awarded)} / ${s.awarded}${extra}${s.wildMultiplier?` · LINEE CON WILD ×${s.wildMultiplier}`:''}`;}
+   if(rem!==last.remaining&&last.remaining>=0&&last.type===s.featureType)bump(q('rem'));if(win!==last.win&&last.win>=0&&last.type===s.featureType)bump(q('win'));last={remaining:rem,win,type:s.featureType};
   },
   /** "+X FREE SPINS" message for a retrigger (X comes from the engine). */
   async retrigger(n:number){toast.textContent=`+${n} FREE SPINS`;toast.classList.remove('show');void toast.offsetWidth;toast.classList.add('show');bump(q('rem'));await wait(reduced?900:1500);toast.classList.remove('show');},
  };
 }
 
-export interface FsSummary{spins:number;winCents:number;celebrate:()=>void;chest?:{baseBonusWinCents:number;multiplier:number;grossMultipliedBonusWinCents:number;effectiveBonusWinCents:number}}
+export interface FsSummary{kind?:'chest'|'scatter';spins:number;winCents:number;celebrate:()=>void;retriggerAwarded?:number;wildMultiplier?:number;chest?:{baseBonusWinCents:number;multiplier:number;grossMultipliedBonusWinCents:number;effectiveBonusWinCents:number}}
 /** End-of-feature screen reusing the approved Free Spins art. Display only: the prize was credited spin by spin; this screen never credits. */
 export function createFsSummary(world:HTMLElement,money:(c:number)=>string,reduced:boolean){
- const root=mk('div','fs-summary',world,`<img alt="" draggable="false"><div class="fsm-plaque"><small>VINCITA TOTALE BONUS</small><b data-k="win">0.00</b><i data-k="spins"></i></div><button type="button" class="fsm-go">CONTINUA</button>`);
- root.setAttribute('role','dialog');root.setAttribute('aria-label','Riepilogo Free Spins');root.querySelector('img')!.setAttribute('src',urls.freeSpins);
- const win=root.querySelector<HTMLElement>('[data-k="win"]')!,spins=root.querySelector<HTMLElement>('[data-k="spins"]')!,go=root.querySelector<HTMLButtonElement>('.fsm-go')!;
- let open=false;
+ const root=mk('div','fs-summary',world,`<img alt="" draggable="false"><div class="fsm-plaque"><small data-k="title">VINCITA TOTALE BONUS</small><b data-k="win">0.00</b><i data-k="spins"></i></div><div class="fsm-detail" data-k="detail"></div><button type="button" class="fsm-go">CONTINUA</button>`);
+ root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-label','Riepilogo bonus');root.querySelector('img')!.setAttribute('src',urls.freeSpins);
+ const win=root.querySelector<HTMLElement>('[data-k="win"]')!,spins=root.querySelector<HTMLElement>('[data-k="spins"]')!,go=root.querySelector<HTMLButtonElement>('.fsm-go')!,title=root.querySelector<HTMLElement>('[data-k="title"]')!,detail=root.querySelector<HTMLElement>('[data-k="detail"]')!;
+ let open=false,shownAt=0;
  return {
   get open(){return open;},
   show(s:FsSummary):Promise<void>{
-   if(open)return Promise.resolve();open=true;spins.textContent=s.chest?`${s.spins} GIRI EFFETTUATI · VINCITA BASE ${money(s.chest.baseBonusWinCents)} · ×${s.chest.multiplier} · TOTALE BONUS ${money(s.chest.effectiveBonusWinCents)}`:`${s.spins} GIRI EFFETTUATI`;
-   root.classList.toggle('zero',s.winCents===0);root.querySelector('small')!.textContent=s.winCents===0?'NESSUNA VINCITA IN QUESTO BONUS':'VINCITA TOTALE BONUS';
+   if(open)return Promise.resolve();open=true;shownAt=performance.now();const chest=!!s.chest&&s.kind!=='scatter';
+   root.classList.toggle('chest',chest);root.classList.toggle('scatter',!chest);
+   spins.textContent=`${s.spins} ${s.spins===1?'GIRO EFFETTUATO':'GIRI EFFETTUATI'}`;
+   title.textContent=s.winCents===0?(chest?'CHEST BONUS COMPLETATO · NESSUNA VINCITA':'NESSUNA VINCITA IN QUESTO BONUS'):chest?'CHEST BONUS COMPLETATO':'FREE SPINS COMPLETATI';
+   const chips:string[]=[];
+   if(s.chest&&chest){const cut=s.chest.grossMultipliedBonusWinCents-s.chest.effectiveBonusWinCents;chips.push(`<span>VINCITA BASE <b>${money(s.chest.baseBonusWinCents)}</b></span>`,`<span>MOLTIPLICATORE <b>×${s.chest.multiplier}</b></span>`,`<span>TOTALE EFFETTIVO <b>${money(s.chest.effectiveBonusWinCents)}</b></span>`);if(cut>0)chips.push(`<span class="cut">RIDUZIONE MAX WIN <b>−${money(cut)}</b></span>`);}
+   else{if(s.retriggerAwarded)chips.push(`<span>RETRIGGER <b>+${s.retriggerAwarded}</b></span>`);if(s.wildMultiplier)chips.push(`<span>LINEE CON WILD <b>×${s.wildMultiplier}</b></span>`);}
+   detail.innerHTML=chips.join('');
+   root.classList.toggle('zero',s.winCents===0);
    win.textContent=money(0);root.classList.add('show');go.focus({preventScroll:true});
    const t0=performance.now(),dur=reduced||s.winCents===0?0:1400;
    const step=(now:number)=>{const k=dur?Math.min(1,(now-t0)/dur):1;win.textContent=money(Math.round(s.winCents*(1-Math.pow(1-k,3))));if(k<1&&open)requestAnimationFrame(step);};requestAnimationFrame(step);
    if(s.winCents>0)s.celebrate();
-   return new Promise<void>(res=>{const done=()=>{go.removeEventListener('click',done);window.removeEventListener('keydown',key,true);open=false;root.classList.remove('show');win.textContent=money(s.winCents);window.setTimeout(res,reduced?0:260);};
-    const key=(e:KeyboardEvent)=>{if(e.code==='Enter'||e.code==='Space'){e.preventDefault();e.stopImmediatePropagation();done();}};
-    go.addEventListener('click',done);window.addEventListener('keydown',key,true);});
+   return new Promise<void>(res=>{let release=()=>{};const done=()=>{if(!open||performance.now()-shownAt<500)return;go.removeEventListener('click',done);release();open=false;root.classList.remove('show');win.textContent=money(s.winCents);window.setTimeout(res,reduced?0:260);};
+    // Enter/Space continue only after the plaque has been visible for 0.5 s; a mashed key can never skip it, auto-repeat never counts
+    release=keys.push({id:'fs-summary',root,handle:e=>{if((e.code==='Enter'||e.code==='NumpadEnter'||e.code==='Space')&&!e.repeat){done();return true;}}});
+    go.addEventListener('click',done);});
   },
  };
 }

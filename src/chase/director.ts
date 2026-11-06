@@ -3,7 +3,7 @@ import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {RoomEnvironment} from 'three/examples/jsm/environments/RoomEnvironment.js';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
 import {DESIGN,FRAME,HUD,PANEL,SKULL,SKULL_ANCHOR} from '../layout';
-import {CHASE} from '../config/chase';
+import {CHASE,HOLO_INTRO_TOTAL} from '../config/chase';import {HologramMaterialization,HoloBeamFx,introState} from './hologram';
 import {RigPoser} from './rigPose';
 import * as P from './poses';
 /**
@@ -17,15 +17,18 @@ import * as P from './poses';
 const ZF=250,ZB=-250,YF=SKULL_ANCHOR.y,YB=SKULL_ANCHOR.y-52;       // lane depth / feet line on the plinth (front = original Skull's standing line)
 const HOME={x:SKULL_ANCHOR.x,y:SKULL_ANCHOR.y,yaw:.38};
 const FACE_L=-1.25,FACE_R=1.25;
+/** Where the Seeker materialises and lands: the original Skull's plinth mirrored across the machine, same stone level (feet line YF). Derived from the layout, never absolute pixels. */
+export const SEEKER_LANDING={x:DESIGN.w-SKULL_ANCHOR.x,y:YF};
+const LX=SEEKER_LANDING.x;
 export type ChaseKind='skull'|'seeker';
-type Anim='idle'|'alert'|'panic'|'run'|'scan'|'lunge'|'trip'|'tumble'|'brake'|'settle'|'hidden';
+type Anim='look'|'idle'|'alert'|'panic'|'run'|'scan'|'lunge'|'trip'|'tumble'|'brake'|'settle'|'hidden';
 interface Seg{t0:number;t1:number;x0:number;x1:number;l0:number;l1:number;yaw0:number;yaw1:number;anim:Anim;cad?:number;amp?:number}
 const S=(t0:number,t1:number,x0:number,x1:number,l0:number,l1:number,yaw0:number,yaw1:number,anim:Anim,cad?:number,amp?:number):Seg=>({t0,t1,x0,x1,l0,l1,yaw0,yaw1,anim,cad,amp});
 // ---- storyboard (seconds). lane 0 = front, 1 = back (hidden behind the machine for x∈[385,1535]) -------------------------------------------------
 const SEEKER:Seg[]=[
- S(0,.75,2100,1620,0,0,FACE_L,FACE_L,'run',3.2,1),        // A: bursts in from the right (stays on the right slab, clear of the reels), blaster forward
- S(.75,2.5,1620,1500,0,0,FACE_L,FACE_L,'scan'),            //    searching on the slab
- S(2.5,3.5,1500,330,0,0,FACE_L,FACE_L,'lunge'),             // C: spots Skull fleeing, gives chase (same route, ~0.6 s later)
+ S(0,.5,LX,LX,0,0,HOME.yaw,FACE_L,'idle'),                   // A: (after the hologram landing, t<0) turns towards the original Skull
+ S(.5,2.5,LX,LX,0,0,FACE_L,FACE_L,'look'),                 //    searching from the plinth
+ S(2.5,3.5,LX,330,0,0,FACE_L,FACE_L,'lunge'),             // C: spots Skull fleeing, gives chase (same route, ~0.6 s later)
  S(3.5,3.8,330,250,0,1,FACE_L,FACE_R,'run',3.2,1),         //    steps back behind the left side and turns
  S(3.8,5.4,250,1580,1,1,FACE_R,FACE_R,'run',3.6,1.0),     //    behind the machine (occluded by the frame art)
  S(5.4,5.65,1580,1650,1,0,FACE_R,FACE_R,'run',3.4,1),      // E: re-emerges on the right, still launched
@@ -50,10 +53,10 @@ export const CHASE_END=7.0;
 export const CHASE_MARKS={crateDrop:5.35,impact:6.1,skullHome:5.8};
 const CRATE_X=1730;
 class Actor{
- readonly root=new T.Group();private mid=new T.Group();readonly mdl=new T.Group();readonly shadow:T.Mesh;
+ readonly model:T.Object3D;readonly root=new T.Group();private mid=new T.Group();readonly mdl=new T.Group();readonly shadow:T.Mesh;
  poser:RigPoser;mixer?:T.AnimationMixer;alert?:T.AnimationAction;height:number;gun:boolean;
  constructor(model:T.Object3D,height:number,gun:boolean,anims:T.AnimationClip[],shadowTex:T.Texture){
-  this.height=height;this.gun=gun;
+  this.height=height;this.gun=gun;this.model=model;
   // normalise: feet centre at origin, requested height (same recipe as the in-slot Skull → identical scale/foot contact)
   const inner=new T.Group();inner.add(model);inner.updateMatrixWorld(true);const b=new T.Box3().setFromObject(model),size=b.getSize(new T.Vector3()),c=b.getCenter(new T.Vector3());
   const s=height/size.y;model.scale.multiplyScalar(s);model.position.sub(new T.Vector3(c.x,b.min.y,c.z).multiplyScalar(s));
@@ -100,6 +103,7 @@ export function createChase(d:{world:HTMLElement,skullCanvas:HTMLCanvasElement,r
   skull=new Actor(SkeletonUtils.clone(tpl.scene),d.skullHeight,false,tpl.animations,shTex);
   seeker=new Actor(gltf.scene,d.skullHeight*CHASE.seekerHeightRatio,true,[],shTex);
   for(const a of [skull,seeker]){scene.add(a.root,a.shadow);}
+  beamFx=new HoloBeamFx(SEEKER_LANDING.x,DESIGN.h-YF,DESIGN.h,ZF+20,d.renderScale()<.8?18:44);scene.add(beamFx.group);
   if(d.crateUrl){try{const cg=await new GLTFLoader().loadAsync(d.crateUrl);const m=cg.scene;m.traverse(o=>{if((o as T.Mesh).isMesh)o.frustumCulled=false;});const b=new T.Box3().setFromObject(m),sz=b.getSize(new T.Vector3()),c=b.getCenter(new T.Vector3()),k=140/sz.y;m.scale.multiplyScalar(k);m.position.sub(new T.Vector3(c.x,b.min.y,c.z).multiplyScalar(k));m.rotation.y=0;crate=new T.Group();const w=new T.Group();w.add(m);w.rotation.y=-.35;crate.add(w);crate.visible=false;scene.add(crate);}catch(e){console.warn('[chase] crate prop unavailable',e);}}
   loaded=true;resize();
  }
@@ -125,6 +129,7 @@ export function createChase(d:{world:HTMLElement,skullCanvas:HTMLCanvasElement,r
   const ctx={p:a.poser,gun:a.gun};let o:P.PoseOut;let squash=0,mix=0;
   switch(seg.anim){
    case 'run':o=P.run(ctx,time,seg.cad,seg.amp);break;
+   case 'look':{o=P.idle(ctx,time);const sc=P.scan(ctx,time);if(sc.d.Head)o.d.Head=sc.d.Head;break;}
    case 'lunge':o=P.lunge(ctx,time);break;case 'scan':o=P.scan(ctx,time);break;
    case 'trip':o=P.trip(ctx,u);break;case 'brake':o=P.brake(ctx,u);break;
    case 'panic':o=P.panic(ctx,lt);break;
@@ -141,7 +146,7 @@ export function createChase(d:{world:HTMLElement,skullCanvas:HTMLCanvasElement,r
   if(seg.anim==='panic'){squash=.03*Math.sin(lt*17);}
   place(a,x,lane,yaw,bounce,squash+o.squash);
  }
- let alertStarted=false,alertFaded=false,scrubbing=false,opts:StartOpts={},speed=1;const fired=new Set<ChaseMark>();
+ let alertStarted=false,alertFaded=false,scrubbing=false,opts:StartOpts={},speed=1;const holo=new HologramMaterialization();let beamFx:HoloBeamFx|undefined;const fired=new Set<ChaseMark>();
  let crate:T.Group|undefined;
  function driveCrate(time:number){
   if(!crate)return;if(!opts.crate||time<CHASE_MARKS.crateDrop||time>=CHASE_END){crate.visible=false;return;}
@@ -150,18 +155,33 @@ export function createChase(d:{world:HTMLElement,skullCanvas:HTMLCanvasElement,r
   if(time>=CHASE_MARKS.impact){const w=time-CHASE_MARKS.impact;y+=Math.max(0,60*Math.sin(Math.min(1,w/.35)*Math.PI));rz=.35*Math.exp(-w*4)*Math.sin(w*22);}
   crate.position.set(CRATE_X,DESIGN.h-YF+y,ZF+60);crate.rotation.z=rz;crate.scale.set(1-sq*.5,1+sq,1-sq*.5);
  }
+ /** Seeker hologram arrival (t < 0): beam → materialise → descent → landing on SEEKER_LANDING. */
+ function driveIntro(time:number){
+  const u=time+HOLO_INTRO_TOTAL,s=introState(u);
+  const gy=YF;seeker.setVisible(s.visible);
+  if(s.visible){const o=P.idle({p:seeker.poser,gun:true},u);seeker.poser.apply(o.d);place(seeker,LX,0,HOME.yaw,(s.lift+s.bounce)/seeker.height,s.squash+o.squash);
+   seeker.shadow.visible=true;seeker.shadow.position.set(LX,DESIGN.h-gy+3,ZF-8);seeker.shadow.scale.setScalar(Math.max(.4,1-(s.lift/260))*s.alpha);}
+  holo.apply(s,u,DESIGN.h-gy,seeker.height);beamFx?.update(s,u);
+ }
+ function driveSeekerAt(time:number){
+  if(time<0){if(!holo.isActive)holo.begin(seeker.model);driveIntro(time);}
+  else{if(holo.isActive){holo.end();}
+   if(time<.9){const s=introState(HOLO_INTRO_TOTAL+time);beamFx?.update(s,HOLO_INTRO_TOTAL+time);}else beamFx?.setVisible(false);   // ring finishes its glow
+   drive(seeker,SEEKER,time,false);}
+ }
+ function driveSkullAt(time:number){drive(skull,SKULLSEG,time<0?.05+(time+HOLO_INTRO_TOTAL)*.5:time,true);}   // idles on its plinth while the Seeker arrives
  function marks(){const at={crateDrop:{x:CRATE_X,y:YF-20},impact:{x:CRATE_X-30,y:YF-70},skullHome:{x:HOME.x,y:HOME.y-120}};for(const k of Object.keys(CHASE_MARKS) as ChaseMark[])if(!fired.has(k)&&t>=CHASE_MARKS[k]){fired.add(k);opts.onMark?.(k,at[k]);}}
- function end(ok:boolean){running=false;if(crate)crate.visible=false;scrubbing=false;canvas.style.visibility='hidden';d.skullCanvas.style.visibility='';skull?.setVisible(false);seeker?.setVisible(false);for(const a of [skull,seeker]){a?.poser.reset();a?.alert?.stop();a?.mixer?.stopAllAction();}alertStarted=false;alertFaded=false;const r=resolveRun;resolveRun=undefined;r?.(ok);}
+ function end(ok:boolean){running=false;holo.end();beamFx?.setVisible(false);if(crate)crate.visible=false;scrubbing=false;canvas.style.visibility='hidden';d.skullCanvas.style.visibility='';skull?.setVisible(false);seeker?.setVisible(false);for(const a of [skull,seeker]){a?.poser.reset();a?.alert?.stop();a?.mixer?.stopAllAction();}alertStarted=false;alertFaded=false;const r=resolveRun;resolveRun=undefined;r?.(ok);}
  const api:Chase={
   ready(){if(!loading)loading=load().catch(e=>{console.error('[chase] load failed',e);loading=undefined;});return loading;},
   async start(o={}){
    if(running||reduced)return false;await api.ready();if(!loaded||running)return false;
-   opts=o;speed=o.speed??1;fired.clear();running=true;t=0;runs++;alertStarted=false;alertFaded=false;resize();d.skullCanvas.style.visibility='hidden';canvas.style.visibility='visible';
+   opts=o;speed=o.speed??1;fired.clear();running=true;t=-HOLO_INTRO_TOTAL;runs++;alertStarted=false;alertFaded=false;resize();d.skullCanvas.style.visibility='hidden';canvas.style.visibility='visible';
    for(const a of [skull,seeker]){a.poser.reset();a.mixer?.stopAllAction();}
    return new Promise<boolean>(res=>{resolveRun=res;});
   },
-  async scrub(time,dt=1/60,crate=false){opts={crate};await api.ready();if(!loaded)return;if(!running){running=true;scrubbing=true;t=0;resize();d.skullCanvas.style.visibility='hidden';canvas.style.visibility='visible';for(const a of [skull,seeker]){a.poser.reset();a.mixer?.stopAllAction();}alertStarted=false;alertFaded=false;}
-   scrubbing=true;while(t<time-1e-6){t=Math.min(time,t+dt);const seg=pick(SKULLSEG,t);if(seg?.anim==='alert'&&skull.alert&&!alertStarted){skull.alert.reset().fadeIn(.15).play();alertStarted=true;}if(seg?.anim==='panic'&&skull.alert&&alertStarted&&!alertFaded){skull.alert.fadeOut(.25);alertFaded=true;}skull.mixer?.update(dt);drive(skull,SKULLSEG,t,true);drive(seeker,SEEKER,t,false);}driveCrate(t);renderer!.render(scene,cam);},
+  async scrub(time,dt=1/60,crate=false){opts={crate};await api.ready();if(!loaded)return;if(!running){running=true;scrubbing=true;t=time<0?-HOLO_INTRO_TOTAL:0;resize();d.skullCanvas.style.visibility='hidden';canvas.style.visibility='visible';for(const a of [skull,seeker]){a.poser.reset();a.mixer?.stopAllAction();}alertStarted=false;alertFaded=false;}
+   scrubbing=true;while(t<time-1e-6){t=Math.min(time,t+dt);const seg=pick(SKULLSEG,t);if(seg?.anim==='alert'&&skull.alert&&!alertStarted){skull.alert.reset().fadeIn(.15).play();alertStarted=true;}if(seg?.anim==='panic'&&skull.alert&&alertStarted&&!alertFaded){skull.alert.fadeOut(.25);alertFaded=true;}skull.mixer?.update(dt);driveSkullAt(t);driveSeekerAt(t);}driveCrate(t);renderer!.render(scene,cam);},
   abort(){if(running){scrubbing=false;end(false);}},
   get running(){return running;},
   update(dt){
@@ -170,13 +190,13 @@ export function createChase(d:{world:HTMLElement,skullCanvas:HTMLCanvasElement,r
    const seg=pick(SKULLSEG,t);if(seg?.anim==='alert'&&skull.alert&&!alertStarted){skull.alert.reset().fadeIn(.15).play();alertStarted=true;}
    if(seg?.anim==='panic'&&skull.alert&&alertStarted&&!alertFaded){skull.alert.fadeOut(.25);alertFaded=true;}
    skull.mixer?.update(sdt);
-   drive(skull,SKULLSEG,t,true);drive(seeker,SEEKER,t,false);driveCrate(t);marks();
+   driveSkullAt(t);driveSeekerAt(t);driveCrate(t);marks();
    renderer.render(scene,cam);
    if(t>=CHASE_END)end(true);
   },
   resize,
   inspect(){return {running,t,runs,loaded,memory:renderer?{...renderer.info.memory}:null,programs:renderer?.info.programs?.length,skull:skull&&{x:skull.root.position.x,y:skull.root.position.y,z:skull.root.position.z,visible:skull.root.visible,yaw:skull.root.rotation.y},seeker:seeker&&{x:seeker.root.position.x,y:seeker.root.position.y,z:seeker.root.position.z,visible:seeker.root.visible}};},
-  dispose(){end(false);for(const m of occluders){m.geometry.dispose();(m.material as T.Material).dispose();}tex.forEach(x=>x.dispose());renderer?.dispose();canvas.remove();},
+  dispose(){end(false);holo.dispose();beamFx?.dispose();for(const m of occluders){m.geometry.dispose();(m.material as T.Material).dispose();}tex.forEach(x=>x.dispose());renderer?.dispose();canvas.remove();},
  };
  void SKULL;void reduced;
  return api;

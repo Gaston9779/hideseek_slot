@@ -9,38 +9,44 @@ export function createBonusOverlay(d:{celebration?:(banner:HTMLElement)=>number,
  const canvas=$('#bonus-canvas') as HTMLCanvasElement,prizesEl=$('#bonus-prizes'),banner=$('#bonus-banner'),summary=$('#bonus-summary'),live=$('#bonus-live'),loading=$('#bonus-loading');
  const previewProvider=new TestRoundProvider(),previewAdapter=new PreviewAdapter();let provider:{nextRound():ChestBonusRound}=previewProvider,adapter:{award(id:string,prize:number):boolean;awards?:{roundId:string,prize:number}[]}=previewAdapter;let real=false;
  let scene:BonusScene|undefined,controller:ChestBonusController|undefined,opening=false,timers=new Set<number>(),isOpen=false;
- const celebrateMs=Number(new URLSearchParams(location.search).get('bonusCelebrateMs'))||3200;   // QA only: lets screenshots catch the celebration
+ const celebrateMs=(import.meta.env.DEV&&Number(new URLSearchParams(location.search).get('bonusCelebrateMs')))||3200;   // QA only: lets screenshots catch the celebration
  const labels=PEDESTALS.map((p,i)=>{const el=document.createElement('div');el.className='bprize';el.style.left=`calc(${p.u}px*var(--k))`;el.style.top=`calc(${p.v-LABEL_UP}px*var(--k))`;el.dataset.index=String(i);el.innerHTML='<i></i><b></b><small></small>';prizesEl.appendChild(el);return el;});
  const track=(fn:()=>void,ms:number)=>{const id=window.setTimeout(()=>{timers.delete(id);fn();},ms);timers.add(id);return ()=>{clearTimeout(id);timers.delete(id);};};
  const clearAll=()=>{timers.forEach(clearTimeout);timers.clear();};
- const fmt=(n:number)=>real?`${n}×`:String(n);
+ const fmt=(n:number)=>real?`×${n}`:String(n);
+ const spinsLine=(n:number)=>n>1?`12 FREE SPINS ×${n}`:'12 FREE SPINS';   // exact text of the awarded package
+ const titleEl=$('#bonus-title');let summaryShownAt=0;
  function makePorts(round:ChestBonusRound):BonusPorts{
   const anim=d.reduced?0:520;
   return {
-   setInteractive:on=>scene?.setInteractive(on),
+   setInteractive:on=>{scene?.setInteractive(on);titleEl.classList.toggle('picked',!on);},
    openChest:i=>{if(round.selectedIndex===i){scene!.setSelected(i);live.textContent='Opening your chest';}else scene!.setUnselected(i);return scene!.openChest(i);},
-   showPrize:(i,kind,value)=>{const el=labels[i];el.className=`bprize ${kind}`;el.querySelector('i')!.textContent=kind==='selected'?'YOU WON':'NOT PICKED';el.querySelector('b')!.textContent=fmt(value);el.querySelector('small')!.textContent=real?'TOTAL BET':'TEST VALUE';
-    void el.offsetWidth;el.classList.add('show');live.textContent=kind==='selected'?`You won ${fmt(value)} your bet`:`Chest ${i+1} held ${fmt(value)}, not awarded`;
+   showPrize:(i,kind,value)=>{const el=labels[i];el.className=`bprize ${kind}`;el.querySelector('i')!.textContent=real?(kind==='selected'?'12 FREE SPINS':'NON SCELTA'):(kind==='selected'?'YOU WON':'NOT PICKED');el.querySelector('b')!.textContent=fmt(value);el.querySelector('small')!.textContent=real?(kind==='selected'?'MOLTIPLICATORE VINCITE':'12 FREE SPINS'):'TEST VALUE';
+    void el.offsetWidth;el.classList.add('show');live.textContent=real?(kind==='selected'?`Hai vinto ${spinsLine(value)}`:`La cassa ${i+1} conteneva ${spinsLine(value)}, non assegnata`):(kind==='selected'?`You won ${fmt(value)} (test)`:`Chest ${i+1} held ${fmt(value)}, not awarded`);
     return new Promise<void>(res=>{track(res,anim);});},     // resolves once the plaque has finished appearing → value is really visible
    celebrate:()=>{const sel=round.selectedIndex!;scene!.highlightBest(sel);scene!.skullAppear('bigwin');d.burst?.();const extra=d.celebration?.(banner)??0;banner.style.animationDuration=extra?`${extra}ms`:'';banner.classList.remove('show');void banner.offsetWidth;banner.classList.add('show');live.textContent=extra?'Max win!':'Best pick!';
     return new Promise<void>(res=>{track(()=>{banner.classList.remove('show');scene?.skullHide();res();},d.reduced?1200:Math.max(celebrateMs,extra));});},
-   showSummary:(r,best)=>{const others=r.prizes.map((p,i)=>({p,i})).filter(x=>x.i!==r.selectedIndex).map(x=>fmt(x.p)).join(' · ');
-    summary.innerHTML=`<div class="sum-main">${best?'BEST PICK! ':''}YOU WON <b>${fmt(r.prizes[r.selectedIndex!])}</b></div><div class="sum-sub">Other chests: ${others} — not awarded</div><div class="sum-note">${real?'VIRTUAL CREDITS · DEMO · PRIZE WAS DECIDED BEFORE YOU PICKED':'DEVELOPMENT PREVIEW · TEST VALUES · NO CREDITS ADDED'}</div><button id="bonus-done" class="sum-btn">BACK TO SLOT</button>`;
-    summary.classList.add('show');summary.querySelector<HTMLButtonElement>('#bonus-done')!.onclick=()=>api.close();live.textContent=real?`Bonus complete. You won ${fmt(r.prizes[r.selectedIndex!])} your bet.`:`Bonus complete. You won ${fmt(r.prizes[r.selectedIndex!])} (test value, not credited).`;},
+   showSummary:(r,best)=>{const others=r.prizes.map((p,i)=>({p,i})).filter(x=>x.i!==r.selectedIndex).map(x=>fmt(x.p)).join(' · ');const won=r.prizes[r.selectedIndex!];
+    summary.innerHTML=real?`<div class="sum-main">${best?'BEST PICK! ':''}<b>${spinsLine(won)}</b></div><div class="sum-sub">Il moltiplicatore vale per le vincite monetarie dei dodici giri · altre casse: ${others} (non assegnate)</div><div class="sum-note">CREDITI VIRTUALI · DEMO · IL PREMIO ERA STATO DECISO PRIMA DELLA SCELTA</div><button id="bonus-done" class="sum-btn">INIZIA</button>`
+     :`<div class="sum-main">${best?'BEST PICK! ':''}YOU WON <b>${fmt(won)}</b></div><div class="sum-sub">Other chests: ${others} — not awarded</div><div class="sum-note">DEVELOPMENT PREVIEW · TEST VALUES · NO CREDITS ADDED</div><button id="bonus-done" class="sum-btn">BACK TO SLOT</button>`;
+    summary.classList.add('show');summaryShownAt=performance.now();summary.querySelector<HTMLButtonElement>('#bonus-done')!.onclick=()=>api.close();live.textContent=real?`Bonus pronto: ${spinsLine(won)}.`:`Bonus complete. You won ${fmt(won)} (test value, not credited).`;},
    schedule:(ms,fn)=>track(fn,ms),
    dispose:()=>{},
    onError:e=>{console.error('[bonus]',e);live.textContent='The bonus preview hit a problem.';},
   };
  }
- function resetUi(){clearAll();labels.forEach(l=>{l.className='bprize';});banner.classList.remove('show');summary.classList.remove('show');summary.innerHTML='';}
+ function resetUi(){summaryShownAt=0;titleEl.classList.remove('picked');clearAll();labels.forEach(l=>{l.className='bprize';});banner.classList.remove('show');summary.classList.remove('show');summary.innerHTML='';}
  const api={
   get adapter(){return adapter;},get provider(){return provider;},get isReal(){return real;},
   /** Real round: prizes come from the math engine and are credited through the engine adapter. */
   useReal(p:{nextRound():ChestBonusRound},a:{award(id:string,prize:number):boolean}){provider=p;adapter=a;real=true;d.root.classList.add('real');},
   usePreview(){provider=previewProvider;adapter=previewAdapter;real=false;d.root.classList.remove('real');},
+  /** Enter/Space on the summary continue — only once it has been visible for 700 ms (a held/mashed key can never skip it). */
+  activateSummary(){if(!summary.classList.contains('show')||performance.now()-summaryShownAt<700)return false;summary.querySelector<HTMLButtonElement>('#bonus-done')?.click();return true;},
+  onOpenChange:undefined as ((open:boolean)=>void)|undefined,
   get isOpen(){return isOpen;},get controller(){return controller;},get scene(){return scene;},
   async open(){
-   if(isOpen||opening)return;opening=true;resetUi();d.root.classList.add('show');isOpen=true;
+   if(isOpen||opening)return;opening=true;resetUi();d.root.classList.add('show');isOpen=true;api.onOpenChange?.(true);
    try{
     if(!scene){loading.hidden=false;scene=await createBonusScene({canvas,chestUrl:d.chestUrl,skullUrl:d.skullUrl,renderScale:d.renderScale,onPick:i=>{controller?.select(i);}});loading.hidden=true;}
     if(!isOpen){return;}                                 // closed while loading
@@ -48,7 +54,7 @@ export function createBonusOverlay(d:{celebration?:(banner:HTMLElement)=>number,
    }catch(e){console.error('[bonus] failed to start',e);loading.textContent='Could not load the bonus preview';}
    finally{opening=false;}
   },
-  close(){if(!isOpen)return;isOpen=false;controller?.close();controller=undefined;resetUi();scene?.stop();scene?.reset();d.root.classList.remove('show');d.onClosed();},
+  close(){if(!isOpen)return;isOpen=false;api.onOpenChange?.(false);controller?.close();controller=undefined;resetUi();scene?.stop();scene?.reset();d.root.classList.remove('show');d.onClosed();},
   /** keyboard access: 1 / 2 / 3 */
   pick(i:number){return controller?.select(i)??false;},
   dispose(){api.close();scene?.dispose();scene=undefined;},
