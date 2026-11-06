@@ -56,4 +56,12 @@ export function tumble(c:Ctx,t:number):PoseOut{
 export function brake(c:Ctx,u:number):PoseOut{
  const d:Deltas={},k=1-ease(u);legs(c,d,.7*k,-.35*k,.4*k,.2*k);arm(c,d,'Left',-.6*k,.8*k,.4);arm(c,d,'Right',-.6*k,.8*k,.4);d.Spine=qx(-.25*k);return {d,bounce:0,squash:0};
 }
+/** Celebration: both arms up and waving, springy hops with a crouch before take-off and a small squash on landing. `ph` offsets the beat so two characters are not clones. */
+export function cheer(c:Ctx,t:number,ph=0):PoseOut{
+ const w=t*7.2+ph*Math.PI*2,s=Math.sin(w),hop=Math.abs(s),d:Deltas={};
+ arm(c,d,'Left',2.75+.22*Math.sin(w*2),.2,.34);arm(c,d,'Right',2.75-.22*Math.sin(w*2),.2,.34);
+ const crouch=1-hop;legs(c,d,.12*s+.2*crouch,-.12*s+.2*crouch,.15+.55*crouch,.15+.55*crouch);
+ d.Spine=qx(-.1+.05*s);d.Head=qz(.14*Math.sin(w*.5)).multiply(qx(-.12));d.Hips=qy(.12*Math.sin(w*.5));
+ return {d,bounce:.2*hop,squash:-.07*crouch*crouch+.04*hop};
+}
 export const smooth=ease;

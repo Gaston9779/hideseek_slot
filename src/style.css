@@ -146,3 +146,20 @@ dialog small,.fine{color:#bda4c3}
 .am-sw input:focus-visible+.am-knob{outline:2px solid #ffd27a;outline-offset:2px}
 .am-row input[type=range]{width:100%;accent-color:#ffb02a}
 .am-row input[type=range]:disabled{opacity:.4}
+
+/* ---- chest prize medallions: part of the scene (round gothic medal, glow by tier), never a rectangular card ---- */
+#bonus-prizes .bprize{min-width:0;width:calc(176px*var(--k));height:calc(176px*var(--k));padding:0;display:grid;align-content:center;justify-items:center;border-radius:50%;border:0;background:radial-gradient(circle at 50% 38%,#4a2a6e,#1b0f2e 72%);box-shadow:0 0 0 calc(5px*var(--k)) #e9b04a,0 0 0 calc(9px*var(--k)) #3a1d5c,0 calc(8px*var(--k)) calc(22px*var(--k)) #000c,0 0 calc(36px*var(--k)) #ffb02a99;transform:translate(-50%,-100%) scale(.2) rotate(-12deg);transition:opacity .4s,transform .7s cubic-bezier(.2,1.6,.4,1)}
+#bonus-prizes .bprize.show{transform:translate(-50%,-100%) scale(1) rotate(0)}
+#bonus-prizes .bprize i{font:800 calc(13px*var(--k))/1.1 var(--ui);letter-spacing:.12em;color:#ffe3a0;text-shadow:0 1px 3px #000}
+#bonus-prizes .bprize b{font:900 calc(76px*var(--k))/.95 var(--font);color:#ffe9a8;-webkit-text-stroke:calc(4px*var(--k)) #6a2c08;paint-order:stroke fill;text-shadow:0 calc(4px*var(--k)) 0 #7a3a08,0 0 calc(20px*var(--k)) #ffb02a}
+#bonus-prizes .bprize small{font:700 calc(10px*var(--k))/1.2 var(--ui);letter-spacing:.1em;color:#e8d6ff;max-width:80%}
+#bonus-prizes .bprize.x2{box-shadow:0 0 0 calc(5px*var(--k)) #ffd36a,0 0 0 calc(9px*var(--k)) #7b3fe0,0 calc(8px*var(--k)) calc(22px*var(--k)) #000c,0 0 calc(44px*var(--k)) #b57cffcc,0 0 calc(30px*var(--k)) #ffb02a88}
+#bonus-prizes .bprize.x5{box-shadow:0 0 0 calc(6px*var(--k)) #fff0b0,0 0 0 calc(11px*var(--k)) #e0891d,0 calc(8px*var(--k)) calc(22px*var(--k)) #000c,0 0 calc(70px*var(--k)) #ffd36aee,0 0 calc(40px*var(--k)) #ffb02a}
+#bonus-prizes .bprize.x5 b{font-size:calc(92px*var(--k));animation:medalPulse 1.4s ease-in-out infinite alternate}
+#bonus-prizes .bprize.x5.selected::before,#bonus-prizes .bprize.x2.selected::before{content:"";position:absolute;inset:calc(-34px*var(--k));border-radius:50%;background:conic-gradient(from 0deg,#ffd36a00,#ffd36aaa 8%,#ffd36a00 16%,#c06cffaa 30%,#ffd36a00 40%,#ffd36aaa 58%,#ffd36a00 70%,#c06cff88 84%,#ffd36a00);-webkit-mask:radial-gradient(circle,transparent 56%,#000 58%,#000 70%,transparent 72%);mask:radial-gradient(circle,transparent 56%,#000 58%,#000 70%,transparent 72%);animation:medalSpin 6s linear infinite;pointer-events:none}
+#bonus-prizes .bprize.unselected{opacity:.92;filter:saturate(.45) brightness(.82);transform:translate(-50%,-100%) scale(.8)}
+#bonus-prizes .bprize.unselected.show{transform:translate(-50%,-100%) scale(.82)}
+#bonus-prizes .bprize.unselected i{color:#cdbfdc}
+@keyframes medalSpin{to{transform:rotate(360deg)}}
+@keyframes medalPulse{from{filter:brightness(1)}to{filter:brightness(1.25)}}
+@media (prefers-reduced-motion:reduce){#bonus-prizes .bprize::before,#bonus-prizes .bprize b{animation:none!important}}

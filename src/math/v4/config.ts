@@ -1,5 +1,5 @@
 /** V4 audited math configuration. Payouts are line-bet units unless noted. */
-export const MATH_VERSION='4.0.0';
+export const MATH_VERSION='4.1.0';   // 4.1: in-feature retriggers (see FEATURE_RULES). NOT yet re-validated by Monte Carlo / exact enumeration.
 export const SYMBOLS=['WILD','SCATTER','CHEST_BONUS','MAGIC_BOOK','SKULL','BLASTER','GARGOYLE','CHEST','LANTERN','GHOST','TOMB','KEY','POTION'] as const;
 export type SymbolId=typeof SYMBOLS[number];
 export const REELS=5,ROWS=3,LINES=20,UNITS_PER_BET=LINES;
@@ -19,6 +19,12 @@ export const CHEST_PACKAGES=[
 export type ChestMultiplier=typeof CHEST_PACKAGES[number]['multiplier'];
 /** Buy price is calibrated from the exact Chest feature EV; cents are always integral because it is a whole-bet multiplier. */
 /** 128.60× is representable in whole cents for every supported 0.20× bet step. */
-export const BUY_BONUS={enabled:true,priceX:128.6,targetRtp:.96};
+/** 4.1: recalibrated from 128.60× after the in-feature extensions raised the Chest feature EV (buy RTP measured 100.08% at 128.6×; ×1.0008/.96 → 134.1×; fine-tuned to 134.0× after a second 6M-round run measured 95.94%). Monte Carlo to be re-run by the math owner. */
+export const BUY_BONUS={enabled:true,priceX:134,targetRtp:.96};
 export const MAX_WIN_X=5000,MAX_WIN_UNITS=MAX_WIN_X*UNITS_PER_BET;
 export const WILD_REELS=[1,2,3] as const;
+
+/** V4.1 in-feature rules (requested game design). Spins are added to the feature that is running; amounts are paid by the unchanged paytable/multiplier mechanics.
+ *  Chest feature (any ×): 3+ SCATTER → +6 spins · 3+ CHEST_BONUS → +12 spins (no pick; same multiplier) · total awarded capped.
+ *  Scatter feature: 3+ SCATTER → retrigger (SCATTER_FREE_SPINS.retrigger, unchanged) · 3+ CHEST_BONUS → pick a chest, +12 spins appended with the picked multiplier (×1/×2/×5). */
+export const FEATURE_RULES={chest:{scatterExtraSpins:6,chestExtraSpins:12,maxAwardedSpins:48},scatter:{chestExtraSpins:12,maxChestPicks:3}};

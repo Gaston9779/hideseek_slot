@@ -21,15 +21,17 @@ export function createBonusOverlay(d:{celebration?:(banner:HTMLElement)=>number,
   return {
    setInteractive:on=>{scene?.setInteractive(on);titleEl.classList.toggle('picked',!on);},
    openChest:i=>{cue.chestOpen();if(round.selectedIndex===i){scene!.setSelected(i);live.textContent='Opening your chest';}else scene!.setUnselected(i);return scene!.openChest(i);},
-   showPrize:(i,kind,value)=>{if(real&&kind==='selected')cue.chestReveal(value);const el=labels[i];el.className=`bprize ${kind}`;el.querySelector('i')!.textContent=real?(kind==='selected'?'12 FREE SPINS':'NON SCELTA'):(kind==='selected'?'YOU WON':'NOT PICKED');el.querySelector('b')!.textContent=fmt(value);el.querySelector('small')!.textContent=real?(kind==='selected'?'MOLTIPLICATORE VINCITE':'12 FREE SPINS'):'TEST VALUE';
+   showPrize:(i,kind,value)=>{if(real&&kind==='selected')cue.chestReveal(value);const el=labels[i];el.className=`bprize ${kind} x${value}`;el.querySelector('i')!.textContent=real?(kind==='selected'?'12 FREE SPINS':'NON SCELTA'):(kind==='selected'?'YOU WON':'NOT PICKED');el.querySelector('b')!.textContent=fmt(value);el.querySelector('small')!.textContent=real?(kind==='selected'?'MOLTIPLICATORE VINCITE':'12 FREE SPINS'):'TEST VALUE';
     void el.offsetWidth;el.classList.add('show');live.textContent=real?(kind==='selected'?`Hai vinto ${spinsLine(value)}`:`La cassa ${i+1} conteneva ${spinsLine(value)}, non assegnata`):(kind==='selected'?`You won ${fmt(value)} (test)`:`Chest ${i+1} held ${fmt(value)}, not awarded`);
     return new Promise<void>(res=>{track(res,anim);});},     // resolves once the plaque has finished appearing → value is really visible
    celebrate:()=>{cue.voice('win');const sel=round.selectedIndex!;scene!.highlightBest(sel);scene!.skullAppear('bigwin');d.burst?.();const extra=d.celebration?.(banner)??0;banner.style.animationDuration=extra?`${extra}ms`:'';banner.classList.remove('show');void banner.offsetWidth;banner.classList.add('show');live.textContent=extra?'Max win!':'Best pick!';
-    return new Promise<void>(res=>{track(()=>{banner.classList.remove('show');scene?.skullHide();res();},d.reduced?1200:Math.max(celebrateMs,extra));});},
-   showSummary:(r,best)=>{const others=r.prizes.map((p,i)=>({p,i})).filter(x=>x.i!==r.selectedIndex).map(x=>fmt(x.p)).join(' · ');const won=r.prizes[r.selectedIndex!];
-    summary.innerHTML=real?`<div class="sum-main">${best?'BEST PICK! ':''}<b>${spinsLine(won)}</b></div><div class="sum-sub">Il moltiplicatore vale per le vincite monetarie dei dodici giri · altre casse: ${others} (non assegnate)</div><div class="sum-note">CREDITI VIRTUALI · DEMO · IL PREMIO ERA STATO DECISO PRIMA DELLA SCELTA</div><button id="bonus-done" class="sum-btn">INIZIA</button>`
-     :`<div class="sum-main">${best?'BEST PICK! ':''}YOU WON <b>${fmt(won)}</b></div><div class="sum-sub">Other chests: ${others} — not awarded</div><div class="sum-note">DEVELOPMENT PREVIEW · TEST VALUES · NO CREDITS ADDED</div><button id="bonus-done" class="sum-btn">BACK TO SLOT</button>`;
-    summary.classList.add('show');summaryShownAt=performance.now();summary.querySelector<HTMLButtonElement>('#bonus-done')!.onclick=()=>api.close();live.textContent=real?`Bonus pronto: ${spinsLine(won)}.`:`Bonus complete. You won ${fmt(won)} (test value, not credited).`;},
+    return new Promise<void>(res=>{track(()=>{banner.classList.remove('show');scene?.skullHide();res();},d.reduced?1200:Math.max(real?2000:celebrateMs,extra));});},
+   showSummary:(r,best)=>{const won=r.prizes[r.selectedIndex!];
+    if(real){                                  // production flow: no button, no click — a readable pause, then the scene closes by itself
+     live.textContent=`Bonus pronto: ${won>1?`12 FREE SPINS ×${won}`:'12 FREE SPINS'}.`;track(()=>api.close(),d.reduced?900:1900);return;}
+    const others=r.prizes.map((p,i)=>({p,i})).filter(x=>x.i!==r.selectedIndex).map(x=>fmt(x.p)).join(' · ');
+    summary.innerHTML=`<div class="sum-main">${best?'BEST PICK! ':''}YOU WON <b>${fmt(won)}</b></div><div class="sum-sub">Other chests: ${others} — not awarded</div><div class="sum-note">DEVELOPMENT PREVIEW · TEST VALUES · NO CREDITS ADDED</div><button id="bonus-done" class="sum-btn">BACK TO SLOT</button>`;
+    summary.classList.add('show');summaryShownAt=performance.now();summary.querySelector<HTMLButtonElement>('#bonus-done')!.onclick=()=>api.close();live.textContent=`Bonus complete. You won ${fmt(won)} (test value, not credited).`;},
    schedule:(ms,fn)=>track(fn,ms),
    dispose:()=>{},
    onError:e=>{console.error('[bonus]',e);live.textContent='The bonus preview hit a problem.';},

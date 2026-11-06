@@ -1,5 +1,5 @@
 import './gameplay.css';
-import {urls} from '../view/assets';import {keys} from './keyboard';import {cue} from '../audio/cues';
+import {urls,symbolUrl} from '../view/assets';import {keys} from './keyboard';import {cue} from '../audio/cues';
 /** Presentation-only widgets: Free Spins HUD, Free Spins summary, Quick Spin control. They display numbers handed in by main.ts from the engine; they compute nothing economic. */
 const mk=(tag:string,cls:string,parent:HTMLElement,html='')=>{const e=document.createElement(tag);e.className=cls;if(html)e.innerHTML=html;parent.appendChild(e);return e as HTMLElement;};
 const wait=(ms:number)=>new Promise<void>(r=>setTimeout(r,ms));
@@ -10,7 +10,8 @@ export interface FsHudState{remaining:number;played:number;awarded:number;winCen
  * every number is handed in from the engine's FeatureState (base / gross multiplied / effective / credited are never re-multiplied).
  */
 export function createFsHud(world:HTMLElement,money:(c:number)=>string,reduced:boolean){
- const root=mk('div','fs-hud',world,`<div class="fh-mult" data-k="multBox" hidden><i>MOLTIPLICATORE</i><b data-k="mult">×1</b></div><div class="fh-title" data-k="title">FREE SPINS</div><div class="fh-row"><span>GIRI RIMANENTI</span><b data-k="rem">0</b></div><div class="fh-row alt" data-k="baseRow" hidden><span>VINCITA BASE</span><b data-k="base">0.00</b></div><div class="fh-row"><span data-k="winLbl">VINCITA BONUS</span><b data-k="win">0.00</b></div><div class="fh-sub" data-k="sub"></div><div class="fh-toast" aria-hidden="true"></div>`);
+ const ico=`<img class="fh-ico" src="${symbolUrl('SKULL')}" alt="" draggable="false">`;
+ const root=mk('div','fs-hud',world,`<div class="fh-head">${ico}<span class="fh-title" data-k="title">FREE SPINS</span>${ico}</div><div class="fh-main"><div class="fh-mult" data-k="multBox" hidden><b data-k="mult">×1</b></div><div class="fh-body"><div class="fh-row"><span>GIRI RIMANENTI</span><b data-k="rem">0</b></div><div class="fh-row"><span data-k="winLbl">VINCITA BONUS</span><b data-k="win">0.00</b></div><div class="fh-sub" data-k="sub"></div></div></div><div class="fh-toast" aria-hidden="true"></div>`);
  root.hidden=true;root.setAttribute('role','status');root.setAttribute('aria-live','polite');
  const q=(k:string)=>root.querySelector<HTMLElement>(`[data-k="${k}"]`)!,toast=root.querySelector<HTMLElement>('.fh-toast')!;
  let last={remaining:-1,win:-1,type:''};
@@ -23,13 +24,14 @@ export function createFsHud(world:HTMLElement,money:(c:number)=>string,reduced:b
    const rem=Math.max(0,s.remaining),win=Math.max(0,s.winCents),chest=s.featureType==='chest';
    root.classList.toggle('chest',chest);root.classList.toggle('scatter',!chest);
    q('rem').textContent=String(rem);q('win').textContent=money(win);q('title').textContent=chest?'CHEST FREE SPINS':'FREE SPINS';
-   q('multBox').hidden=!chest;q('baseRow').hidden=!chest;
-   if(chest){q('mult').textContent=`×${s.multiplier}`;q('base').textContent=money(Math.max(0,s.baseBonusWinCents));q('winLbl').textContent='TOTALE BONUS';q('sub').textContent=`${s.awarded} FREE SPINS · ×${s.multiplier} SULLE VINCITE DEL BONUS`;}
-   else{q('winLbl').textContent='VINCITA BONUS';const extra=s.retriggerAwarded?` · +${s.retriggerAwarded} EXTRA`:'';q('sub').textContent=`GIRO ${Math.min(s.played,s.awarded)} / ${s.awarded}${extra}${s.wildMultiplier?` · LINEE CON WILD ×${s.wildMultiplier}`:''}`;}
+   q('multBox').hidden=!(chest||s.multiplier>1);q('mult').textContent=`×${s.multiplier}`;
+   // Chest: only the BASE win is shown while the spins run; the multiplied total is reserved for the final reveal.
+   if(chest){q('mult').textContent=`×${s.multiplier}`;q('winLbl').textContent='VINCITA BASE';q('sub').textContent='';}
+   else{q('winLbl').textContent='VINCITA CUMULATA';const extra=s.retriggerAwarded?`+${s.retriggerAwarded} GIRI EXTRA`:'';q('sub').textContent=`${extra}${extra&&s.wildMultiplier?' · ':''}${s.wildMultiplier?`WILD ×${s.wildMultiplier}`:''}`;}
    if(rem!==last.remaining&&last.remaining>=0&&last.type===s.featureType)bump(q('rem'));if(win!==last.win&&last.win>=0&&last.type===s.featureType)bump(q('win'));last={remaining:rem,win,type:s.featureType};
   },
   /** "+X FREE SPINS" message for a retrigger (X comes from the engine). */
-  async retrigger(n:number){toast.textContent=`+${n} FREE SPINS`;toast.classList.remove('show');void toast.offsetWidth;toast.classList.add('show');bump(q('rem'));await wait(reduced?900:1500);toast.classList.remove('show');},
+  async retrigger(n:number,suffix=''){toast.textContent=`+${n} FREE SPINS${suffix}`;toast.classList.remove('show');void toast.offsetWidth;toast.classList.add('show');bump(q('rem'));await wait(reduced?900:1500);toast.classList.remove('show');},
  };
 }
 

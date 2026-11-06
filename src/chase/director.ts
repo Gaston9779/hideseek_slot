@@ -74,6 +74,8 @@ export interface StartOpts{speed?:number;crate?:boolean;onMark?:(m:ChaseMark,at:
 export interface Chase{
  /** Loads models (once) and plays the gag. Resolves true when it ran to completion, false if aborted/unavailable. */
  start(opts?:StartOpts):Promise<boolean>;abort():void;readonly running:boolean;ready():Promise<void>;
+ /** Finale party: the original Skull and the Seeker (blaster at rest) jump and cheer at the given FEET positions (design px) until stopCelebrate(). Never resumes the chase. */
+ celebrate(o:{skull:{x:number;y:number};seeker:{x:number;y:number}}):Promise<boolean>;stopCelebrate():void;readonly celebrating:boolean;
   /** DEV/QA: render the gag at an exact time (frame-accurate screenshots); stays paused until abort(). */
  scrub(time:number,dt?:number,crate?:boolean):Promise<void>;update(dt:number):void;resize():void;inspect():unknown;dispose():void;
 }
@@ -110,8 +112,9 @@ export function createChase(d:{world:HTMLElement,skullCanvas:HTMLCanvasElement,r
  function resize(){if(!renderer)return;const s=d.renderScale();renderer.setPixelRatio(1);renderer.setSize(Math.round(DESIGN.w*s),Math.round(DESIGN.h*s),false);}
  function pick(segs:Seg[],time:number){for(const s of segs)if(time>=s.t0&&time<s.t1)return s;return null;}
  const lerp=(a:number,b:number,u:number)=>a+(b-a)*u;
+ let groundY=YF;     // feet line used by place(); the finale celebration temporarily moves it
  function place(a:Actor,x:number,lane:number,yawv:number,bounce:number,squash:number,wobble=0,roll=0){
-  const gy=lerp(YF,YB,lane),z=lerp(ZF,ZB,lane);a.root.position.set(x,DESIGN.h-gy+bounce*a.height,z);
+  const gy=lerp(groundY,groundY-(YF-YB),lane),z=lerp(ZF,ZB,lane);a.root.position.set(x,DESIGN.h-gy+bounce*a.height,z);
   a.root.quaternion.setFromAxisAngle(new T.Vector3(0,0,1),roll).multiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),yawv));
   a.root.scale.set(1-squash*.5,1+squash,1-squash*.5);a.shadow.position.set(x,DESIGN.h-gy+3,z-8);a.shadow.visible=a.root.visible;a.shadow.scale.setScalar(Math.max(.4,1-Math.max(0,bounce)*2.2));void wobble;
  }
@@ -146,6 +149,7 @@ export function createChase(d:{world:HTMLElement,skullCanvas:HTMLCanvasElement,r
   if(seg.anim==='panic'){squash=.03*Math.sin(lt*17);}
   place(a,x,lane,yaw,bounce,squash+o.squash);
  }
+ let celeb:{t:number;sk:{x:number;y:number};se:{x:number;y:number}}|null=null;
  let alertStarted=false,alertFaded=false,scrubbing=false,opts:StartOpts={},speed=1;const holo=new HologramMaterialization();let beamFx:HoloBeamFx|undefined;const fired=new Set<ChaseMark>();
  let crate:T.Group|undefined;
  function driveCrate(time:number){
@@ -178,7 +182,18 @@ export function createChase(d:{world:HTMLElement,skullCanvas:HTMLCanvasElement,r
   once('run',2.5,()=>cue.skullRun(true));once('runOff',6.0,()=>cue.skullRun(false));once('fall',TUMBLE.t0,()=>cue.skullFall());}
  function marks(){const at={crateDrop:{x:CRATE_X,y:YF-20},impact:{x:CRATE_X-30,y:YF-70},skullHome:{x:HOME.x,y:HOME.y-120}};for(const k of Object.keys(CHASE_MARKS) as ChaseMark[])if(!fired.has(k)&&t>=CHASE_MARKS[k]){fired.add(k);opts.onMark?.(k,at[k]);}}
  function end(ok:boolean){running=false;aud.clear();if(!ok)cue.cinematicAbort();holo.end();beamFx?.setVisible(false);if(crate)crate.visible=false;scrubbing=false;canvas.style.visibility='hidden';d.skullCanvas.style.visibility='';skull?.setVisible(false);seeker?.setVisible(false);for(const a of [skull,seeker]){a?.poser.reset();a?.alert?.stop();a?.mixer?.stopAllAction();}alertStarted=false;alertFaded=false;const r=resolveRun;resolveRun=undefined;r?.(ok);}
+ function driveCelebration(dt:number){
+  const c=celeb!;c.t+=Math.min(dt,.05);const t=c.t,enter=Math.min(1,t/.4),ease=1-Math.pow(1-enter,3);
+  for(const [a,pos,ph,yaw] of [[skull,c.sk,0,.4],[seeker,c.se,.45,-.4]] as const){
+   a.setVisible(true);groundY=pos.y;const o=P.cheer({p:a.poser,gun:a.gun},t,ph);a.poser.apply(o.d);
+   place(a,pos.x,0,yaw+Math.sin(t*1.6+ph*6)*.14,o.bounce*ease,o.squash*ease);}
+  groundY=YF;renderer!.render(scene,cam);
+ }
+ function endCelebration(){if(!celeb)return;celeb=null;groundY=YF;canvas.style.zIndex='5';canvas.style.visibility='hidden';d.skullCanvas.style.visibility='';skull?.setVisible(false);seeker?.setVisible(false);for(const a of [skull,seeker])a?.poser.reset();}
  const api:Chase={
+  async celebrate(o){if(running||reduced||celeb)return false;await api.ready();if(!loaded||running||celeb)return false;holo.end();beamFx?.setVisible(false);
+   for(const a of [skull,seeker]){a.poser.reset();a.mixer?.stopAllAction();}if(crate)crate.visible=false;resize();celeb={t:0,sk:o.skull,se:o.seeker};d.skullCanvas.style.visibility='hidden';canvas.style.zIndex='9';canvas.style.visibility='visible';return true;},
+  stopCelebrate(){endCelebration();},get celebrating(){return !!celeb;},
   ready(){if(!loading)loading=load().catch(e=>{console.error('[chase] load failed',e);loading=undefined;});return loading;},
   async start(o={}){
    if(running||reduced)return false;await api.ready();if(!loaded||running)return false;
@@ -191,6 +206,7 @@ export function createChase(d:{world:HTMLElement,skullCanvas:HTMLCanvasElement,r
   abort(){if(running){scrubbing=false;end(false);}},
   get running(){return running;},
   update(dt){
+   if(celeb&&renderer&&!running){driveCelebration(dt);return;}
    if(!running||!renderer||scrubbing)return;const sdt=Math.min(dt,.05)*speed;t+=sdt;
    // skull's alert clip runs through the AnimationMixer (real GLB clip "afraid"); procedural poses take over afterwards
    const seg=pick(SKULLSEG,t);if(seg?.anim==='alert'&&skull.alert&&!alertStarted){skull.alert.reset().fadeIn(.15).play();alertStarted=true;}
@@ -202,7 +218,7 @@ export function createChase(d:{world:HTMLElement,skullCanvas:HTMLCanvasElement,r
   },
   resize,
   inspect(){return {running,t,runs,loaded,memory:renderer?{...renderer.info.memory}:null,programs:renderer?.info.programs?.length,skull:skull&&{x:skull.root.position.x,y:skull.root.position.y,z:skull.root.position.z,visible:skull.root.visible,yaw:skull.root.rotation.y},seeker:seeker&&{x:seeker.root.position.x,y:seeker.root.position.y,z:seeker.root.position.z,visible:seeker.root.visible}};},
-  dispose(){end(false);holo.dispose();beamFx?.dispose();for(const m of occluders){m.geometry.dispose();(m.material as T.Material).dispose();}tex.forEach(x=>x.dispose());renderer?.dispose();canvas.remove();},
+  dispose(){endCelebration();end(false);holo.dispose();beamFx?.dispose();for(const m of occluders){m.geometry.dispose();(m.material as T.Material).dispose();}tex.forEach(x=>x.dispose());renderer?.dispose();canvas.remove();},
  };
  void SKULL;void reduced;
  return api;

@@ -1,0 +1,55 @@
+{
+  "schema": "skull-hunt-math-v4-simulation-1",
+  "mathVersion": "4.0.0",
+  "engine": "src/engine/game.ts",
+  "basePaidRounds": 40000000,
+  "seed": 20261202,
+  "rtp": 0.962215194937668,
+  "rtpPercent": 96.2215194937668,
+  "rtpCI95": [
+    0.9600283577617141,
+    0.964402032113622
+  ],
+  "components": {
+    "base": 0.5772416312331182,
+    "scatterFreeSpins": 0.34811812125000935,
+    "chestFreeSpins": 0.036855442499999926
+  },
+  "roundReturnVsBet": {
+    "below": {
+      "count": 34212433,
+      "probability": 0.855310825
+    },
+    "equal": {
+      "count": 307791,
+      "probability": 0.007694775
+    },
+    "above": {
+      "count": 5479776,
+      "probability": 0.1369944
+    }
+  },
+  "triggers": {
+    "scatter": {
+      "count": 285362,
+      "probability": 0.00713405
+    },
+    "chest": {
+      "count": 11581,
+      "probability": 0.000289525
+    },
+    "dual": {
+      "count": 4214,
+      "probability": 0.00010535
+    }
+  },
+  "chestPackageSelections": {
+    "1x": 4238,
+    "2x": 4177,
+    "5x": 4168
+  },
+  "totalPhysicalSpins": 43756704,
+  "capHitCount": 0,
+  "maxRoundWinX": 2222.65,
+  "conservationFailures": 0
+}

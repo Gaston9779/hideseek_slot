@@ -38,7 +38,7 @@ export function createBonusCinematic(d:BonusCinematicDeps){
   const key=`${ev.type}:${ev.roundId}:${ev.spinNo}`;if(seen.has(key))return;seen.add(key);if(seen.size>200)seen.delete(seen.values().next().value!);
   switch(ev.type){
    case 'DUAL_BONUS_TRIGGERED':pending={kind:'DUAL',ev};break;                      // one chase only: DUAL overrides and no separate FS/CHEST handler runs
-   case 'CHEST_BONUS_TRIGGERED':if(pending?.kind!=='DUAL')pending={kind:'CHEST',ev};break;
+   case 'CHEST_BONUS_TRIGGERED':if(ev.source!=='FEATURE'&&pending?.kind!=='DUAL')pending={kind:'CHEST',ev};break;   // a chest found INSIDE a feature has its own short flow (no chase)
    case 'FREE_SPINS_TRIGGERED':if(ev.source==='BASE'&&!pending)pending={kind:'FREE_SPINS',ev};break;   // retriggers keep the existing in-feature banner, no chase
    case 'BEST_CHEST_PICK':best=ev;break;
    case 'MAX_WIN':if(best&&best.roundId===ev.roundId)maxCoordinated=true;else maxStandalone=true;break;
