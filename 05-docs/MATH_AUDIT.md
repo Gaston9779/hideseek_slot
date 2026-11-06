@@ -1,0 +1,36 @@
+# MATH AUDIT — Skull Hunt, implementation as found at commit `09e2b5a`
+
+Scope: rules reconstructed **from the code** (not from earlier docs). Files audited: `src/math/{evaluate,slot,rng}.ts`, `src/config/game.ts`, `src/engine/game.ts`, `src/bonus/{controller,provider,bonusOverlay}.ts`, `src/main.ts`, `scripts/simulate.ts`, `tests/*.test.ts`.
+Legend: **PASS** = verified by execution · **FAIL** = defect, executed or demonstrable · **UNVERIFIED** = could not be demonstrated.
+Every FAIL below was remediated in math v2.0.0 (see `MATH_SPEC_V2.md`); remediation column points to the new artefact.
+
+## Reconstructed rules (old engine)
+5×3, 20 fixed lines, left-to-right, min. 3. Strips = 111 stops/reel built from weights `[POTION 16, KEY 15, TOMB 14, GHOST 13, LANTERN 12, CHEST 10, MAUSOLEUM 8, GARGOYLE 7, BLASTER 6, SKULL 5, WILD 3, SCATTER 2]` and ordered by a `charCode % 17` sort (`config/game.ts:reelStrips`). Line pay = `paytable[symbol][count]` **as a multiple of the total bet, per line** (`engine/game.ts:settle` → `totalMultiplier × bet`). WILD substitutes (also pays its own 3/4/5), SCATTER pays 2×/10×/50× anywhere. ≥3 scatters = +10 free spins (+5 retrigger, max 30 awarded). In free spins a winning line containing a wild ×2. Cap 5000× applied **per spin** (`evaluate.ts`, `Math.min(total, 5000)`). Chest bonus: preview only.
+
+## Findings
+
+| # | Area | Class | Finding | Evidence | Remediation |
+|---|---|---|---|---|---|
+| 1 | **RTP** | **FAIL** | Executed the old engine: base-only mean return **236.6 %** of total bet per spin (2 M spins, seed 1); full engine incl. free spins **270.8 %** (2 M spins). Cause: line pays are multiples of the *total* bet *per line*, so one 3-of-a-kind low win pays 3–5× the whole stake. The game as built paid out far more than it took in. Never declared as 96 %; no document proved any RTP. | run of `HEAD` code, scratch harness | New paytable in line-bet units; exact RTP 96.0003 % |
+| 2 | Paytable vs engine | **FAIL** | Paytable dialog (`index.html`) said "Bonus wins with a Wild have a 2× multiplier" and "10 free spins"; docs described RTP targets that the code never met. The dialog showed pay values as `×` without saying of what. | `main.ts` paytable render, `config/game.ts` | Paytable text regenerated from config; units explicit |
+| 3 | Reel strips | **FAIL** | Strips are not designed: `sort` by `(charCode+r·7)%17` clusters identical symbols (reel 1 starts `WILD,WILD,WILD,GHOST×9…`). Adjacent clumps make windows highly correlated, contrary to the independence assumption any RTP calc would need; wild clumps inflate 3-wild windows. | `config/game.ts`, run output | Explicit 32-stop strips, committed literally (`src/math/v2/strips.ts`) |
+| 4 | WILD pay | **FAIL** | `first = values.find(s ≠ WILD) ?? 'WILD'`. A line `WILD WILD WILD SCATTER …` → `first = SCATTER` → `continue`, so the WILD-only win (20× paytable entry) is silently dropped, while `WILD WILD WILD KEY KEY` pays as KEY only, never `max(WILD, KEY)`. Rule incomplete / inconsistent. | `evaluate.ts` | WILD no longer pays by itself; substitution rule specified and tested |
+| 5 | Cap | **FAIL** | Max win 5000× is clipped **per spin only**; the free-spin feature total and the bonus are not capped, so "max win 5000×" is not enforced for a round. `capped` flag is per spin. | `evaluate.ts`, `engine/game.ts` | Cap per *round* (trigger + chest + free spins) in `SlotGame.credit` |
+| 6 | Free spins | **UNVERIFIED→FAIL** | FS used the same strips and an ad-hoc ×2 wild; their contribution to RTP was never computed; the retrigger arithmetic (`min(add, 30−featureAwarded)`) is correct but untested at the cap. | `engine/game.ts` | Exact Markov expectation + test at the cap |
+| 7 | Chest bonus | **FAIL** | Prizes are fixed TEST values `[5,20,10]` (`bonus/provider.ts`), the pick is a pure animation, the adapter is `PreviewAdapter` that never touches the balance, and nothing in the math triggers it. The bonus was not connected to the engine at all. | `provider.ts`, `bonusOverlay.ts` | Engine-committed prize sets, real credit, RTP share computed |
+| 8 | RNG | **FAIL** (sim) / **PASS-with-caveat** (prod) | `SeededRng` is a 32-bit LCG (`1664525·x+1013904223`): period 2³², weak low bits — unacceptable for 10⁸-spin proofs. `Math.floor(rng.next()*len)` has a (tiny) modulo-like bias; `CryptoRng` is OK in kind but not rejection-sampled. No adaptive manipulation found: outcomes depend only on the RNG (checked in `generateOutcome`). | `math/rng.ts`, `math/slot.ts` | sfc32 sim RNG; rejection-sampled `int(n)` for both sources; chi-square test |
+| 9 | Double credit | **PASS** | `settle()` is guarded by `phase==='spinning'` and `last`; a second call throws. However `last` stays set after settle (relied on phase only), and there was no snapshot/restore story. | `engine/game.ts`; old test `rejects a second settlement…` | Added `pendingSettled` flag + snapshot/restore tests |
+| 10 | Money units | **FAIL** | Bets `[20,50,100,200,500]` cents; `totalMultiplier` is a float (`0.5`-style possible) × bet. With bet 50 and per-line fractions rounding could occur; no integer proof. | `config/game.ts` | Line-bet units; every bet is a multiple of 20 ¢ — no rounding anywhere |
+| 11 | Unreachable / unanalysed states | **UNVERIFIED** | Reachability and probability of the 5000× cap were never analysed (old full-wild screen = 20 × 100 = 2000× in base, 4000× with the free-spin ×2, so the cap depended on extreme-rarity events nobody quantified). | `evaluate.ts` arithmetic | Cap redesigned as a round limit; probability bound computed (`RTP_VALIDATION_V2.md`) |
+| 12 | Graphics ≠ math | **FAIL** | Free-spin intro, banner tiers (`tierFor`: ≥5×, ≥15×, ≥50×, ≥200×) and the Skull reactions were driven by the multiple of *total bet* per spin, celebrating returns below the stake as wins. Chest bonus visuals were not linked to math (item 7). | `config/presentation.ts`, `view.ts:present` | Tiers re-based on net result vs bet; sub-bet returns not celebrated |
+| 13 | Tests | **FAIL** | 5 math tests: reproducibility, one wild case, scatter count, single deduction, cap ≤ 5000. No payline-by-payline test, no independent evaluator, no RTP test, no retrigger/cap/chest/persistence tests. `scripts/simulate.ts` printed base RTP from a 32-bit LCG only. | `tests/math.test.ts` | `tests/math-v2.test.ts`, `tests/engine-v2.test.ts` (+ exact & Monte Carlo tooling) |
+| 14 | Provable RTP | **FAIL** | None. Base game could have been enumerated (111⁵ ≈ 1.7·10¹⁰) but was not; features were never modelled. | — | `tools/math/exact.ts`, `enumerate.ts`, `simulate.ts` |
+
+## Items checked and found sound
+- 20 payline definitions are distinct and in range (**PASS**, now a unit test).
+- Scatter counted over all 15 cells (**PASS**).
+- Debit of the bet happens once and only for paid spins (**PASS**); blocking of concurrent `spin()` (**PASS**).
+- Outcome generation is memory-less: no use of balance, bet, history or timing (**PASS**).
+
+## Residual UNVERIFIED items after remediation
+See `PROVIDER_READINESS.md`: independent lab certification, RGS integration, regulatory constraints per market, practical reachability of the 5000× cap (reachable in theory only; `RTP_VALIDATION_V2.md` §Max win).

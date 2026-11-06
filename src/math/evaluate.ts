@@ -1,6 +1,1 @@
-import { MAX_WIN_MULTIPLIER, paylines, paytable, type SymbolId } from '../config/game';
-export type Grid = SymbolId[][];
-export interface Evaluation { lineWins:{line:number,symbol:SymbolId,count:number,amount:number}[]; scatterCount:number; scatterAmount:number; totalMultiplier:number; capped:boolean; }
-export function evaluate(grid: Grid, freeSpins=false): Evaluation { let total=0, scatterCount=0; const lineWins=[] as Evaluation['lineWins']; for(const col of grid) for(const s of col) if(s==='SCATTER') scatterCount++;
- for(let l=0;l<paylines.length;l++){ const line=paylines[l]; const values:SymbolId[]=line.map((row,col)=>grid[col]![row]!); const first:SymbolId=values.find(s=>s!=='WILD') ?? 'WILD'; if(first==='SCATTER') continue; let count=0; for(const s of values){if(s===first||s==='WILD') count++; else break;} const base=paytable[first][count] ?? 0; if(base){ const multiplier=freeSpins && values.slice(0,count).includes('WILD') ? 2 : 1; const amount=base*multiplier; total+=amount; lineWins.push({line:l+1,symbol:first,count,amount}); }}
- const scatterAmount=paytable.SCATTER[scatterCount] ?? 0; total+=scatterAmount; const capped=Math.min(total,MAX_WIN_MULTIPLIER); return {lineWins,scatterCount,scatterAmount,totalMultiplier:capped,capped:total!==capped}; }
+export {evaluate,type Evaluation,type Grid} from './v2/evaluate';

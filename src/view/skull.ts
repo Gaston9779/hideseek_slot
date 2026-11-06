@@ -1,7 +1,7 @@
 import * as T from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {RoomEnvironment} from 'three/examples/jsm/environments/RoomEnvironment.js';
-import {MascotController,type SkullState} from '../animation/mascot';
+import {MascotController,type SkullEvent,type SkullState} from '../animation/mascot';
 import {SKULL} from '../layout';
 
 /** The real rigged Skull GLB in a transparent WebGL canvas, lit to match the 2D scene (warm lantern key, violet moon rim). */
@@ -22,12 +22,16 @@ export async function createSkull(canvas:HTMLCanvasElement,glbUrl:string,renderS
  // soft contact shadow (camera-facing, behind the feet)
  const sc=document.createElement('canvas');sc.width=256;sc.height=64;{const g=sc.getContext('2d')!;const r=g.createRadialGradient(128,32,4,128,32,128);r.addColorStop(0,'rgba(8,2,20,.7)');r.addColorStop(1,'rgba(8,2,20,0)');g.save();g.scale(1,.26);g.fillStyle=r;g.fillRect(0,0,256,246);g.restore();}
  const shadow=new T.Mesh(new T.PlaneGeometry(height*1.0,height*.26),new T.MeshBasicMaterial({map:new T.CanvasTexture(sc),transparent:true,depthWrite:false}));shadow.position.set(base.x,base.y+4,-300);scene.add(shadow);
+ const pulseColor=new T.Color('#ff8f4a');let pulseK=0;const fillBase=new T.Color('#ff8f4a');
  let hop=0,elapsed=0,raf=0,last=performance.now(),running=true;const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  function resize(){const s=renderScale();renderer.setPixelRatio(1);renderer.setSize(w*s,h*s,false);}
  resize();
  function tick(now:number){if(!running)return;raf=requestAnimationFrame(tick);const dt=Math.min((now-last)/1000,.05);last=now;elapsed+=dt;controller.update(dt);
+  // dynamic light: the lantern key flickers in sync with the 2D lamps (same frequencies as the atmosphere layer); result-driven colour pulse on the fill light
+  const fl=reduced?0:.06*Math.sin(elapsed*9)*Math.sin(elapsed*3.1)+.03*Math.sin(elapsed*17);key.intensity=3.1*(1+fl);pulseK=Math.max(0,pulseK-dt*1.1);fill.color.copy(fillBase).lerp(pulseColor,Math.min(1,pulseK));fill.intensity=.8+pulseK*2.4;rim.intensity=3.2+pulseK*1.2;
   if(hop>0){hop=Math.max(0,hop-dt);const k=1-hop/1.2;root.position.y=base.y+Math.abs(Math.sin(k*Math.PI*3))*(reduced?0:height*.04)*(1-k*.4);}else root.position.y=base.y+Math.sin(elapsed*1.8)*(reduced?0:height*.004);
   root.scale.y=1+Math.sin(elapsed*1.8)*(reduced?0:.006);renderer.render(scene,cam);}
+ function pulse(e:SkullEvent){if(reduced)return;const m:Partial<Record<SkullEvent,[string,number]>>={WIN:['#ffd36a',.7],BIG_WIN:['#ffe08a',1.3],BONUS_TRIGGER:['#c06cff',1.1],BEST_CHEST_PICK:['#ffe08a',1.3]};const v=m[e];if(!v)return;pulseColor.set(v[0]);pulseK=v[1];}
  raf=requestAnimationFrame(tick);
- return {controller,resize,set(state:SkullState){controller.setState(state);if(state==='bigwin')hop=1.2;},inspect:()=>controller.inspect(),dispose(){running=false;cancelAnimationFrame(raf);renderer.dispose();}};
+ return {controller,resize,set(state:SkullState){controller.setState(state);if(state==='bigwin')hop=1.2;},dispatch(e:SkullEvent,o?:{freeSpin?:boolean}){controller.dispatch(e,o);if(e==='BIG_WIN'||e==='BEST_CHEST_PICK')hop=1.2;pulse(e);},inspect:()=>controller.inspect(),dispose(){running=false;cancelAnimationFrame(raf);renderer.dispose();}};
 }

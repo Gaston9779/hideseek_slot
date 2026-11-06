@@ -110,3 +110,5 @@ dialog small,.fine{color:#bda4c3}
 #bonus-loading{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font:700 calc(30px*var(--k)) var(--ui);color:#ffe2a8}
 #bonus-badge{position:absolute;left:50%;top:calc(2px*var(--k));transform:translate(-50%,-100%);padding:6px 22px;border-radius:20px;font:700 17px var(--ui);letter-spacing:.14em;background:#2a1048;border:2px solid #ffc457;color:#ffe2a8;white-space:nowrap}
 #bonus-close{position:absolute;right:calc(20px*var(--k));top:calc(40px*var(--k));width:calc(60px*var(--k));height:calc(60px*var(--k));border-radius:50%;border:3px solid #ffc457;background:#2a1048;font-size:calc(36px*var(--k));line-height:1;color:#ffe2a8;cursor:pointer}
+/* real (engine-driven) chest round: no preview badge, no way to abandon the pick */
+#bonus-overlay.real #bonus-badge,#bonus-overlay.real #bonus-close{display:none}

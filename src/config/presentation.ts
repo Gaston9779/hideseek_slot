@@ -1,12 +1,13 @@
-/** Presentation-only configuration: win tiers (multiples of total bet) used purely to pick a celebration. */
-export const WIN_TIERS = { medium: 5, big: 15, mega: 50, max: 200 } as const;
+/** Presentation tiers derived ONLY from the real credited amount relative to the round's bet (never invented by animation).
+ *  none = loss · small = positive return not above the bet (a net loss: no celebration) · medium = net win · big ≥20× · mega ≥100× · max = round win cap reached. */
+export const WIN_TIERS = { big: 20, mega: 100 } as const;
 export type WinTier = 'none' | 'small' | 'medium' | 'big' | 'mega' | 'max';
 export function tierFor(multiplier: number, capped = false): WinTier {
   if (multiplier <= 0) return 'none';
-  if (capped || multiplier >= WIN_TIERS.max) return 'max';
+  if (capped) return 'max';
   if (multiplier >= WIN_TIERS.mega) return 'mega';
   if (multiplier >= WIN_TIERS.big) return 'big';
-  if (multiplier >= WIN_TIERS.medium) return 'medium';
+  if (multiplier > 1) return 'medium';
   return 'small';
 }
 /** Symbol-art mapping. Math IDs and payouts are untouched; only the artwork shown per ID is chosen here. */

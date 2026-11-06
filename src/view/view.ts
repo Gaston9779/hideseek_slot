@@ -62,8 +62,8 @@ export async function createView(onProgress:(s:string)=>void){
  const backdrop=$('#backdrop'),fsOverlay=$('#fs-overlay'),bonusOverlay=$('#bonus-overlay'),banner=$('#bigwin'),flash=$('#flash');
  const fsImg=$<HTMLImageElement>('#fs-img');fsImg.src=urls.freeSpins;{const w=OVERLAY.freeSpins.w,h=w*941/1672;place(fsOverlay,OVERLAY.freeSpins.cx-w/2,OVERLAY.freeSpins.cy-h/2,w,h);}
  const bonusImg=$<HTMLImageElement>('#bonus-img');bonusImg.src=urls.bonus;{const w=OVERLAY.bonus.w,h=w*BONUS_IMG.h/BONUS_IMG.w;place(bonusOverlay,OVERLAY.bonus.cx-w/2,OVERLAY.bonus.cy-h/2,w,h);bonusOverlay.style.setProperty('--k',String(w/BONUS_IMG.w));}
- const bonus=createBonusOverlay({root:bonusOverlay,chestUrl:`${import.meta.env.BASE_URL}bonus-chest/bonus-chest-animated.glb`,skullUrl:`${import.meta.env.BASE_URL}assets/scenery/Skull_Horned_Creature_Rigged.glb`,renderScale:()=>rs()*OVERLAY.bonus.w/BONUS_IMG.w,reduced,onClosed:()=>{backdrop.classList.remove('on');skull!.set('idle');},burst:()=>{if(!reduced)fx.emit(DESIGN.w/2,420,'#ffd36a',40,420,40,{gravity:120});}});
- let bannerTimer=0,fsResolve:(()=>void)|undefined;
+ const bonus=createBonusOverlay({root:bonusOverlay,chestUrl:`${import.meta.env.BASE_URL}bonus-chest/bonus-chest-animated.glb`,skullUrl:`${import.meta.env.BASE_URL}assets/scenery/Skull_Horned_Creature_Rigged.glb`,renderScale:()=>rs()*OVERLAY.bonus.w/BONUS_IMG.w,reduced,onClosed:()=>{backdrop.classList.remove('on');skull!.set('idle');const r=chestClosed;chestClosed=undefined;r?.();},burst:()=>{if(!reduced)fx.emit(DESIGN.w/2,420,'#ffd36a',40,420,40,{gravity:120});}});
+ let chestClosed:(()=>void)|undefined;let bannerTimer=0,fsResolve:(()=>void)|undefined;
  const api={
   reels,skull:skull!,
   async spin(outcome:Outcome){hideBanner();skull!.set('watch');await reels.spin(outcome);},
@@ -71,7 +71,8 @@ export async function createView(onProgress:(s:string)=>void){
   present(outcome:Outcome,tier:WinTier,cents:number,fmt:(c:number)=>string){
    reels.present(outcome,tier);
    const scatterFeature=outcome.evaluation.scatterCount>=3;
-   skull!.set(tier==='none'?(scatterFeature?'bonus':'idle'):tier==='small'||tier==='medium'?'win':'bigwin');
+   if(scatterFeature)skull!.dispatch('BONUS_TRIGGER');else if(tier==='none')skull!.dispatch('SPIN_LOSS',{freeSpin:outcome.mode==='free'});else if(tier==='small')skull!.dispatch('IDLE');   // positive return ≤ bet is a net loss: no celebration
+   else if(tier==='medium')skull!.dispatch('WIN');else skull!.dispatch('BIG_WIN');
    if(tier==='medium'||tier==='big'||tier==='mega'||tier==='max'){burst(tier);}
    if(tier==='big'||tier==='mega'||tier==='max')showBanner(tier,cents,fmt);
   },
@@ -84,7 +85,9 @@ export async function createView(onProgress:(s:string)=>void){
     const key=(e:KeyboardEvent)=>{if(e.code==='Space'||e.code==='Enter'||e.code==='Escape'){e.preventDefault();e.stopImmediatePropagation();close();}};
     const t=setTimeout(close,reduced?1500:2900);addEventListener('keydown',key,true);fsOverlay.addEventListener('pointerdown',close);});
   },
-  showBonusPreview(){backdrop.classList.add('on');void bonus.open();},
+  showBonusPreview(){bonus.usePreview();backdrop.classList.add('on');void bonus.open();},
+  /** Real chest round from the math engine. Resolves when the player has picked, the reveal finished and the overlay was closed. */
+  playChestBonus(provider:{nextRound():import('../bonus/controller').ChestBonusRound},adapter:{award(id:string,prize:number):boolean}){bonus.useReal(provider,adapter);backdrop.classList.add('on');return new Promise<void>(res=>{chestClosed=res;void bonus.open();});},
   hideBonusPreview(){bonus.close();},
   bonus,
   inspect(){return {skull:skull!.inspect(),grid:reels.grid,spinning:reels.isSpinning,scale,renderScale:rs(),fxParticles:fx.count,winCells:reels.activeWinCells};},
@@ -95,8 +98,8 @@ export async function createView(onProgress:(s:string)=>void){
  function hideBanner(){clearTimeout(bannerTimer);banner.classList.remove('show');banner.style.animation='';banner.style.opacity='';banner.style.scale='';shower=0;}
  function showBanner(tier:WinTier,cents:number,fmt:(c:number)=>string){const title={big:'BIG WIN',mega:'MEGA WIN',max:'MAX WIN'}[tier as 'big']!;banner.dataset.tier=tier;banner.querySelector('h2')!.textContent=title;const p=banner.querySelector<HTMLElement>('p')!;const ms=reduced?0:1500;const t0=performance.now();const step=(now:number)=>{const k=ms?Math.min(1,(now-t0)/ms):1;p.textContent=fmt(Math.round(cents*(1-Math.pow(1-k,3))));if(k<1&&banner.classList.contains('show'))requestAnimationFrame(step);};
   banner.classList.remove('show');void banner.offsetWidth;banner.classList.add('show');requestAnimationFrame(step);if(!new URLSearchParams(location.search).has('hold'))bannerTimer=window.setTimeout(()=>banner.classList.remove('show'),tier==='big'?2800:tier==='mega'?3400:4200);else banner.style.animation='none',banner.style.opacity='1',banner.style.scale='1';}
- $('#bonus-close').onclick=()=>bonus.close();
- addEventListener('keydown',e=>{if(!bonus.isOpen)return;if(e.code==='Escape')bonus.close();else if(['Digit1','Digit2','Digit3'].includes(e.code))bonus.pick(+e.code.slice(-1)-1);});
+ $('#bonus-close').onclick=()=>{if(!bonus.isReal)bonus.close();};
+ addEventListener('keydown',e=>{if(!bonus.isOpen)return;if(e.code==='Escape'){if(!bonus.isReal)bonus.close();}else if(['Digit1','Digit2','Digit3'].includes(e.code))bonus.pick(+e.code.slice(-1)-1);});
  return api;
 }
 export type View=Awaited<ReturnType<typeof createView>>;

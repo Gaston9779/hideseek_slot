@@ -1,0 +1,24 @@
+.cine{position:absolute;inset:0;z-index:30;background:#000;opacity:0;transition:opacity .25s;display:grid;place-items:center;touch-action:manipulation}
+.cine[hidden]{display:none}
+.cine.on{opacity:1}
+.cine-video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;opacity:0;transition:opacity .2s}
+.cine.playing .cine-video{opacity:1}
+/* poster shows first frame until the video really plays */
+.cine:not(.playing) .cine-video{opacity:1}
+.cine-skip,.cine-play{position:absolute;font:900 16px/1 var(--ui,system-ui,sans-serif);letter-spacing:.14em;color:#fff6dc;cursor:pointer;border:2px solid #ffc457;background:#2a1048d9;border-radius:999px;min-height:46px;min-width:46px;padding:0 24px}
+.cine-skip{right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom))}
+.cine-play{left:50%;top:50%;transform:translate(-50%,-50%);font-size:20px;padding:0 32px;min-height:56px;background:linear-gradient(#ff9a2a,#c2470a)}
+.cine-skip:hover,.cine-skip:focus-visible,.cine-play:hover,.cine-play:focus-visible{outline:3px solid #fff;outline-offset:2px}
+/* ---- exit transition ---- */
+.cine{--cine-fade:480ms}
+.cine:not(.on){pointer-events:none}
+.cine.out{opacity:0;transition:opacity var(--cine-fade) cubic-bezier(.4,0,.2,1)}
+.cine-video{transition:opacity .2s,filter .42s ease-out}
+.cine.prep .cine-video{filter:brightness(1.18) saturate(1.08)}          /* gentle lift, never blinding */
+.cine-flash{position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(ellipse at 50% 50%,#ffe9a8f0 0%,#c06cffb0 38%,#c06cff00 75%)}
+.cine.flash .cine-flash{animation:cineFlash .34s ease-out 1}               /* single pulse, peak 0.5 */
+@keyframes cineFlash{0%{opacity:0}35%{opacity:.5}100%{opacity:0}}
+.cine-fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.cine.out .cine-fx,.cine.out .cine-flash{transition:opacity .2s;opacity:0}
+.cine.out .cine-skip{opacity:0;transition:opacity .15s}
+@media (prefers-reduced-motion:reduce){.cine,.cine-video{transition:opacity .2s}.cine.prep .cine-video{filter:none}.cine-flash,.cine-fx{display:none}}

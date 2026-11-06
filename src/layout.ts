@@ -40,7 +40,11 @@ export const HUD = {
 };
 
 /** Real 3D Skull gets a bounded transparent canvas on the left foreground. */
-export const SKULL_ANCHOR = { x: 420, y: 831 };   // where the feet touch the stone (design px)
-export const SKULL = { w: 400, h: 400, height: 190, foot: 40, x: SKULL_ANCHOR.x - 200, y: SKULL_ANCHOR.y - (400 - 40) };
+export const SKULL_ANCHOR = { x: 405, y: 831 };   // where the feet touch the stone (design px)
+/** Skull scale: previous configured height was 190 design px; v2 enlarges the character ×1.5 (newScale = currentScale × 1.5). The canvas grows with it so nothing is clipped;
+ *  feet stay on SKULL_ANCHOR (the model is normalised from its real bounding box: min.y → ground, x/z centre → pivot). */
+export const SKULL_BASE_HEIGHT = 190, SKULL_SCALE = 1.5;
+const SK_W = 600, SK_H = 600, SK_FOOT = 60;
+export const SKULL = { w: SK_W, h: SK_H, height: SKULL_BASE_HEIGHT * SKULL_SCALE, foot: SK_FOOT, x: SKULL_ANCHOR.x - SK_W / 2, y: SKULL_ANCHOR.y - (SK_H - SK_FOOT) };
 
 export const OVERLAY = { bonus: { cx: 960, cy: 548, w: 1380 }, freeSpins: { cx: 960, cy: 500, w: 1380 } };
