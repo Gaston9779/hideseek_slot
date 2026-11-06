@@ -1,0 +1,74 @@
+{
+  "schema": "skull-hunt-v5-theoretical-precap-1",
+  "mathVersion": "4.1.0",
+  "method": "exact reel-count enumeration for per-spin EV/trigger probabilities plus finite acyclic Markov reward DP for V5 feature state; numerical DP only (no Monte Carlo)",
+  "assumption": "round cap excluded",
+  "perSpin": {
+    "baseLineEV": 0.5491711133056216,
+    "baseScatterEV": 0.028026401996612556,
+    "featureLineEV": 3.8063141269448364,
+    "featureScatterEV": 0.02802640199661255,
+    "featureEV": 3.834340528941449
+  },
+  "triggers": {
+    "scatter": 0.007124483585357666,
+    "chest": 0.00029104948043823237,
+    "dual": 0.00010652453811080368
+  },
+  "features": {
+    "scatter": {
+      "initial12": {
+        "spins": 12.502497424651176,
+        "one": 12.472194605835133,
+        "two": 0.015151409408024374,
+        "five": 0.015151409408024374
+      },
+      "value": 48.22931090414498,
+      "initial15": {
+        "spins": 15.627569960807548,
+        "one": 15.589696745905146,
+        "two": 0.018936607451195922,
+        "five": 0.018936607451195922
+      },
+      "value15": 60.284471876746146,
+      "initial20": {
+        "spins": 20.826284674500428,
+        "one": 20.77588758649483,
+        "two": 0.025198544002787142,
+        "five": 0.025198544002787142
+      },
+      "value20": 80.33816638741008
+    },
+    "chest": {
+      "x1": {
+        "spins": 12.581772170508929,
+        "one": 12.581772170508929,
+        "two": 0,
+        "five": 0
+      },
+      "value1": 48.242798959290006,
+      "x2": {
+        "spins": 12.581772170508929,
+        "one": 0,
+        "two": 12.581772170508929,
+        "five": 0
+      },
+      "value2": 96.48559791858001,
+      "x5": {
+        "spins": 12.581772170508929,
+        "one": 0,
+        "two": 0,
+        "five": 12.581772170508929
+      },
+      "value5": 241.21399479645004,
+      "averageValue": 128.64746389144003
+    }
+  },
+  "rtp": {
+    "baseLines": 0.5491711133056216,
+    "baseScatter": 0.028026401996612556,
+    "scatterFeature": 0.3480611122735955,
+    "chestFeature": 0.037442777525299877,
+    "totalPreCap": 0.9627014051011296
+  }
+}
