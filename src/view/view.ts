@@ -1,6 +1,7 @@
 import type {SymbolId} from '../config/game';
 import type {Outcome} from '../math/slot';
 import type {WinTier} from '../config/presentation';
+import {createBonusOverlay} from '../bonus/bonusOverlay';import {BONUS_IMG} from '../bonus/bonusLayout';
 import {BG,DESIGN,FRAME,HUD,LOGO,OVERLAY,PANEL,SKULL,CELLS,PLAY_AREA} from '../layout';
 import {loadImage,loadSymbolImages,urls} from './assets';
 import {Reels} from './reels';
@@ -60,7 +61,8 @@ export async function createView(onProgress:(s:string)=>void){
  // ---- overlays
  const backdrop=$('#backdrop'),fsOverlay=$('#fs-overlay'),bonusOverlay=$('#bonus-overlay'),banner=$('#bigwin'),flash=$('#flash');
  const fsImg=$<HTMLImageElement>('#fs-img');fsImg.src=urls.freeSpins;{const w=OVERLAY.freeSpins.w,h=w*941/1672;place(fsOverlay,OVERLAY.freeSpins.cx-w/2,OVERLAY.freeSpins.cy-h/2,w,h);}
- const bonusImg=$<HTMLImageElement>('#bonus-img');bonusImg.src=urls.bonus;{const w=OVERLAY.bonus.w,h=w*941/1672;place(bonusOverlay,OVERLAY.bonus.cx-w/2,OVERLAY.bonus.cy-h/2,w,h);bonusOverlay.style.setProperty('--k',String(w/1672));}
+ const bonusImg=$<HTMLImageElement>('#bonus-img');bonusImg.src=urls.bonus;{const w=OVERLAY.bonus.w,h=w*BONUS_IMG.h/BONUS_IMG.w;place(bonusOverlay,OVERLAY.bonus.cx-w/2,OVERLAY.bonus.cy-h/2,w,h);bonusOverlay.style.setProperty('--k',String(w/BONUS_IMG.w));}
+ const bonus=createBonusOverlay({root:bonusOverlay,chestUrl:`${import.meta.env.BASE_URL}bonus-chest/bonus-chest-animated.glb`,skullUrl:`${import.meta.env.BASE_URL}assets/scenery/Skull_Horned_Creature_Rigged.glb`,renderScale:()=>rs()*OVERLAY.bonus.w/BONUS_IMG.w,reduced,onClosed:()=>{backdrop.classList.remove('on');skull!.set('idle');},burst:()=>{if(!reduced)fx.emit(DESIGN.w/2,420,'#ffd36a',40,420,40,{gravity:120});}});
  let bannerTimer=0,fsResolve:(()=>void)|undefined;
  const api={
   reels,skull:skull!,
@@ -82,8 +84,9 @@ export async function createView(onProgress:(s:string)=>void){
     const key=(e:KeyboardEvent)=>{if(e.code==='Space'||e.code==='Enter'||e.code==='Escape'){e.preventDefault();e.stopImmediatePropagation();close();}};
     const t=setTimeout(close,reduced?1500:2900);addEventListener('keydown',key,true);fsOverlay.addEventListener('pointerdown',close);});
   },
-  showBonusPreview(){backdrop.classList.add('on');bonusOverlay.classList.add('show');bonusOverlay.querySelector<HTMLElement>('.crate')?.focus();skull!.set('bonus');},
-  hideBonusPreview(){backdrop.classList.remove('on');bonusOverlay.classList.remove('show');$('#bonus-note').textContent='Pick a crate (visual preview — no prize is awarded)';},
+  showBonusPreview(){backdrop.classList.add('on');void bonus.open();},
+  hideBonusPreview(){bonus.close();},
+  bonus,
   inspect(){return {skull:skull!.inspect(),grid:reels.grid,spinning:reels.isSpinning,scale,renderScale:rs(),fxParticles:fx.count,winCells:reels.activeWinCells};},
   dispose(){cancelAnimationFrame(raf);skull!.dispose();},
  };
@@ -92,9 +95,8 @@ export async function createView(onProgress:(s:string)=>void){
  function hideBanner(){clearTimeout(bannerTimer);banner.classList.remove('show');banner.style.animation='';banner.style.opacity='';banner.style.scale='';shower=0;}
  function showBanner(tier:WinTier,cents:number,fmt:(c:number)=>string){const title={big:'BIG WIN',mega:'MEGA WIN',max:'MAX WIN'}[tier as 'big']!;banner.dataset.tier=tier;banner.querySelector('h2')!.textContent=title;const p=banner.querySelector<HTMLElement>('p')!;const ms=reduced?0:1500;const t0=performance.now();const step=(now:number)=>{const k=ms?Math.min(1,(now-t0)/ms):1;p.textContent=fmt(Math.round(cents*(1-Math.pow(1-k,3))));if(k<1&&banner.classList.contains('show'))requestAnimationFrame(step);};
   banner.classList.remove('show');void banner.offsetWidth;banner.classList.add('show');requestAnimationFrame(step);if(!new URLSearchParams(location.search).has('hold'))bannerTimer=window.setTimeout(()=>banner.classList.remove('show'),tier==='big'?2800:tier==='mega'?3400:4200);else banner.style.animation='none',banner.style.opacity='1',banner.style.scale='1';}
- // bonus preview wiring (visual only)
- bonusOverlay.querySelectorAll<HTMLElement>('.crate').forEach(b=>b.onclick=()=>{b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');$('#bonus-note').textContent='DEVELOPMENT PREVIEW — no prize is awarded';});
- $('#bonus-close').onclick=()=>api.hideBonusPreview();
+ $('#bonus-close').onclick=()=>bonus.close();
+ addEventListener('keydown',e=>{if(!bonus.isOpen)return;if(e.code==='Escape')bonus.close();else if(['Digit1','Digit2','Digit3'].includes(e.code))bonus.pick(+e.code.slice(-1)-1);});
  return api;
 }
 export type View=Awaited<ReturnType<typeof createView>>;

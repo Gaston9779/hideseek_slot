@@ -65,7 +65,8 @@ for c,segs in cutsegs.items():
         cen=np.mean([p[0] for p in loop],0);cuv=np.mean([p[2] for p in loop],0)
         for sidename,ny in (('lid',-1.0),('base',1.0)):
             for i in range(len(loop)):
-                p,q=loop[i],loop[(i+1)%len(loop)];tri=[(cen,np.array([0,ny,0.]),cuv),p and (p[0],np.array([0,ny,0.]),p[2]),(q[0],np.array([0,ny,0.]),q[2])]
+                p,q=loop[i],loop[(i+1)%len(loop)];u0=loop[0][2]   # one flat colour sample per cap (loop vertices can sit in different UV islands)
+                tri=[(cen,np.array([0,ny,0.]),u0),(p[0],np.array([0,ny,0.]),u0),(q[0],np.array([0,ny,0.]),u0)]
                 nrm=np.cross(tri[1][0]-tri[0][0],tri[2][0]-tri[0][0])
                 if nrm[1]*ny<0:tri=[tri[0],tri[2],tri[1]]
                 caps[sidename].append(tri)

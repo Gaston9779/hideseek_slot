@@ -43,4 +43,4 @@ export const HUD = {
 export const SKULL_ANCHOR = { x: 420, y: 831 };   // where the feet touch the stone (design px)
 export const SKULL = { w: 400, h: 400, height: 190, foot: 40, x: SKULL_ANCHOR.x - 200, y: SKULL_ANCHOR.y - (400 - 40) };
 
-export const OVERLAY = { bonus: { cx: 960, cy: 500, w: 1440 }, freeSpins: { cx: 960, cy: 500, w: 1380 } };
+export const OVERLAY = { bonus: { cx: 960, cy: 548, w: 1380 }, freeSpins: { cx: 960, cy: 500, w: 1380 } };

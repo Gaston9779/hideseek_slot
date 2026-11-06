@@ -32,7 +32,7 @@ $('#paytable-content').innerHTML=SYMBOLS.map(s=>`<div><b>${SYMBOL_ART[s].label}<
 async function init(){try{view=await createView(m=>{$('#loading p').textContent=m;});busy=false;update();$('#loading').classList.add('done');status.textContent='THE CRYPT AWAITS · GOOD LUCK';document.body.dataset.ready='true';
  if(query.has('qa')){Object.assign(window,{__SKULL_QA__:{
   demo:async(grid:SymbolId[][],free=0)=>{const evaluation=evaluate(grid);const outcome={stops:[0,0,0,0,0],grid,evaluation};await view.spin(outcome);const cents=evaluation.totalMultiplier*game.bet;const tier=tierFor(evaluation.totalMultiplier,evaluation.capped);view.present(outcome,tier,cents,money);winMeter(cents,tier);if(free)await view.freeSpinsIntro(free,false);},
-  freeIntro:(n:number,re=false)=>view.freeSpinsIntro(n,re),bonus:()=>view.showBonusPreview(),skull:(s:string)=>view.skull.set(s as never),
+  freeIntro:(n:number,re=false)=>view.freeSpinsIntro(n,re),bonus:()=>view.showBonusPreview(),bonusPick:(i:number)=>view.bonus.pick(i),bonusInspect:()=>view.bonus.inspect(),bonusClose:()=>view.hideBonusPreview(),skull:(s:string)=>view.skull.set(s as never),
   inspect:()=>({...view.inspect(),game:{phase:game.phase,balance:game.balance,bet:game.bet,freeSpins:game.freeSpins,last:game.last}}),react:(s:string)=>view.skull.set(s as never)}});}
  }catch(error){$('#loading p').textContent=`Unable to load the crypt: ${error instanceof Error?error.message:'unknown error'}`;console.error(error);}}
 void init();
