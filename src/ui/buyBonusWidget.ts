@@ -1,7 +1,7 @@
 import * as T from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {RoomEnvironment} from 'three/examples/jsm/environments/RoomEnvironment.js';
-import type {BuyBonusAdapter} from '../engine/buyBonus';
+import type {BuyBonusAdapter} from '../engine/buyBonus';import {cue} from '../audio/cues';
 /**
  * BUY BONUS entry point: the original 3D chest (same GLB as the bonus screen) standing on the lower-right plinth, outside the reels and every control.
  * UI only. All gating/pricing comes from the adapter; with the default (disabled) adapter nothing can be bought, no credits move and no RNG is touched.
@@ -33,7 +33,7 @@ export function createBuyBonusWidget(d:BuyWidgetDeps){
  btn.addEventListener('click',()=>{if(btn.disabled||dlg.open||submitting||!d.canOpen())return;refresh();dlg.showModal();cancel.focus();});
  cancel.addEventListener('click',()=>{if(!submitting)dlg.close();});
  okBtn.addEventListener('click',async()=>{if(okBtn.disabled||submitting||!d.canOpen())return;submitting=true;okBtn.disabled=true;cancel.disabled=true;let r;try{r=await d.adapter.purchase();}catch(e){r={ok:false as const,reason:e instanceof Error?e.message:'Acquisto non riuscito'};}
-  if(!r.ok){qs('.bd-note').textContent=r.reason;submitting=false;cancel.disabled=false;refresh();return;}
+  if(!r.ok){cue.error();qs('.bd-note').textContent=r.reason;submitting=false;cancel.disabled=false;refresh();return;}
   dlg.close();try{await d.adapter.afterPurchase?.();}catch(e){console.error('[buy-bonus] accepted purchase follow-up failed',e);}finally{submitting=false;cancel.disabled=false;refresh();}});
  // ---- 3D chest ---------------------------------------------------------------------------------
  let renderer:T.WebGLRenderer|undefined,scene:T.Scene,cam:T.OrthographicCamera,model:T.Group,t=0,hover=0,hoverTarget=0,loadP:Promise<void>|undefined,visible=true;

@@ -34,7 +34,7 @@ export class Reels{
  private win?:Wins;private time=0;private reduced=false;readonly particles=new Particles(260);
  /** 0..1 energy added on big wins (glow intensity of outlines/lines) */
  energy=0;energyTarget=0;
- onLand:(col:number,anyScatter:boolean)=>void=()=>{};onAnticipate:(on:boolean)=>void=()=>{};onSuspense:(e:SuspenseEvent)=>void=()=>{};
+ onLand:(col:number,anyScatter:boolean)=>void=()=>{};onReelStop:(col:number)=>void=()=>{};onAnticipate:(on:boolean)=>void=()=>{};onSuspense:(e:SuspenseEvent)=>void=()=>{};
  private susp={s:0,c:0};private suspT={s:0,c:0};private suspActive={s:false,c:false};private resolveFx={s:-9,c:-9};private sweep?:{t0:number,tone:string};
  constructor(private ctx:CanvasRenderingContext2D,private images:Record<SymbolId,HTMLImageElement>,initial:SymbolId[][]){
   this.grid=initial.map(c=>[...c]);this.cells=initial.map(c=>c.map(id=>({id,landed:-9,win:0 as const})));
@@ -117,7 +117,7 @@ export class Reels{
    this.strips.forEach((st,c)=>{if(st.done)return;allDone=false;const tt=t-c*sp.stag;
     if(tt<=0){st.pos=0;st.speed=0;return;}
     const p=st.plan!.at(tt);st.pos=p.pos;st.speed=p.speed;
-    if(tt>=st.plan!.end){st.done=true;st.pos=st.N;st.speed=0;sp.landedCount++;let sc=false;for(let r=0;r<3;r++){const id=sp.outcome.grid[c][r];const cell=this.cells[c][r];cell.id=id;cell.win=0;cell.landed=this.time;this.grid[c][r]=id;if(id==='SCATTER')sc=true;if(!this.reduced&&(id==='WILD'||id==='SCATTER')){const q=this.center(c,r);this.particles.emit(q.x,q.y,id==='WILD'?'#ffc844':'#d58cff',14,190,34);}}this.onLand(c,sc);this.afterLand(c);}
+    if(tt>=st.plan!.end){st.done=true;st.pos=st.N;st.speed=0;sp.landedCount++;let sc=false;for(let r=0;r<3;r++){const id=sp.outcome.grid[c][r];const cell=this.cells[c][r];cell.id=id;cell.win=0;cell.landed=this.time;this.grid[c][r]=id;if(id==='SCATTER')sc=true;if(!this.reduced&&(id==='WILD'||id==='SCATTER')){const q=this.center(c,r);this.particles.emit(q.x,q.y,id==='WILD'?'#ffc844':'#d58cff',14,190,34);}}this.onLand(c,sc);this.onReelStop(c);this.afterLand(c);}
    });
    if(this.win&&t>REEL_ANIM.carryFadeSec+4*sp.stag+.05){this.win=undefined;this.energyTarget=0;}      // previous round's highlights are fully faded by now
    this.onAnticipate(this.suspActive.s||this.suspActive.c);

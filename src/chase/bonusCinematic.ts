@@ -1,7 +1,7 @@
 import './bonusCinematic.css';
 import {GAME_EVENT_NAME,type GameEvent} from '../engine/events';
 import {FRAME,DESIGN} from '../layout';
-import {urls} from '../view/assets';import {keys} from '../ui/keyboard';
+import {urls} from '../view/assets';import {keys} from '../ui/keyboard';import {cue} from '../audio/cues';
 import type {Chase} from './director';
 /**
  * BonusCinematicController — the single owner of every bonus cinematic. Presentation only: it READS engine events (`skull-hunt:game-event`),
@@ -58,7 +58,7 @@ export function createBonusCinematic(d:BonusCinematicDeps){
  function ending(kind:BonusKind,at:{x:number,y:number},quick:boolean,ev:Pending['ev']){
   const tone:Tone=kind==='FREE_SPINS'?'purple':kind==='CHEST'?'gold':'dual';
   glowFx(tone,quick?600:1100);flashFx(tone,at.x,at.y);burst(tone,at.x,at.y,quick?.6:1);
-  d.skullReact('BONUS_TRIGGER');
+  d.skullReact('BONUS_TRIGGER');cue.trigger(kind);
   if(kind==='DUAL'){const n=(ev as Extract<GameEvent,{type:'DUAL_BONUS_TRIGGERED'}>).awardedSpins;announce.innerHTML=`HIDE &amp; SEEK BONUS<small>+ ${n} FREE SPINS</small>`;announce.className='bc-announce';void announce.offsetWidth;announce.classList.add('show');live.textContent=`Hide and Seek Bonus and ${n} Free Spins`;}
   else live.textContent=kind==='FREE_SPINS'?`${(ev as Extract<GameEvent,{type:'FREE_SPINS_TRIGGERED'}>).awardedSpins} Free Spins`:'Hide and Seek Bonus';
   return kind==='DUAL'?(quick?900:1500):(quick?250:800);
@@ -98,7 +98,7 @@ export function createBonusCinematic(d:BonusCinematicDeps){
  // ---- MAX WIN (standalone: no chest pick involved) -------------------------------------------------
  async function playMaxWin(cents=d.roundWinCents()){
   maxEl.querySelector('p')!.textContent='0.00';maxEl.querySelector('small')!.textContent='5,000× YOUR BET · VIRTUAL CREDITS';maxEl.classList.add('on');d.world.classList.add('bc-max-open');live.textContent=`Max win. ${d.money(cents)} credited`;
-  d.skullReact('BIG_WIN');glowFx('dual',2400);
+  cue.maxWin();d.skullReact('BIG_WIN');glowFx('dual',2400);
   const t0=performance.now(),dur=d.reduced?0:1900,cnt=maxEl.querySelector('p')!;
   const tick=(now:number)=>{const k=dur?Math.min(1,(now-t0)/dur):1;cnt.textContent=d.money(Math.round(cents*(1-Math.pow(1-k,3))));if(k<1&&maxEl.classList.contains('on'))requestAnimationFrame(tick);};requestAnimationFrame(tick);
   await new Promise<void>(res=>{let n=0;const iv=window.setInterval(()=>{if(!d.reduced&&n<8){burst('dual',300+Math.random()*1320,380+Math.random()*260,1.2);n++;}},380);
@@ -118,12 +118,12 @@ export function createBonusCinematic(d:BonusCinematicDeps){
    if(running)return;running=true;
    try{const p=pending;pending=null;if(p)await playIntro(p);if(maxStandalone){maxStandalone=false;await playMaxWin();}}
    catch(e){console.error('[bonus-cinematic]',e);d.chase.abort();skip.hidden=true;}
-   finally{running=false;}
+   finally{running=false;cue.cinematicEnd();}
   },
   /** Called by the chest overlay when it reaches its celebration; returns the banner duration. One call per round (the chest state machine guarantees it). */
   chestCelebration(banner:HTMLElement):number{
    if(maxCoordinated){
-    const cents=d.roundWinCents();banner.innerHTML=`MAX WIN!<span class="mw-cnt">0.00</span>`;const cnt=banner.querySelector('.mw-cnt')!;const t0=performance.now(),dur=d.reduced?0:1800;
+    cue.maxWin();const cents=d.roundWinCents();banner.innerHTML=`MAX WIN!<span class="mw-cnt">0.00</span>`;const cnt=banner.querySelector('.mw-cnt')!;const t0=performance.now(),dur=d.reduced?0:1800;
     const tick=(now:number)=>{const k=dur?Math.min(1,(now-t0)/dur):1;cnt.textContent=d.money(Math.round(cents*(1-Math.pow(1-k,3))));if(k<1)requestAnimationFrame(tick);};requestAnimationFrame(tick);
     glowFx('dual',2600);burst('dual',DESIGN.w/2,380,1.6);window.setTimeout(()=>burst('dual',DESIGN.w/2,420,1.3),700);window.setTimeout(()=>burst('gold',DESIGN.w/2,400,1.2),1500);live.textContent=`Max win. ${d.money(cents)} credited`;return d.reduced?1800:4200;
    }

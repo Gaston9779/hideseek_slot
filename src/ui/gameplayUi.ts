@@ -1,5 +1,5 @@
 import './gameplay.css';
-import {urls} from '../view/assets';import {keys} from './keyboard';
+import {urls} from '../view/assets';import {keys} from './keyboard';import {cue} from '../audio/cues';
 /** Presentation-only widgets: Free Spins HUD, Free Spins summary, Quick Spin control. They display numbers handed in by main.ts from the engine; they compute nothing economic. */
 const mk=(tag:string,cls:string,parent:HTMLElement,html='')=>{const e=document.createElement(tag);e.className=cls;if(html)e.innerHTML=html;parent.appendChild(e);return e as HTMLElement;};
 const wait=(ms:number)=>new Promise<void>(r=>setTimeout(r,ms));
@@ -43,7 +43,7 @@ export function createFsSummary(world:HTMLElement,money:(c:number)=>string,reduc
  return {
   get open(){return open;},
   show(s:FsSummary):Promise<void>{
-   if(open)return Promise.resolve();open=true;shownAt=performance.now();const chest=!!s.chest&&s.kind!=='scatter';
+   if(open)return Promise.resolve();open=true;shownAt=performance.now();cue.bonusComplete();if(s.winCents>0)cue.coinTick();const chest=!!s.chest&&s.kind!=='scatter';
    root.classList.toggle('chest',chest);root.classList.toggle('scatter',!chest);
    spins.textContent=`${s.spins} ${s.spins===1?'GIRO EFFETTUATO':'GIRI EFFETTUATI'}`;
    title.textContent=s.winCents===0?(chest?'CHEST BONUS COMPLETATO · NESSUNA VINCITA':'NESSUNA VINCITA IN QUESTO BONUS'):chest?'CHEST BONUS COMPLETATO':'FREE SPINS COMPLETATI';

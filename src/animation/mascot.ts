@@ -3,6 +3,8 @@ import * as T from 'three';
  * Skull animation state machine. Real clips from the rigged GLB (agree / afraid / angry_01) are blended with
  * procedural bone clips (idle / watch) so the character is never static. Falls back to the first clip if one is missing.
  */
+/** Optional presentation hook (audio voices): called with the state the mascot enters. */
+export const mascotHooks:{onState?:(s:SkullState)=>void}={};
 export type SkullState='idle'|'watch'|'anticipation'|'win'|'bigwin'|'bonus'|'lose';
 /** Gameplay events → states. Emotional feedback is derived from the real credited result only. */
 export type SkullEvent='IDLE'|'SPIN_STARTED'|'SPIN_LOSS'|'WIN'|'BIG_WIN'|'BONUS_TRIGGER'|'BEST_CHEST_PICK'|'BONUS_END';
@@ -22,7 +24,7 @@ export class MascotController {
  setState(name:SkullState){
   const map:Record<SkullState,[string,boolean,number]>={idle:['proc_idle',true,1],watch:['proc_watch',true,1],anticipation:['afraid',false,1],win:['agree',false,1],bigwin:['agree',false,1.35],bonus:['agree',false,1.6],lose:['angry_01',false,1.7]};
   const [clipName,loop,speed]=map[name];const clip=this.find(clipName)??this.find('proc_idle')??this.clips[0];if(!clip)return;
-  this.state=name;this.activeClip=clip.name;this.remaining=loop?0:clip.duration/speed;this.play(clip,loop,speed);
+  mascotHooks.onState?.(name);this.state=name;this.activeClip=clip.name;this.remaining=loop?0:clip.duration/speed;this.play(clip,loop,speed);
  }
  /** Event entry point. SPIN_LOSS plays 'angry_01' (short, cartoon) on the 1st and then every ANGRY_EVERY-th consecutive full loss; otherwise idle. Any other event resets the streak. */
  dispatch(e:SkullEvent,opts:{freeSpin?:boolean}={}){if(e==='SPIN_LOSS'){const show=!opts.freeSpin&&this.lossStreak%ANGRY_EVERY===0;if(!opts.freeSpin)this.lossStreak++;this.setState(show?'lose':'idle');return;}if(e==='WIN'||e==='BIG_WIN'||e==='BONUS_TRIGGER'||e==='BEST_CHEST_PICK')this.lossStreak=0;this.setState(EVENT_STATE[e]);}

@@ -79,3 +79,14 @@ describe('win celebration thresholds are central and economic',()=>{
   expect(tierFor(WIN_TIERS.big-.01)).toBe('medium');expect(tierFor(WIN_TIERS.big)).toBe('big');expect(tierFor(WIN_TIERS.mega)).toBe('mega');expect(tierFor(3,true)).toBe('max');
  });
 });
+describe('V5 symbol sheet integration',()=>{
+ it('13 symbols: 3 special + 10 ordinary, each with its own art; retired art files are gone',()=>{
+  expect(SYMBOLS).toHaveLength(13);const special=['WILD','SCATTER','CHEST_BONUS'];expect(SYMBOLS.filter(s=>!special.includes(s))).toHaveLength(10);
+  expect(SYMBOL_ART.BLASTER!.file).toBe('grail');expect(SYMBOL_ART.CHEST!.file).toBe('hourglass');expect(SYMBOL_ART.TOMB!.file).toBe('tombstone');
+  for(const old of ['chest','ghost-tomb','book'])expect(existsSync(`assets-2d/symbols/exported/${old}.png`),old).toBe(false);
+  for(const f of ['grail','hourglass','chest-bonus'])expect(existsSync(`assets-2d/symbols/exported/${f}.png`),f).toBe(true);
+ });
+ it('displayed names match the images (Magic Book, Skull Coin, Skull Key, Potion, Skull Ghost, Skull Lantern, Gargoyle, Tombstone, Sacred Grail, Skull Hourglass, Wild, Scatter, Chest Bonus)',()=>{
+  expect(SYMBOLS.map(s=>SYMBOL_ART[s]!.label).sort()).toEqual(['Chest Bonus','Gargoyle','Magic Book','Potion','Sacred Grail','Scatter','Skull Coin','Skull Ghost','Skull Hourglass','Skull Key','Skull Lantern','Tombstone','Wild']);
+ });
+});

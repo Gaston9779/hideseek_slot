@@ -3,7 +3,7 @@ import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {RoomEnvironment} from 'three/examples/jsm/environments/RoomEnvironment.js';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
 import {DESIGN,FRAME,HUD,PANEL,SKULL,SKULL_ANCHOR} from '../layout';
-import {CHASE,HOLO_INTRO_TOTAL} from '../config/chase';import {HologramMaterialization,HoloBeamFx,introState} from './hologram';
+import {CHASE,HOLO_INTRO,HOLO_INTRO_TOTAL} from '../config/chase';import {cue} from '../audio/cues';import {HologramMaterialization,HoloBeamFx,introState} from './hologram';
 import {RigPoser} from './rigPose';
 import * as P from './poses';
 /**
@@ -170,8 +170,14 @@ export function createChase(d:{world:HTMLElement,skullCanvas:HTMLCanvasElement,r
    drive(seeker,SEEKER,time,false);}
  }
  function driveSkullAt(time:number){drive(skull,SKULLSEG,time<0?.05+(time+HOLO_INTRO_TOTAL)*.5:time,true);}   // idles on its plinth while the Seeker arrives
+ /** Sound cues on the REAL phases of the chase (no timers of their own: they follow the same clock, skip/abort stops them). */
+ const aud=new Set<string>();
+ function audioMarks(){const once=(k:string,at:number,fn:()=>void)=>{if(t>=at&&!aud.has(k)){aud.add(k);fn();}};
+  once('beam',-HOLO_INTRO_TOTAL,()=>cue.hologramBeam());once('land',-HOLO_INTRO.land,()=>cue.skullLand());
+  once('look',.5,()=>cue.voice('searching'));once('scared',1.5,()=>cue.voice('scared'));
+  once('run',2.5,()=>cue.skullRun(true));once('runOff',6.0,()=>cue.skullRun(false));once('fall',TUMBLE.t0,()=>cue.skullFall());}
  function marks(){const at={crateDrop:{x:CRATE_X,y:YF-20},impact:{x:CRATE_X-30,y:YF-70},skullHome:{x:HOME.x,y:HOME.y-120}};for(const k of Object.keys(CHASE_MARKS) as ChaseMark[])if(!fired.has(k)&&t>=CHASE_MARKS[k]){fired.add(k);opts.onMark?.(k,at[k]);}}
- function end(ok:boolean){running=false;holo.end();beamFx?.setVisible(false);if(crate)crate.visible=false;scrubbing=false;canvas.style.visibility='hidden';d.skullCanvas.style.visibility='';skull?.setVisible(false);seeker?.setVisible(false);for(const a of [skull,seeker]){a?.poser.reset();a?.alert?.stop();a?.mixer?.stopAllAction();}alertStarted=false;alertFaded=false;const r=resolveRun;resolveRun=undefined;r?.(ok);}
+ function end(ok:boolean){running=false;aud.clear();if(!ok)cue.cinematicAbort();holo.end();beamFx?.setVisible(false);if(crate)crate.visible=false;scrubbing=false;canvas.style.visibility='hidden';d.skullCanvas.style.visibility='';skull?.setVisible(false);seeker?.setVisible(false);for(const a of [skull,seeker]){a?.poser.reset();a?.alert?.stop();a?.mixer?.stopAllAction();}alertStarted=false;alertFaded=false;const r=resolveRun;resolveRun=undefined;r?.(ok);}
  const api:Chase={
   ready(){if(!loading)loading=load().catch(e=>{console.error('[chase] load failed',e);loading=undefined;});return loading;},
   async start(o={}){
@@ -190,7 +196,7 @@ export function createChase(d:{world:HTMLElement,skullCanvas:HTMLCanvasElement,r
    const seg=pick(SKULLSEG,t);if(seg?.anim==='alert'&&skull.alert&&!alertStarted){skull.alert.reset().fadeIn(.15).play();alertStarted=true;}
    if(seg?.anim==='panic'&&skull.alert&&alertStarted&&!alertFaded){skull.alert.fadeOut(.25);alertFaded=true;}
    skull.mixer?.update(sdt);
-   driveSkullAt(t);driveSeekerAt(t);driveCrate(t);marks();
+   driveSkullAt(t);driveSeekerAt(t);driveCrate(t);marks();audioMarks();
    renderer.render(scene,cam);
    if(t>=CHASE_END)end(true);
   },

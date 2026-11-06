@@ -10,5 +10,5 @@ describe('Buy Bonus market gate',()=>{
  it('UK profile: no buy feature, no quick spin, no autoplay/turbo/slam stop',()=>{const uk=MARKETS.uk!;expect(uk.buyBonus).toBe(false);expect(uk.quickSpin).toBe(false);expect(uk.autoplay||uk.turbo||uk.slamStop).toBe(false);});
 });
 describe('symbol identities',()=>{
- it('MAGIC_BOOK, ordinary CHEST and CHEST_BONUS have distinct identities',()=>{expect(SYMBOL_ART.MAGIC_BOOK!.file).toBe('magic-book');expect(SYMBOL_ART.CHEST!.file).toBe('chest');expect(SYMBOL_ART.CHEST_BONUS!.file).toBe('chest-bonus');const files=SYMBOLS.map(s=>SYMBOL_ART[s]!.file),labels=SYMBOLS.map(s=>SYMBOL_ART[s]!.label);expect(new Set(files).size).toBe(files.length);expect(new Set(labels).size).toBe(labels.length);});
+ it('MAGIC_BOOK, ordinary CHEST and CHEST_BONUS have distinct identities',()=>{expect(SYMBOL_ART.MAGIC_BOOK!.file).toBe('magic-book');expect(SYMBOL_ART.CHEST!.file).toBe('hourglass');expect(SYMBOL_ART.CHEST_BONUS!.file).toBe('chest-bonus');const files=SYMBOLS.map(s=>SYMBOL_ART[s]!.file),labels=SYMBOLS.map(s=>SYMBOL_ART[s]!.label);expect(new Set(files).size).toBe(files.length);expect(new Set(labels).size).toBe(labels.length);});
 });

@@ -51,6 +51,8 @@ export const HUD = {
   menu: { cx: px(1771), cy: py(395), r: ps(54) },
   /** Lightning button drawn in control-panel.png (measured on the unscaled art: ring 1228–1314 × 911–996) — a transparent hit area sits exactly on it, nothing is redrawn. */
   quick: { cx: bx(1271), cy: by(953), r: 43 * CONTROL_BAR.scale },
+  /** Audio button: the circular button left of the lightning one (ring centre art (1346.5, 425.5) → same y as quick, x = 80 + 1346.5 × 0.8103). Its rotation icon is blanked in control-panel-audio.png. */
+  audio: { cx: bx(80 + 1346.5 * 0.8103), cy: by(953), r: 43 * CONTROL_BAR.scale },
 };
 
 /** Real 3D Skull gets a bounded transparent canvas on the left foreground. */

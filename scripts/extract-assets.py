@@ -1,19 +1,22 @@
-"""Extract the 12 symbols from the atlas (alpha-cleaned, 512x512) + measure reel-frame cells + control panel field boxes.
+"""Extract the 13 symbols (4 columns x 4 rows, last row has one symbol) from the atlas (alpha-cleaned, 512x512) + measure reel-frame cells + control panel field boxes.
 Run: python scripts/extract-assets.py  (needs numpy scipy pillow)"""
 import json,sys
 import numpy as np
 from PIL import Image
 import scipy.ndimage as nd
 ROOT='.'
-NAMES=[['tombstone','wild','lantern','chest'],['potion','ghost','key','book'],['scatter','coin','gargoyle','ghost-tomb']]
+NAMES=[['tombstone','wild','lantern','chest-bonus'],['potion','ghost','key','magic-book'],['scatter','coin','gargoyle','grail'],['hourglass',None,None,None]]
 im=np.array(Image.open(f'{ROOT}/assets-2d/symbols/symbols-sheet.png').convert('RGBA'))
 H,W=im.shape[:2];a=im[...,3].astype(float)
 lab,n=nd.label(a>128,structure=np.ones((3,3)))
 areas=nd.sum(np.ones_like(a),lab,range(1,n+1));cms=nd.center_of_mass(np.ones_like(a),lab,range(1,n+1))
-cw,ch=W/4,H/3;groups={}
+cw,ch=W/4,H/4;groups={}
 for i,(ar,(cy,cx)) in enumerate(zip(areas,cms),1):
     if ar<400:continue
     groups.setdefault((int(cy//ch),int(cx//cw)),[]).append(i)
+# drop stray specks: a component must be >=1% of the largest one in its cell
+for k,ids in list(groups.items()):
+    big=max(areas[i-1] for i in ids);groups[k]=[i for i in ids if areas[i-1]>=.01*big]
 report={}
 for (r,c),ids in sorted(groups.items()):
     name=NAMES[r][c];mask=np.isin(lab,ids)
@@ -39,7 +42,7 @@ for (r,c),ids in sorted(groups.items()):
     report[name]={'cell':[r,c],'src_bbox':[int(x0),int(y0),int(x1),int(y1)],'components':len(ids)}
 print(json.dumps(report))
 # contact sheet on checker + magenta (to expose fringes)
-names=[n for row in NAMES for n in row];sheet=Image.new('RGBA',(4*256,3*256),(255,0,255,255))
+names=[n for row in NAMES for n in row if n];sheet=Image.new('RGBA',(4*256,4*256),(255,0,255,255))
 for i,nm in enumerate(names):
     s=Image.open(f'{ROOT}/assets-2d/symbols/exported/{nm}.png').resize((256,256),Image.LANCZOS);sheet.alpha_composite(s,((i%4)*256,(i//4)*256))
 sheet.save(f'{ROOT}/assets-2d/symbols/contact-sheet-magenta.png')

@@ -1,4 +1,4 @@
-import type {SymbolId} from '../config/game';import {keys} from '../ui/keyboard';
+import type {SymbolId} from '../config/game';import {keys} from '../ui/keyboard';import {cue} from '../audio/cues';
 import type {Outcome} from '../math/slot';
 import type {WinTier} from '../config/presentation';
 import {createBonusOverlay} from '../bonus/bonusOverlay';import {BONUS_IMG} from '../bonus/bonusLayout';
@@ -25,7 +25,7 @@ export async function createView(onProgress:(s:string)=>void){
  const panel=$<HTMLImageElement>('#panel');panel.src=panelImg.src;place(panel,PANEL.x,PANEL.y,PANEL.src[0]*PANEL.scale,PANEL.src[1]*PANEL.scale);
  const logo=$<HTMLImageElement>('#logo');logo.src=logoImg.src;place(logo,LOGO.cx-LOGO.w/2,LOGO.top,LOGO.w);
  box($('#balance-field'),HUD.balance);box($('#bet-field'),HUD.bet);box($('#win-field'),HUD.win);
- circle($('#spin'),HUD.spin);circle($('#info'),HUD.info);circle($('#bet-down'),HUD.minus);circle($('#bet-up'),HUD.plus);circle($('#menu'),HUD.menu);circle($('#quick'),HUD.quick);
+ circle($('#spin'),HUD.spin);circle($('#info'),HUD.info);circle($('#bet-down'),HUD.minus);circle($('#bet-up'),HUD.plus);circle($('#menu'),HUD.menu);circle($('#quick'),HUD.quick);circle($('#audio'),HUD.audio);
  for(const [id,s] of [['balance-field',.62],['bet-field',.56],['win-field',.66]] as const)$(`#${id}`).style.fontSize=`${72*PANEL.scale*s}px`;   // same type size for all three fields (reference pill height 72 art px)
  // ---- scaling
  const hitBase=new Map<HTMLElement,{x:number,y:number,w:number}>();let scale=1;const canvases=[...document.querySelectorAll<HTMLCanvasElement>('canvas.layer')];
@@ -44,7 +44,7 @@ export async function createView(onProgress:(s:string)=>void){
  onProgress('Waking the Skull…');
  skull=await createSkull(sk,`${import.meta.env.BASE_URL}assets/scenery/Skull_Horned_Creature_Rigged.glb`,rs);fit();
  let suspHook:((e:import('./reels').SuspenseEvent)=>void)|undefined;reels.onSuspense=e=>suspHook?.(e);
- reels.onAnticipate=on=>{if(on&&skull!.controller.state!=='anticipation')skull!.set('anticipation');};
+ reels.onReelStop=()=>cue.reelStop();reels.onAnticipate=on=>{if(on&&skull!.controller.state!=='anticipation')skull!.set('anticipation');};
  // ---- atmosphere: lantern flicker glows over the art + fireflies + slow mist (all subtle)
  const bgPt=(x:number,y:number)=>({x:BG.x+x*BG.scale,y:BG.y+y*BG.scale});
  const LAMPS=[[225,250,150],[495,395,95],[1160,395,95],[1450,420,120],[190,590,70],[1495,640,70]].map(([x,y,r])=>({...bgPt(x,y),r:r*BG.scale}));
@@ -71,7 +71,7 @@ export async function createView(onProgress:(s:string)=>void){
   /** hooks for the bonus cinematic controller (presentation only) */
   emitFx:(x:number,y:number,color:string,n:number,speed?:number,size?:number,opt?:{up?:number,gravity?:number,star?:boolean,spread?:number})=>fx.emit(x,y,color,n,speed,size,opt),
   setCelebrationHook(f:((b:HTMLElement)=>number)|undefined){celebHook=f;},
-  skullReact(e:'WIN'|'BIG_WIN'|'BONUS_TRIGGER'|'BEST_CHEST_PICK'){skull!.dispatch(e);},
+  skullReact(e:'WIN'|'BIG_WIN'|'BONUS_TRIGGER'|'BEST_CHEST_PICK'){if(e==='BIG_WIN')cue.voice('happy');else if(e==='BEST_CHEST_PICK')cue.voice('win');skull!.dispatch(e);},
   async spin(outcome:Outcome,quick=false){hideBanner();skull!.set('watch');await reels.spin(outcome,quick);},
   /** Present the (already known) result: highlights, particles, skull reaction and the tiered celebration. */
   present(outcome:Outcome,tier:WinTier,cents:number,fmt:(c:number)=>string,opts:{banner?:boolean}={}){
@@ -108,7 +108,7 @@ export async function createView(onProgress:(s:string)=>void){
 
  // Chest screen owns the keyboard while open: Enter/Space/Escape are inert (real round), 1/2/3 pick, Escape closes only the no-credit preview.
  let releaseBonusKeys:(()=>void)|undefined;
- bonus.onOpenChange=open=>{releaseBonusKeys?.();releaseBonusKeys=undefined;if(!open)return;releaseBonusKeys=keys.push({id:'chest-bonus',handle:e=>{if(e.code==='Escape'){if(!bonus.isReal)bonus.close();return true;}if((e.code==='Enter'||e.code==='NumpadEnter'||e.code==='Space')&&!e.repeat){bonus.activateSummary();return true;}if(['Digit1','Digit2','Digit3'].includes(e.code)){bonus.pick(+e.code.slice(-1)-1);return true;}}});};
+ bonus.onOpenChange=open=>{releaseBonusKeys?.();releaseBonusKeys=undefined;if(open)cue.ambientChest();else cue.ambientBase();if(!open)return;releaseBonusKeys=keys.push({id:'chest-bonus',handle:e=>{if(e.code==='Escape'){if(!bonus.isReal)bonus.close();return true;}if((e.code==='Enter'||e.code==='NumpadEnter'||e.code==='Space')&&!e.repeat){bonus.activateSummary();return true;}if(['Digit1','Digit2','Digit3'].includes(e.code)){bonus.pick(+e.code.slice(-1)-1);return true;}}});};
  return api;
 }
 export type View=Awaited<ReturnType<typeof createView>>;

@@ -1,8 +1,8 @@
 import './style.css';
 import './ui/touch.css';
-import {SlotGame} from './engine/game';import {CryptoRng,SeededRng} from './math/rng';import {SYMBOLS,paytable,type SymbolId} from './config/game';import type {BonusAdapter,BonusRoundProvider} from './bonus/controller';import {SYMBOL_ART,tierFor} from './config/presentation';
+import {SlotGame} from './engine/game';import {CryptoRng,SeededRng} from './math/rng';import {SYMBOLS,paytable,type SymbolId} from './config/game';import type {BonusAdapter,BonusRoundProvider} from './bonus/controller';import {symbolUrl} from './view/assets';import {SYMBOL_ART,tierFor} from './config/presentation';
 import {createBonusCinematic,type BonusCinematic} from './chase/bonusCinematic';import {currentMarket} from './config/markets';import {createCinematicPlayer,type CinematicPlayer} from './ui/cinematicPlayer';import {evaluate} from './math/evaluate';import {createView,type View} from './view/view';
-import {SCATTER_FREE_SPINS} from './math/v4/config';import {GAME_EVENT_NAME} from './engine/events';import {initHudFields} from './ui/hudFields';import {keys} from './ui/keyboard';import {createFsHud,createFsSummary,createQuickSpin} from './ui/gameplayUi';import {createBuyBonusWidget} from './ui/buyBonusWidget';import {GameBuyBonusAdapter} from './engine/buyBonus';
+import {SCATTER_FREE_SPINS} from './math/v4/config';import {GAME_EVENT_NAME} from './engine/events';import {initHudFields} from './ui/hudFields';import {keys} from './ui/keyboard';import {installAudioUnlock} from './audio';import {cue} from './audio/cues';import {createAudioControls} from './ui/audioControls';import {mascotHooks} from './animation/mascot';import {createFsHud,createFsSummary,createQuickSpin} from './ui/gameplayUi';import {createBuyBonusWidget} from './ui/buyBonusWidget';import {GameBuyBonusAdapter} from './engine/buyBonus';
 const $=<T extends HTMLElement>(s:string)=>document.querySelector<T>(s)!;
 const query=new URLSearchParams(location.search);const qaEnabled=import.meta.env.DEV&&query.has('qa');const qaSeed=qaEnabled&&query.has('seed')?Number(query.get('seed')):undefined;
 const game=new SlotGame(qaSeed===undefined?new CryptoRng():new SeededRng(qaSeed));const spin=$<HTMLButtonElement>('#spin'),status=$('#status');let busy=true;let view:View;let cinematic:CinematicPlayer|undefined;let bonusCine:BonusCinematic|undefined;let fsHud:ReturnType<typeof createFsHud>|undefined,fsSummary:ReturnType<typeof createFsSummary>|undefined,quick:ReturnType<typeof createQuickSpin>|undefined,buy:ReturnType<typeof createBuyBonusWidget>|undefined;
@@ -26,17 +26,17 @@ async function runChest(){const c=game.chest!;const round={roundId:c.roundId,pri
  const before=game.balance;await view.playChestBonus(provider,adapter);if(game.phase==='chest'&&c.selected!==null){game.closeChest();persist();beginFeatureUi();}const won=game.balance-before;update();$('#win').textContent=money(Math.round(Number($('#win').textContent!.replace(/,/g,'')||0)*100)+won);}
 async function doSpin(){if(busy||spin.disabled||cinematic?.isPlaying||document.querySelector('dialog[open]'))return;view.chase.abort();busy=true;bonusCine?.beginSpin();update();spin.classList.add('busy');$('#win').textContent='0.00';
  try{const free=game.freeSpins>0;const before=game.freeSpins;const prevCompleted=game.lastCompletedFeature;const outcome=game.spin();persist();update();if(free&&!fs.active){fs.active=true;fs.played=0;fs.winCents=0;fs.ledgerStart=game.ledger.paid;}fsRefresh();status.textContent=free?`FREE SPINS · ${game.freeSpins} REMAINING`:'THE HUNT IS ON';
-  const t0=performance.now();await view.spin(outcome,!!quick?.on);{const wait=currentMarket().minSpinCycleMs-(performance.now()-t0);if(wait>0)await new Promise(r=>setTimeout(r,wait));}   // market minimum spin cycle (presentation only; the outcome was committed before the spin)
+  const t0=performance.now();cue.reelStart();cue.reelTicks(true);try{await view.spin(outcome,!!quick?.on);}finally{cue.reelTicks(false);}{const wait=currentMarket().minSpinCycleMs-(performance.now()-t0);if(wait>0)await new Promise(r=>setTimeout(r,wait));}   // market minimum spin cycle (presentation only; the outcome was committed before the spin)
   const cents=game.settle();if(free){fs.played++;fs.winCents+=cents;}persist();fsPersist();publishGameEvents();persist();const awarded=game.freeSpins-(before-(free?1:0));
   const mult=cents/game.roundBet,tier=tierFor(mult,outcome.evaluation.capped);
-  view.present(outcome,tier,cents,money,{banner:!bonusCine?.maxStandalone});winMeter(cents,tier);
+  view.present(outcome,tier,cents,money,{banner:!bonusCine?.maxStandalone});winMeter(cents,tier);if(!bonusCine?.maxStandalone)cue.win(tier);
   $('#reel-description').textContent=outcome.grid.map((c,i)=>`Reel ${i+1}: ${c.join(', ')}`).join('. ');
   status.textContent=game.freeSpins?`${game.freeSpins} FREE SPINS · PRESS SPIN TO CONTINUE`:cents?`TREASURE FOUND · ${money(cents)}`:'THE CRYPT AWAITS YOUR NEXT SPIN';
   update();
   if(awarded>0||game.phase==='chest'||bonusCine?.hasPending()){await new Promise(r=>setTimeout(r,tier==='none'?500:1300));document.body.dataset.cine='1';try{await bonusCine?.run();}finally{delete document.body.dataset.cine;}   // one chase per bonus event (FS / chest / dual), then the matching existing screen
    if(game.phase==='chest')await runChest();
    if(awarded>0&&game.freeSpins>0){
-    if(free){fsRefresh();await fsHud!.retrigger(awarded);}                                   // retrigger: "+X FREE SPINS" (X = engine), counter updates
+    if(free){fsRefresh();cue.retrigger();await fsHud!.retrigger(awarded);}                                   // retrigger: "+X FREE SPINS" (X = engine), counter updates
     else{await view.freeSpinsIntro(awarded,false);}}}
   if(!free&&game.freeSpins>0&&game.phase==='free-spins'&&!fs.active)beginFeatureUi();   // feature starts after intro (and chest, if dual)
   if(free&&game.lastCompletedFeature!==prevCompleted&&fs.active){                                                    // last spin completed → summary (display only, no second credit)
@@ -47,6 +47,9 @@ async function doSpin(){if(busy||spin.disabled||cinematic?.isPlaying||document.q
  }catch(e){status.textContent=e instanceof Error?e.message:'The crypt could not be opened.';}
  finally{bonusCine?.endSpin();busy=false;spin.classList.remove('busy');update();}}
 spin.onclick=()=>void doSpin();
+/** UI sounds: one delegated listener (no per-button handlers, nothing to duplicate on remount). */
+document.addEventListener('click',e=>{const b=(e.target as HTMLElement|null)?.closest?.('button');if(!b||(b as HTMLButtonElement).disabled)return;
+ if(b.matches('#bet-up,#bet-down'))cue.bet();else if(b.matches('.bd-ok,.fsm-go,#bonus-done,#reset'))cue.confirm();else if(b.matches('.bd-cancel,.close,#bonus-close'))cue.cancel();else if(b.matches('#info,#menu,#quick,.buy-hit,.menu-action,.fsm-go'))cue.click();});
 /** One authoritative keyboard policy (src/ui/keyboard.ts): Enter/Space spin only when idle; they are inert in every other state. */
 const canStartRound=()=>!busy&&(game.phase==='ready'||game.phase==='free-spins')&&!cinematic?.isPlaying&&!fsSummary?.open&&!bonusCine?.active&&!document.querySelector('dialog[open]');
 keys.configure({canSpin:()=>canStartRound()&&!spin.disabled,spin:()=>void doSpin(),dialogOpen:()=>!!document.querySelector('dialog[open]')});keys.attach();
@@ -54,7 +57,8 @@ $('#bet-down').onclick=()=>{if(!busy){game.changeBet(-1);persist();update();}};$
 $('#info').onclick=()=>$<HTMLDialogElement>('#paytable').showModal();$('#menu').onclick=()=>$<HTMLDialogElement>('#menu-dialog').showModal();document.querySelectorAll('dialog').forEach(d=>d.classList.add('skh-modal'));document.querySelectorAll<HTMLButtonElement>('dialog .close').forEach(b=>b.onclick=()=>b.closest('dialog')!.close());
 $('#reset').onclick=()=>{if(busy)return;game.reset();persist();$('#win').textContent='0.00';status.textContent='VIRTUAL BALANCE RESTORED';$<HTMLDialogElement>('#menu-dialog').close();update();};
 if(!import.meta.env.DEV)$('#bonus-preview').remove();else $('#bonus-preview').onclick=async()=>{$<HTMLDialogElement>('#menu-dialog').close();await cinematic?.play();view.showBonusPreview();};
-$('#paytable-content').innerHTML=SYMBOLS.filter(s=>s!=='WILD').map(s=>s==='CHEST_BONUS'?`<div><b>${SYMBOL_ART[s].label}</b><span>3+ anywhere: HIDE & SEEK · choose one committed package: 12 Free Spins at 1×, 2× or 5× · no line pay</span></div>`:`<div><b>${SYMBOL_ART[s].label}</b><span>3: ${paytable[s][3]??0}× · 4: ${paytable[s][4]??0}× · 5: ${paytable[s][5]??0}×${s==='SCATTER'?' total bet':' line bet'}</span></div>`).join('');
+{const ico=(s:SymbolId)=>`<img class="pt-ico" src="${symbolUrl(s)}" alt="" width="44" height="44" draggable="false">`;
+$('#paytable-content').innerHTML=SYMBOLS.map(s=>s==='WILD'?`<div>${ico(s)}<b>${SYMBOL_ART[s].label}</b><span>Reels 2–4 · substitutes for line symbols (not Scatter / Chest Bonus) · no pay of its own</span></div>`:s==='CHEST_BONUS'?`<div>${ico(s)}<b>${SYMBOL_ART[s].label}</b><span>3+ anywhere: HIDE & SEEK · choose one committed package: 12 Free Spins at 1×, 2× or 5× · no line pay</span></div>`:`<div>${ico(s)}<b>${SYMBOL_ART[s].label}</b><span>3: ${paytable[s][3]??0}× · 4: ${paytable[s][4]??0}× · 5: ${paytable[s][5]??0}×${s==='SCATTER'?' total bet':' line bet'}</span></div>`).join('');}
 async function resumePending(){
  if(game.phase==='spinning'&&game.last){status.textContent='RESTORING COMMITTED ROUND';await view.spin(game.last);const cents=game.settle();persist();publishGameEvents();persist();view.present(game.last,tierFor(cents/game.roundBet,game.last.evaluation.capped),cents,money);winMeter(cents,tierFor(cents/game.roundBet,game.last.evaluation.capped));}
  if(game.phase==='chest'){if(game.chest?.selected!==null){game.closeChest();persist();}else await runChest();}
@@ -64,8 +68,10 @@ async function init(){try{view=await createView(m=>{$('#loading p').textContent=
 initHudFields();const market=currentMarket(),world=$('#world');fsHud=createFsHud(world,money,reduced);fsSummary=createFsSummary(world,money,reduced);quick=createQuickSpin($<HTMLButtonElement>('#quick'),world,market.quickSpin);
  buy=createBuyBonusWidget({canOpen:()=>!busy&&game.phase==='ready'&&!game.feature&&!fsSummary?.open,balance:()=>game.balance,world,dialogHost:document.querySelector('main')!,glbUrl:`${import.meta.env.BASE_URL}bonus-chest/bonus-chest-animated.glb`,adapter:new GameBuyBonusAdapter(game,()=>market.buyBonus,async()=>{busy=true;update();persist();publishGameEvents();persist();await runChest();status.textContent='CHEST FREE SPINS · PRESS SPIN TO CONTINUE';busy=false;update();}),bet:()=>game.bet,money,renderScale:()=>view.inspect().renderScale,reduced});buy.setEnabledByMarket(market.buyBonus);view.onFrame(dt=>buy!.update(dt));void buy.ready();
  if(game.phase==='free-spins'){try{const r=JSON.parse(localStorage.getItem(FS_KEY)||'null');if(r&&r.roundNo===game.roundNo){Object.assign(fs,{active:true,played:r.played,winCents:r.winCents,ledgerStart:r.ledgerStart});}else{fs.active=true;fs.played=game.featureAwarded-game.freeSpins;fs.ledgerStart=game.ledger.paid;}}catch{fs.active=true;}fsRefresh();}
+installAudioUnlock();cue.ambientBase();createAudioControls($<HTMLDialogElement>('#menu-dialog'),$<HTMLButtonElement>('#audio'));
+ mascotHooks.onState=s=>{if(s==='anticipation')cue.voice('scared');else if(s==='lose')cue.voice('angry');else if(s==='bonus')cue.voice('happy');};
  bonusCine=createBonusCinematic({chase:view.chase,world:$('#world'),stage:$('#stage'),reduced,emit:view.emitFx,skullReact:view.skullReact,roundWinCents:()=>game.roundWinUnits*game.roundBet/20,money});
- view.setSuspenseHook(e=>bonusCine!.suspense(e));
+ view.setSuspenseHook(e=>{bonusCine!.suspense(e);cue.anticipation(e.kind,e.phase);});
  view.setCelebrationHook(b=>bonusCine!.chestCelebration(b));if(!reduced)window.setTimeout(()=>void view.chase.ready(),3000);
  if(import.meta.env.DEV){const w=window as unknown as Record<string,unknown>;w.__debugSkullChase=()=>view.chase.start();w.__debugSkullChaseReset=()=>view.chase.abort();w.__debugSkullChaseAt=(t:number,crate=false)=>view.chase.scrub(t,1/60,crate);w.__chaseInspect=()=>view.chase.inspect();w.__debugMaxWin=(c:number)=>(bonusCine as unknown as {debugMaxWin:(c:number)=>Promise<void>}).debugMaxWin(c);w.__debugMathV4={evaluate:(grid:SymbolId[][])=>evaluate(grid),snapshot:()=>game.snapshot()};}
  const base=import.meta.env.BASE_URL;cinematic=createCinematicPlayer({host:$('#stage'),webm:`${base}cinematics/skull-hunt-intro.webm`,mp4:`${base}cinematics/skull-hunt-intro.mp4`,poster:`${base}cinematics/skull-hunt-intro-poster.webp`});

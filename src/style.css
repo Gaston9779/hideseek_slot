@@ -118,3 +118,31 @@ dialog small,.fine{color:#bda4c3}
 #bonus-title p{margin:0;font:900 calc(36px*var(--k))/1.1 var(--font);letter-spacing:.06em;color:#ffe7a0;text-shadow:0 calc(3px*var(--k)) 0 #5a2608,0 0 calc(16px*var(--k)) #b57cff88}
 #bonus-title small{display:block;margin-top:calc(4px*var(--k));font:700 calc(16px*var(--k))/1.25 var(--ui);color:#e8d6ff}
 #bonus-title .post,#bonus-title.picked .pre{display:none}#bonus-title.picked .post{display:block}
+
+.pt-ico{width:44px;height:44px;object-fit:contain;vertical-align:middle;margin-right:10px;filter:drop-shadow(0 2px 3px #000a)}
+#paytable-content div{align-items:center}
+
+/* ---- audio button: lives on the blanked ring of the panel art; icon colours/shadow mirror the neighbouring lightning icon ---- */
+#audio{background:transparent;border:0;padding:0;border-radius:50%;cursor:pointer}
+#audio svg{position:absolute;left:50%;top:50%;width:68%;height:68%;transform:translate(-50%,-50%);filter:drop-shadow(0 1.5px 1px #2a0f0acc) drop-shadow(0 0 5px #ffb54a88);pointer-events:none;transition:filter .2s,opacity .2s}
+#audio .spk-slash{opacity:0}
+#audio[aria-pressed=false] .spk-waves{opacity:0}
+#audio[aria-pressed=false] .spk-slash{opacity:1}
+#audio[aria-pressed=false] svg{filter:drop-shadow(0 1.5px 1px #2a0f0acc);opacity:.8}
+#audio[aria-pressed=false] .spk-body{opacity:.6}
+#audio:hover svg,#audio:focus-visible svg{filter:drop-shadow(0 1.5px 1px #2a0f0acc) drop-shadow(0 0 9px #ffd27acc)}
+#audio:focus-visible{outline:2px solid #ffd27a;outline-offset:-4px}
+/* ---- AUDIO section in the existing menu ---- */
+.audio-menu{margin:14px 0 6px;padding:12px 14px;border:1px solid #6a4a9a;border-radius:12px;background:#00000038}
+.audio-menu h2{margin:0 0 8px;font:900 15px var(--ui);letter-spacing:.3em;color:#c7a8ff}
+.am-row{display:grid;grid-template-columns:auto 96px 1fr;align-items:center;gap:12px;padding:5px 0}
+.am-name{font:700 15px var(--ui);letter-spacing:.08em;color:#ffe7bb}
+.am-sw{position:relative;width:44px;height:24px;display:inline-block}
+.am-sw input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer;z-index:1}
+.am-knob{position:absolute;inset:0;border-radius:999px;background:#3a2a52;border:2px solid #7a6a90;transition:background .2s}
+.am-knob::after{content:"";position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#cdbfdc;transition:transform .2s,background .2s}
+.am-sw input:checked+.am-knob{background:#7a3a10;border-color:#ffc457}
+.am-sw input:checked+.am-knob::after{transform:translateX(20px);background:#ffe38a}
+.am-sw input:focus-visible+.am-knob{outline:2px solid #ffd27a;outline-offset:2px}
+.am-row input[type=range]{width:100%;accent-color:#ffb02a}
+.am-row input[type=range]:disabled{opacity:.4}

@@ -12,17 +12,20 @@ export function tierFor(multiplier: number, capped = false): WinTier {
 }
 /** Symbol-art mapping. Math IDs and payouts are untouched; only the artwork shown per ID is chosen here. */
 export const SYMBOL_ART: Record<string, { file: string; label: string }> = {
-  TOMB: { file: 'tombstone', label: 'Tombstone' },
-  WILD: { file: 'wild', label: 'Wild Skull' },
-  LANTERN: { file: 'lantern', label: 'Lantern' },
-  CHEST: { file: 'chest', label: 'Treasure Chest' },
-  POTION: { file: 'potion', label: 'Purple Potion' },
-  GHOST: { file: 'ghost', label: 'Blue Ghost' },
-  KEY: { file: 'key', label: 'Golden Key' },
+  // 13 symbols of assets-2d/symbols/symbols-sheet.png. Math IDs, strips and paytable are V4 and untouched; only art + label are chosen here.
+  // The two sheet symbols without a dedicated V4 id take over the ids whose old art was retired, keeping each id's pay rank:
+  //   BLASTER (3rd highest ordinary, old "Ghost Tombstone") → Sacred Grail · CHEST (5th, old Treasure Chest) → Skull Hourglass.
   MAGIC_BOOK: { file: 'magic-book', label: 'Magic Book' },
-  SCATTER: { file: 'scatter', label: 'Crypt Scatter' },
   SKULL: { file: 'coin', label: 'Skull Coin' },
+  BLASTER: { file: 'grail', label: 'Sacred Grail' },
   GARGOYLE: { file: 'gargoyle', label: 'Gargoyle' },
-  BLASTER: { file: 'ghost-tomb', label: 'Ghost Tombstone' },
+  CHEST: { file: 'hourglass', label: 'Skull Hourglass' },
+  LANTERN: { file: 'lantern', label: 'Skull Lantern' },
+  GHOST: { file: 'ghost', label: 'Skull Ghost' },
+  TOMB: { file: 'tombstone', label: 'Tombstone' },
+  KEY: { file: 'key', label: 'Skull Key' },
+  POTION: { file: 'potion', label: 'Potion' },
+  WILD: { file: 'wild', label: 'Wild' },
+  SCATTER: { file: 'scatter', label: 'Scatter' },
   CHEST_BONUS: { file: 'chest-bonus', label: 'Chest Bonus' },
 };
