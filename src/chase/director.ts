@@ -1,0 +1,167 @@
+import * as T from 'three';
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {RoomEnvironment} from 'three/examples/jsm/environments/RoomEnvironment.js';
+import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
+import {DESIGN,FRAME,HUD,PANEL,SKULL,SKULL_ANCHOR} from '../layout';
+import {CHASE} from '../config/chase';
+import {RigPoser} from './rigPose';
+import * as P from './poses';
+/**
+ * 3D "Seeker chase" gag. One extra transparent WebGL canvas covering the whole 1920×1080 design space (1 unit = 1 design px, y up),
+ * driven by the existing main loop (no second rAF). Occlusion is explicit and depth-based:
+ *   – two invisible, alpha-tested "occluder" planes at z=0 reproduce the exact silhouettes of the 2D machine frame and control panel (their own PNG alpha);
+ *   – characters walk on a FRONT lane (z>0, in front of the occluders) or a BACK lane (z<0, hidden wherever the machine/ledge art is opaque);
+ *   – the SPIN button (art lives inside the panel PNG) is protected by a CSS mask hole on the canvas.
+ * Purely cosmetic: no import of math/engine code.
+ */
+const ZF=250,ZB=-250,YF=SKULL_ANCHOR.y,YB=SKULL_ANCHOR.y-52;       // lane depth / feet line on the plinth (front = original Skull's standing line)
+const HOME={x:SKULL_ANCHOR.x,y:SKULL_ANCHOR.y,yaw:.38};
+const FACE_L=-1.25,FACE_R=1.25;
+export type ChaseKind='skull'|'seeker';
+type Anim='idle'|'alert'|'panic'|'run'|'scan'|'lunge'|'trip'|'tumble'|'brake'|'settle'|'hidden';
+interface Seg{t0:number;t1:number;x0:number;x1:number;l0:number;l1:number;yaw0:number;yaw1:number;anim:Anim;cad?:number;amp?:number}
+const S=(t0:number,t1:number,x0:number,x1:number,l0:number,l1:number,yaw0:number,yaw1:number,anim:Anim,cad?:number,amp?:number):Seg=>({t0,t1,x0,x1,l0,l1,yaw0,yaw1,anim,cad,amp});
+// ---- storyboard (seconds). lane 0 = front, 1 = back (hidden behind the machine for x∈[385,1535]) -------------------------------------------------
+const SEEKER:Seg[]=[
+ S(0,.8,2100,1480,0,0,FACE_L,FACE_L,'run',3.2,1),         // A: bursts in from the right, blaster forward
+ S(.8,2.5,1480,1060,0,0,FACE_L,FACE_L,'scan'),             //    searching
+ S(2.5,3.4,1060,330,0,0,FACE_L,FACE_L,'lunge'),             // C: spots Skull fleeing, gives chase (same route, ~0.6 s later)
+ S(3.4,3.7,330,250,0,1,FACE_L,FACE_R,'run',3.2,1),         //    steps back behind the left side and turns
+ S(3.7,4.85,250,1620,1,1,FACE_R,FACE_R,'run',3.6,1.05),    //    behind the machine (occluded by the frame art)
+ S(4.85,5.1,1620,1720,1,0,FACE_R,FACE_R,'run',3.4,1),      // E: re-emerges on the right, still launched
+ S(5.1,5.5,1720,1790,0,0,FACE_R,FACE_R,'trip'),            //    trips on the plinth step
+];
+const SKULLSEG:Seg[]=[
+ S(0,1.5,HOME.x,HOME.x,0,0,HOME.yaw,HOME.yaw,'idle'),
+ S(1.5,2.1,HOME.x,HOME.x,0,0,HOME.yaw,.95,'alert'),        // B: sees the seeker (clip "afraid"), hops
+ S(2.1,2.7,HOME.x,HOME.x,0,0,.95,FACE_L,'panic'),          //    flails and turns to flee
+ S(2.7,2.95,HOME.x,335,0,0,FACE_L,FACE_L,'run',3.4,1),
+ S(2.95,3.2,335,260,0,1,FACE_L,FACE_R,'run',3.4,1),        // C: steps behind the left side
+ S(3.2,4.1,260,1600,1,1,FACE_R,FACE_R,'run',3.8,1.05),     //    behind the machine
+ S(4.1,4.4,1600,1670,1,0,FACE_R,FACE_L,'run',3.4,1),       // D: pops out on the right, spins around
+ S(4.4,5.7,1670,420,0,0,FACE_L,FACE_L,'run',3.6,1.05),     //    dashes home along the front of the plinth
+ S(5.7,6.1,420,HOME.x,0,0,FACE_L,HOME.yaw,'brake'),
+ S(6.1,6.6,HOME.x,HOME.x,0,0,HOME.yaw,HOME.yaw,'settle'),
+];
+const TUMBLE={t0:5.5,t1:6.35,x0:1790,vx:380,v0:420,g:1000,turns:1.2};
+export const CHASE_END=6.6;
+class Actor{
+ readonly root=new T.Group();private mid=new T.Group();readonly mdl=new T.Group();readonly shadow:T.Mesh;
+ poser:RigPoser;mixer?:T.AnimationMixer;alert?:T.AnimationAction;height:number;gun:boolean;
+ constructor(model:T.Object3D,height:number,gun:boolean,anims:T.AnimationClip[],shadowTex:T.Texture){
+  this.height=height;this.gun=gun;
+  // normalise: feet centre at origin, requested height (same recipe as the in-slot Skull → identical scale/foot contact)
+  const inner=new T.Group();inner.add(model);inner.updateMatrixWorld(true);const b=new T.Box3().setFromObject(model),size=b.getSize(new T.Vector3()),c=b.getCenter(new T.Vector3());
+  const s=height/size.y;model.scale.multiplyScalar(s);model.position.sub(new T.Vector3(c.x,b.min.y,c.z).multiplyScalar(s));
+  this.mdl.add(inner);this.mid.position.y=height/2;this.mdl.position.y=-height/2;this.mid.add(this.mdl);this.root.add(this.mid);
+  this.root.updateMatrixWorld(true);this.poser=new RigPoser(model,this.mdl);
+  model.traverse(o=>{if((o as T.Mesh).isMesh)o.frustumCulled=false;});
+  if(anims.length){this.mixer=new T.AnimationMixer(model);const a=anims.find(x=>x.name==='afraid');if(a){this.alert=this.mixer.clipAction(a);this.alert.setLoop(T.LoopOnce,1);this.alert.clampWhenFinished=true;}}
+  this.shadow=new T.Mesh(new T.PlaneGeometry(height*1.0,height*.26),new T.MeshBasicMaterial({map:shadowTex,transparent:true,depthWrite:false}));
+  this.root.visible=false;this.shadow.visible=false;
+ }
+ setVisible(v:boolean){this.root.visible=v;this.shadow.visible=v;}
+}
+export interface Chase{
+ /** Loads models (once) and plays the gag. Resolves true when it ran to completion, false if aborted/unavailable. */
+ start():Promise<boolean>;abort():void;readonly running:boolean;ready():Promise<void>;
+  /** DEV/QA: render the gag at an exact time (frame-accurate screenshots); stays paused until abort(). */
+ scrub(time:number,dt?:number):Promise<void>;update(dt:number):void;resize():void;inspect():unknown;dispose():void;
+}
+export function createChase(d:{world:HTMLElement,skullCanvas:HTMLCanvasElement,renderScale:()=>number,skullTemplate:()=>{scene:T.Object3D,animations:T.AnimationClip[]},frameImg:HTMLImageElement,panelImg:HTMLImageElement,seekerUrl:string,skullHeight:number}):Chase{
+ const canvas=document.createElement('canvas');canvas.id='chase';canvas.setAttribute('aria-hidden','true');d.world.appendChild(canvas);
+ const hole=HUD.spin;const R=hole.r*1.04;const mask=`radial-gradient(circle at ${hole.cx}px ${hole.cy}px, transparent ${R}px, #000 ${R+1.5}px)`;
+ canvas.style.cssText=`position:absolute;left:0;top:0;width:${DESIGN.w}px;height:${DESIGN.h}px;z-index:5;pointer-events:none;visibility:hidden;-webkit-mask-image:${mask};mask-image:${mask}`;
+ let renderer:T.WebGLRenderer|undefined,scene:T.Scene,cam:T.OrthographicCamera,skull:Actor,seeker:Actor,occluders:T.Mesh[]=[],tex:T.Texture[]=[],loading:Promise<void>|undefined,loaded=false;
+ let t=0,running=false,resolveRun:((ok:boolean)=>void)|undefined,runs=0;const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const lights:T.Light[]=[];
+ function occluder(img:HTMLImageElement,x:number,y:number,w:number,h:number){
+  const tx=new T.Texture(img);tx.colorSpace=T.SRGBColorSpace;tx.needsUpdate=true;tex.push(tx);
+  const m=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshBasicMaterial({map:tx,alphaTest:.5,colorWrite:false,depthWrite:true,side:T.DoubleSide}));
+  m.position.set(x+w/2,DESIGN.h-(y+h/2),0);m.renderOrder=-10;scene.add(m);occluders.push(m);
+ }
+ async function load(){
+  const gl=new T.WebGLRenderer({canvas,antialias:true,alpha:true,premultipliedAlpha:true});gl.setClearColor(0,0);gl.toneMapping=T.ACESFilmicToneMapping;gl.toneMappingExposure=1.05;gl.outputColorSpace=T.SRGBColorSpace;renderer=gl;
+  scene=new T.Scene();const pm=new T.PMREMGenerator(gl);scene.environment=pm.fromScene(new RoomEnvironment(),.04).texture;scene.environmentIntensity=.55;pm.dispose();
+  cam=new T.OrthographicCamera(0,DESIGN.w,DESIGN.h,0,-2000,2000);cam.position.set(0,0,1000);
+  // identical lighting recipe as the in-slot Skull so the two stay visually matched
+  lights.push(new T.HemisphereLight('#9a8cff','#4a3050',.9));const key=new T.DirectionalLight('#ffb36b',3.1);key.position.set(-500,600,700);const rim=new T.DirectionalLight('#7b5cff',3.2);rim.position.set(500,300,-500);const fill=new T.DirectionalLight('#ff8f4a',.8);fill.position.set(600,-200,600);lights.push(key,rim,fill);scene.add(...lights);
+  occluder(d.frameImg,FRAME.x,FRAME.y,FRAME.src[0]*FRAME.scale,FRAME.src[1]*FRAME.scale);occluder(d.panelImg,PANEL.x,PANEL.y,PANEL.src[0]*PANEL.scale,PANEL.src[1]*PANEL.scale);
+  const sc=document.createElement('canvas');sc.width=256;sc.height=64;{const g=sc.getContext('2d')!;const r=g.createRadialGradient(128,32,4,128,32,128);r.addColorStop(0,'rgba(8,2,20,.7)');r.addColorStop(1,'rgba(8,2,20,0)');g.save();g.scale(1,.26);g.fillStyle=r;g.fillRect(0,0,256,246);g.restore();}
+  const shTex=new T.CanvasTexture(sc);tex.push(shTex);
+  const gltf=await new GLTFLoader().loadAsync(d.seekerUrl);                    // loaded once, reused by every run
+  const tpl=d.skullTemplate();
+  skull=new Actor(SkeletonUtils.clone(tpl.scene),d.skullHeight,false,tpl.animations,shTex);
+  seeker=new Actor(gltf.scene,d.skullHeight*CHASE.seekerHeightRatio,true,[],shTex);
+  for(const a of [skull,seeker]){scene.add(a.root,a.shadow);}
+  loaded=true;resize();
+ }
+ function resize(){if(!renderer)return;const s=d.renderScale();renderer.setPixelRatio(1);renderer.setSize(Math.round(DESIGN.w*s),Math.round(DESIGN.h*s),false);}
+ function pick(segs:Seg[],time:number){for(const s of segs)if(time>=s.t0&&time<s.t1)return s;return null;}
+ const lerp=(a:number,b:number,u:number)=>a+(b-a)*u;
+ function place(a:Actor,x:number,lane:number,yawv:number,bounce:number,squash:number,wobble=0,roll=0){
+  const gy=lerp(YF,YB,lane),z=lerp(ZF,ZB,lane);a.root.position.set(x,DESIGN.h-gy+bounce*a.height,z);
+  a.root.quaternion.setFromAxisAngle(new T.Vector3(0,0,1),roll).multiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),yawv));
+  a.root.scale.set(1-squash*.5,1+squash,1-squash*.5);a.shadow.position.set(x,DESIGN.h-gy+3,z-8);a.shadow.visible=a.root.visible;a.shadow.scale.setScalar(Math.max(.4,1-Math.max(0,bounce)*2.2));void wobble;
+ }
+ function drive(a:Actor,segs:Seg[],time:number,isSkull:boolean){
+  const seg=pick(segs,time);
+  if(time>=TUMBLE.t0&&!isSkull){ // ballistic tumble: intentional trajectory + somersault, limbs flailing, exits right
+   const u=time-TUMBLE.t0,dur=TUMBLE.t1-TUMBLE.t0;if(u>dur+.05){a.setVisible(false);return;}
+   const x=TUMBLE.x0+TUMBLE.vx*u,up=Math.max(0,TUMBLE.v0*u-.5*TUMBLE.g*u*u),k=P.smooth(u/dur),theta=TUMBLE.turns*Math.PI*2*k;
+   a.setVisible(true);const o=P.tumble({p:a.poser,gun:true},u);a.poser.apply(o.d);
+   a.root.position.set(x,DESIGN.h-YF+up,ZF);a.root.quaternion.setFromAxisAngle(new T.Vector3(0,0,1),-theta).multiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),FACE_R));a.root.scale.set(1,1,1);
+   a.shadow.position.set(x,DESIGN.h-YF+3,ZF-8);a.shadow.visible=true;a.shadow.scale.setScalar(Math.max(.35,1-up/260));return;}
+  if(!seg){a.setVisible(time<0?false:isSkull);if(isSkull&&time>=CHASE_END)a.setVisible(false);return;}
+  a.setVisible(true);const u=(time-seg.t0)/(seg.t1-seg.t0),lt=time-seg.t0,e=P.smooth(u);
+  const x=lerp(seg.x0,seg.x1,seg.anim==='run'||seg.anim==='lunge'||seg.anim==='scan'?u:e),lane=lerp(seg.l0,seg.l1,e),yaw=lerp(seg.yaw0,seg.yaw1,P.smooth(Math.min(1,u*1.3)));
+  const ctx={p:a.poser,gun:a.gun};let o:P.PoseOut;let squash=0,mix=0;
+  switch(seg.anim){
+   case 'run':o=P.run(ctx,time,seg.cad,seg.amp);break;
+   case 'lunge':o=P.lunge(ctx,time);break;case 'scan':o=P.scan(ctx,time);break;
+   case 'trip':o=P.trip(ctx,u);break;case 'brake':o=P.brake(ctx,u);break;
+   case 'panic':o=P.panic(ctx,lt);break;
+   case 'alert':o=P.idle(ctx,time);mix=1;{ // clip "afraid" (real GLB clip) + a surprise hop with squash & stretch
+     const hopT=.3,hu=(lt-hopT)/.3;if(hu>0&&hu<1){a.root.position.y+=0;squash=hu<.25?.08*(hu/.25):.08*(1-hu)*-.9;} }break;
+   default:o=P.idle(ctx,time);
+  }
+  // blend: the procedural pose takes the share the mixer clip ("afraid") is not using → smooth crossfade in and out of the real clip
+  const mw=a.alert?a.alert.getEffectiveWeight():0;void mix;
+  if(seg.anim==='settle'){a.poser.apply(o.d,Math.max(.12,P.smooth(u)));}
+  else if(mw<.999)a.poser.apply(o.d,1-mw);
+  let bounce=o.bounce;
+  if(seg.anim==='alert'){const hu=(lt-.3)/.45;if(hu>0&&hu<1)bounce+=Math.sin(hu*Math.PI)*.16;squash=hu>0&&hu<1?(hu<.2?.1*(hu/.2):-.06*Math.sin(hu*Math.PI)):0;}
+  if(seg.anim==='panic'){squash=.03*Math.sin(lt*17);}
+  place(a,x,lane,yaw,bounce,squash+o.squash);
+ }
+ let alertStarted=false,alertFaded=false,scrubbing=false;
+ function end(ok:boolean){running=false;scrubbing=false;canvas.style.visibility='hidden';d.skullCanvas.style.visibility='';skull?.setVisible(false);seeker?.setVisible(false);for(const a of [skull,seeker]){a?.poser.reset();a?.alert?.stop();a?.mixer?.stopAllAction();}alertStarted=false;alertFaded=false;const r=resolveRun;resolveRun=undefined;r?.(ok);}
+ const api:Chase={
+  ready(){if(!loading)loading=load().catch(e=>{console.error('[chase] load failed',e);loading=undefined;});return loading;},
+  async start(){
+   if(running||reduced)return false;await api.ready();if(!loaded||running)return false;
+   running=true;t=0;runs++;alertStarted=false;alertFaded=false;resize();d.skullCanvas.style.visibility='hidden';canvas.style.visibility='visible';
+   for(const a of [skull,seeker]){a.poser.reset();a.mixer?.stopAllAction();}
+   return new Promise<boolean>(res=>{resolveRun=res;});
+  },
+  async scrub(time,dt=1/60){await api.ready();if(!loaded)return;if(!running){running=true;scrubbing=true;t=0;resize();d.skullCanvas.style.visibility='hidden';canvas.style.visibility='visible';for(const a of [skull,seeker]){a.poser.reset();a.mixer?.stopAllAction();}alertStarted=false;alertFaded=false;}
+   scrubbing=true;while(t<time-1e-6){t=Math.min(time,t+dt);const seg=pick(SKULLSEG,t);if(seg?.anim==='alert'&&skull.alert&&!alertStarted){skull.alert.reset().fadeIn(.15).play();alertStarted=true;}if(seg?.anim==='panic'&&skull.alert&&alertStarted&&!alertFaded){skull.alert.fadeOut(.25);alertFaded=true;}skull.mixer?.update(dt);drive(skull,SKULLSEG,t,true);drive(seeker,SEEKER,t,false);}renderer!.render(scene,cam);},
+  abort(){if(running){scrubbing=false;end(false);}},
+  get running(){return running;},
+  update(dt){
+   if(!running||!renderer||scrubbing)return;t+=Math.min(dt,.05);
+   // skull's alert clip runs through the AnimationMixer (real GLB clip "afraid"); procedural poses take over afterwards
+   const seg=pick(SKULLSEG,t);if(seg?.anim==='alert'&&skull.alert&&!alertStarted){skull.alert.reset().fadeIn(.15).play();alertStarted=true;}
+   if(seg?.anim==='panic'&&skull.alert&&alertStarted&&!alertFaded){skull.alert.fadeOut(.25);alertFaded=true;}
+   skull.mixer?.update(Math.min(dt,.05));
+   drive(skull,SKULLSEG,t,true);drive(seeker,SEEKER,t,false);
+   renderer.render(scene,cam);
+   if(t>=CHASE_END)end(true);
+  },
+  resize,
+  inspect(){return {running,t,runs,loaded,memory:renderer?{...renderer.info.memory}:null,programs:renderer?.info.programs?.length,skull:skull&&{x:skull.root.position.x,y:skull.root.position.y,z:skull.root.position.z,visible:skull.root.visible,yaw:skull.root.rotation.y},seeker:seeker&&{x:seeker.root.position.x,y:seeker.root.position.y,z:seeker.root.position.z,visible:seeker.root.visible}};},
+  dispose(){end(false);for(const m of occluders){m.geometry.dispose();(m.material as T.Material).dispose();}tex.forEach(x=>x.dispose());renderer?.dispose();canvas.remove();},
+ };
+ void SKULL;void reduced;
+ return api;
+}

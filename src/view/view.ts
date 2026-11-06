@@ -6,7 +6,7 @@ import {BG,DESIGN,FRAME,HUD,LOGO,OVERLAY,PANEL,SKULL,CELLS,PLAY_AREA} from '../l
 import {loadImage,loadSymbolImages,urls} from './assets';
 import {Reels} from './reels';
 import {Particles} from './particles';
-import {createSkull} from './skull';
+import {createSkull} from './skull';import {createChase,type Chase} from '../chase/director';
 import type {SkullState} from '../animation/mascot';
 
 const INITIAL:SymbolId[][]=[['TOMB','CHEST','LANTERN'],['WILD','GHOST','SKULL'],['LANTERN','KEY','SCATTER'],['CHEST','POTION','MAUSOLEUM'],['POTION','SCATTER','GARGOYLE']];
@@ -34,8 +34,8 @@ export async function createView(onProgress:(s:string)=>void){
  function fit(){const vw=stage.clientWidth,vh=stage.clientHeight;scale=Math.min(vw/DESIGN.w,vh/DESIGN.h);world.style.transform=`translate(${(vw-DESIGN.w*scale)/2}px,${(vh-DESIGN.h*scale)/2}px) scale(${scale})`;
   for(const c of canvases){if(c.id==='skull')continue;const r=rs();c.width=Math.round(DESIGN.w*r);c.height=Math.round(DESIGN.h*r);const x=c.getContext('2d')!;x.setTransform(r,0,0,r,0,0);ctxs.set(c,x);}
   const MIN=46;document.querySelectorAll<HTMLElement>('.hit').forEach(h=>{const b=hitBase.get(h)??(()=>{const o={x:parseFloat(h.style.left),y:parseFloat(h.style.top),w:parseFloat(h.style.width)};hitBase.set(h,o);return o;})();const size=Math.max(b.w,MIN/scale);h.style.left=`${b.x+b.w/2-size/2}px`;h.style.top=`${b.y+b.w/2-size/2}px`;h.style.width=h.style.height=`${size}px`;});
-  skull?.resize();}
- let skull:Awaited<ReturnType<typeof createSkull>>|undefined;
+  skull?.resize();chase?.resize();}
+ let chase:Chase|undefined;let skull:Awaited<ReturnType<typeof createSkull>>|undefined;
  const sk=$<HTMLCanvasElement>('#skull');place(sk,SKULL.x,SKULL.y,SKULL.w,SKULL.h);
  fit();addEventListener('resize',fit);
  const reelsCtx=ctxs.get($('#reels'))!,fxCtx=ctxs.get($('#fx'))!,atmoCtx=ctxs.get($('#atmo'))!;
@@ -54,7 +54,7 @@ export async function createView(onProgress:(s:string)=>void){
   if(!reduced)for(const f of flies){const x=f.x+Math.sin(elapsed*.25*f.s+f.p)*70,y=f.y+Math.cos(elapsed*.31*f.s+f.p*2)*38;const a=.35+.35*Math.sin(elapsed*1.6*f.s+f.p);const g=c.createRadialGradient(x,y,0,x,y,9);g.addColorStop(0,`rgba(255,226,130,${a})`);g.addColorStop(1,'rgba(255,200,90,0)');c.fillStyle=g;c.fillRect(x-9,y-9,18,18);}
   c.restore();}
  function frameLoop(now:number){raf=requestAnimationFrame(frameLoop);if(document.hidden){clock=now;return;}const dt=Math.min((now-clock)/1000,.05);clock=now;elapsed+=dt;
-  reels.update(dt);reelsCtx.clearRect(0,0,DESIGN.w,DESIGN.h);reels.draw();atmo();
+  chase?.update(dt);reels.update(dt);reelsCtx.clearRect(0,0,DESIGN.w,DESIGN.h);reels.draw();atmo();
   fx.update(dt);fxCtx.clearRect(0,0,DESIGN.w,DESIGN.h);fx.draw(fxCtx);
   if(shower>0&&!reduced){shower-=dt;if(Math.random()<.9){fx.emit(300+Math.random()*1300,-10,Math.random()<.5?'#ffd36a':'#ff9ae8',1,40,34,{gravity:520,spread:.4});}}}
  let shower=0;raf=requestAnimationFrame(frameLoop);
@@ -63,9 +63,10 @@ export async function createView(onProgress:(s:string)=>void){
  const fsImg=$<HTMLImageElement>('#fs-img');fsImg.src=urls.freeSpins;{const w=OVERLAY.freeSpins.w,h=w*941/1672;place(fsOverlay,OVERLAY.freeSpins.cx-w/2,OVERLAY.freeSpins.cy-h/2,w,h);}
  const bonusImg=$<HTMLImageElement>('#bonus-img');bonusImg.src=urls.bonus;{const w=OVERLAY.bonus.w,h=w*BONUS_IMG.h/BONUS_IMG.w;place(bonusOverlay,OVERLAY.bonus.cx-w/2,OVERLAY.bonus.cy-h/2,w,h);bonusOverlay.style.setProperty('--k',String(w/BONUS_IMG.w));}
  const bonus=createBonusOverlay({root:bonusOverlay,chestUrl:`${import.meta.env.BASE_URL}bonus-chest/bonus-chest-animated.glb`,skullUrl:`${import.meta.env.BASE_URL}assets/scenery/Skull_Horned_Creature_Rigged.glb`,renderScale:()=>rs()*OVERLAY.bonus.w/BONUS_IMG.w,reduced,onClosed:()=>{backdrop.classList.remove('on');skull!.set('idle');const r=chestClosed;chestClosed=undefined;r?.();},burst:()=>{if(!reduced)fx.emit(DESIGN.w/2,420,'#ffd36a',40,420,40,{gravity:120});}});
+ chase=createChase({world,skullCanvas:sk,renderScale:rs,skullTemplate:()=>skull!.template(),frameImg,panelImg,seekerUrl:`${import.meta.env.BASE_URL}assets/scenery/Skull_Seeker.glb`,skullHeight:SKULL.height});
  let chestClosed:(()=>void)|undefined;let bannerTimer=0,fsResolve:(()=>void)|undefined;
  const api={
-  reels,skull:skull!,
+  reels,skull:skull!,chase:chase!,
   async spin(outcome:Outcome){hideBanner();skull!.set('watch');await reels.spin(outcome);},
   /** Present the (already known) result: highlights, particles, skull reaction and the tiered celebration. */
   present(outcome:Outcome,tier:WinTier,cents:number,fmt:(c:number)=>string){

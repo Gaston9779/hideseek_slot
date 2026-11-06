@@ -33,5 +33,5 @@ export async function createSkull(canvas:HTMLCanvasElement,glbUrl:string,renderS
   root.scale.y=1+Math.sin(elapsed*1.8)*(reduced?0:.006);renderer.render(scene,cam);}
  function pulse(e:SkullEvent){if(reduced)return;const m:Partial<Record<SkullEvent,[string,number]>>={WIN:['#ffd36a',.7],BIG_WIN:['#ffe08a',1.3],BONUS_TRIGGER:['#c06cff',1.1],BEST_CHEST_PICK:['#ffe08a',1.3]};const v=m[e];if(!v)return;pulseColor.set(v[0]);pulseK=v[1];}
  raf=requestAnimationFrame(tick);
- return {controller,resize,set(state:SkullState){controller.setState(state);if(state==='bigwin')hop=1.2;},dispatch(e:SkullEvent,o?:{freeSpin?:boolean}){controller.dispatch(e,o);if(e==='BIG_WIN'||e==='BEST_CHEST_PICK')hop=1.2;pulse(e);},inspect:()=>controller.inspect(),dispose(){running=false;cancelAnimationFrame(raf);renderer.dispose();}};
+ return {controller,resize,template:()=>({scene:gltf.scene,animations:gltf.animations}),set(state:SkullState){controller.setState(state);if(state==='bigwin')hop=1.2;},dispatch(e:SkullEvent,o?:{freeSpin?:boolean}){controller.dispatch(e,o);if(e==='BIG_WIN'||e==='BEST_CHEST_PICK')hop=1.2;pulse(e);},inspect:()=>controller.inspect(),dispose(){running=false;cancelAnimationFrame(raf);renderer.dispose();}};
 }
