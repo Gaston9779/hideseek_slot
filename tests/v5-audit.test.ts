@@ -1,0 +1,9 @@
+import {describe,it,expect} from 'vitest';
+import {evaluate,type Grid} from '../src/math/v4/evaluate';import {LINE_PAYS,paylines,SYMBOLS} from '../src/math/v4/config';import {FS_STRIPS} from '../src/math/v4/strips';import {SYMBOL_ART} from '../src/config/presentation';
+const ordinary=SYMBOLS.filter(s=>!['WILD','SCATTER','CHEST_BONUS'].includes(s));
+const lineGrid=(id:(typeof ordinary)[number],count:number,wild=false):Grid=>{const g=Array.from({length:5},()=>Array(3).fill('POTION')) as Grid;const l=paylines[0]!;for(let c=0;c<count;c++)g[c]![l[c]!]=wild&&c===1?'WILD':id;if(count<5)g[count]![l[count]!]='SCATTER';return g;};
+describe('V5 independent paytable and symbol audit',()=>{
+ for(const id of ordinary){for(const count of [3,4,5])it(`${id} ${count}-of-a-kind pays only its published line amount`,()=>{const e=evaluate(lineGrid(id,count));expect(e.lineWins.find(x=>x.line===1)).toMatchObject({symbol:id,count,units:LINE_PAYS[id]![count-3]});});it(`${id} Wild substitution uses the same published 5-of-a-kind`,()=>{const e=evaluate(lineGrid(id,5,true));expect(e.lineWins.find(x=>x.line===1)).toMatchObject({symbol:id,count:5,units:LINE_PAYS[id]![2],wilds:1});});it(`${id} stops at a nonmatching fourth symbol`,()=>{const e=evaluate(lineGrid(id,3));expect(e.lineWins.find(x=>x.line===1)?.count).toBe(3);});}
+ it('has precisely 20 five-column paylines and no ordinary symbol is unmapped or shares art',()=>{expect(paylines).toHaveLength(20);expect(paylines.every(x=>x.length===5)).toBe(true);expect(ordinary).toHaveLength(10);expect(new Set(SYMBOLS.map(s=>SYMBOL_ART[s]!.file)).size).toBe(13);});
+ it('V5 feature strips make in-feature Chest Bonus reachable but prohibit a same-spin 3 Scatter + 3 Chest combination',()=>{const per=FS_STRIPS.map(s=>s.filter(x=>x==='CHEST_BONUS').length);expect(per).toEqual([1,1,1,1,1]);for(const s of FS_STRIPS){const i=s.indexOf('CHEST_BONUS');for(let d=-2;d<=2;d++)expect(s[(i+d+s.length)%s.length]).not.toBe('SCATTER');}});
+});

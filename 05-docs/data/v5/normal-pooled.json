@@ -1,0 +1,22 @@
+{
+  "schema": "skull-hunt-v5-monte-carlo-pooled-1",
+  "mode": "normal",
+  "files": [
+    2026110711,
+    2026110713
+  ],
+  "rounds": 10000000,
+  "rtp": 0.9656985000083644,
+  "rtpPercent": 96.56985000083644,
+  "standardDeviation": 7.283362350096302,
+  "ci95": [
+    0.9611842252544427,
+    0.9702127747622862
+  ],
+  "ci999": [
+    0.9581197542181308,
+    0.9732772457985981
+  ],
+  "accountingFailures": 0,
+  "capHits": 0
+}

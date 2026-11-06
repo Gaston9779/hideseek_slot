@@ -1,0 +1,123 @@
+{
+  "schema": "skull-hunt-v5-production-engine-monte-carlo-1",
+  "mathVersion": "4.1.0",
+  "mode": "normal",
+  "rounds": 1000000,
+  "engineSeed": 2026110701,
+  "choiceSeed": 2026110702,
+  "engine": "src/engine/game.ts",
+  "buyPriceX": 134,
+  "denominator": "base stake",
+  "seconds": 2.965,
+  "rtp": 0.9553775000014524,
+  "rtpPercent": 95.53775000014524,
+  "standardDeviation": 6.825587585517336,
+  "standardError": 0.006825587585517335,
+  "ci95": [
+    0.9419993483338384,
+    0.9687556516690664
+  ],
+  "ci999": [
+    0.9329177215965259,
+    0.9778372784063789
+  ],
+  "hitFrequency": 0.443762,
+  "returnVsDenominator": {
+    "below": 0.855014,
+    "equal": 0.007662,
+    "above": 0.137324
+  },
+  "triggers": {
+    "scatter": 0.007067,
+    "chest": 0.000282,
+    "dual": 0.000114
+  },
+  "chestSelections": {
+    "positions": [
+      93,
+      113,
+      105
+    ],
+    "positionFrequency": [
+      0.000093,
+      0.000113,
+      0.000105
+    ],
+    "permutations": {
+      "1,2,5": 55,
+      "5,2,1": 45,
+      "2,1,5": 42,
+      "2,5,1": 64,
+      "5,1,2": 66,
+      "1,5,2": 39
+    },
+    "byMultiplier": {
+      "1x": {
+        "selections": 93,
+        "selectionFrequency": 0.000093,
+        "averageBase": 50.106989247311816,
+        "averageGross": 50.106989247311816,
+        "averageCredited": 50.106989247311816,
+        "standardDeviation": 59.82261978756195,
+        "winFrequency": 0.989247311827957,
+        "tailProbability": {
+          "100x": 0.10752688172043011,
+          "250x": 0.021505376344086023,
+          "500x": 0,
+          "1000x": 0,
+          "5000x": 0
+        },
+        "max": 391.2
+      },
+      "2x": {
+        "selections": 91,
+        "selectionFrequency": 0.000091,
+        "averageBase": 48.68241758241758,
+        "averageGross": 97.36483516483516,
+        "averageCredited": 97.36483516483516,
+        "standardDeviation": 71.86810320260207,
+        "winFrequency": 1,
+        "tailProbability": {
+          "100x": 0.37362637362637363,
+          "250x": 0.03296703296703297,
+          "500x": 0,
+          "1000x": 0,
+          "5000x": 0
+        },
+        "max": 391.7
+      },
+      "5x": {
+        "selections": 98,
+        "selectionFrequency": 0.000098,
+        "averageBase": 44.45,
+        "averageGross": 222.25,
+        "averageCredited": 222.25,
+        "standardDeviation": 151.65443482483727,
+        "winFrequency": 1,
+        "tailProbability": {
+          "100x": 0.8163265306122449,
+          "250x": 0.35714285714285715,
+          "500x": 0.05102040816326531,
+          "1000x": 0,
+          "5000x": 0
+        },
+        "max": 900.75
+      }
+    }
+  },
+  "eventCounts": {
+    "FREE_SPINS_TRIGGERED": 7549,
+    "CHEST_BONUS_TRIGGERED": 197,
+    "CHEST_PICK_COMPLETED": 311,
+    "BEST_CHEST_PICK": 104,
+    "CHEST_FREE_SPINS_STARTED": 282,
+    "CHEST_FREE_SPINS_UPDATED": 3600,
+    "CHEST_FREE_SPINS_COMPLETED": 282,
+    "DUAL_BONUS_TRIGGERED": 114,
+    "FEATURE_EXTENDED": 65
+  },
+  "physicalSpins": 1092941,
+  "capHits": 0,
+  "maxReturnX": 927.65,
+  "accountingFailures": 0
+}
