@@ -24,7 +24,8 @@ export function createBuyBonusWidget(d:BuyWidgetDeps){
  refresh();
  btn.addEventListener('click',()=>{if(btn.disabled||dlg.open)return;refresh();dlg.showModal();cancel.focus();});
  cancel.addEventListener('click',()=>dlg.close());
- okBtn.addEventListener('click',async()=>{if(okBtn.disabled)return;const r=await d.adapter.purchase();if(!r.ok){dlg.querySelector('.bd-note')!.textContent=r.reason;}else dlg.close();});
+ let submitting=false;
+ okBtn.addEventListener('click',async()=>{if(okBtn.disabled||submitting)return;submitting=true;okBtn.disabled=true;cancel.disabled=true;const r=await d.adapter.purchase();if(!r.ok){dlg.querySelector('.bd-note')!.textContent=r.reason;submitting=false;cancel.disabled=false;refresh();return;}dlg.close();try{await d.adapter.afterPurchase?.();}catch(e){console.error('[buy-bonus] accepted purchase follow-up failed',e);}finally{submitting=false;cancel.disabled=false;}});
  // ---- 3D chest ---------------------------------------------------------------------------------
  let renderer:T.WebGLRenderer|undefined,scene:T.Scene,cam:T.OrthographicCamera,model:T.Group,t=0,hover=0,hoverTarget=0,loadP:Promise<void>|undefined,visible=true;
  async function load(){

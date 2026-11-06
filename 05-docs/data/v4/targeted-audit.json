@@ -1,0 +1,107 @@
+{
+  "schema": "skull-hunt-v4-targeted-audit-1",
+  "mathVersion": "4.0.0",
+  "configurationSha256": "94c368a22422546fd1dec6d0d8af83077958ebf7bb2cd6d58e5218dd50919be2",
+  "baseStopCombinations": "8153726976",
+  "probabilities": {
+    "scatter": {
+      "fraction": "119529/16777216",
+      "decimal": 0.007124483585357,
+      "oneIn": 140.36105045638772
+    },
+    "chest": {
+      "fraction": "4883/16777216",
+      "decimal": 0.000291049480438,
+      "oneIn": 3435.8419004737652
+    },
+    "dual": {
+      "fraction": "24127/226492416",
+      "decimal": 0.00010652453811,
+      "oneIn": 9387.50843460475
+    },
+    "dualGivenChest": {
+      "fraction": "48254/131841",
+      "decimal": 0.366001471469421,
+      "percent": 36.6001471469421
+    }
+  },
+  "dualExample": {
+    "seed": 693,
+    "stops": [
+      75,
+      11,
+      13,
+      21,
+      16
+    ],
+    "grid": [
+      [
+        "SCATTER",
+        "GHOST",
+        "POTION"
+      ],
+      [
+        "WILD",
+        "GHOST",
+        "CHEST_BONUS"
+      ],
+      [
+        "GHOST",
+        "CHEST_BONUS",
+        "SCATTER"
+      ],
+      [
+        "KEY",
+        "CHEST",
+        "MAGIC_BOOK"
+      ],
+      [
+        "CHEST_BONUS",
+        "SCATTER",
+        "GHOST"
+      ]
+    ],
+    "scatterCount": 3,
+    "chestBonusCount": 3,
+    "committedPackages": [
+      5,
+      2,
+      1
+    ]
+  },
+  "rtp": {
+    "baseLines": 0.549171113305621,
+    "baseScatter": 0.028026401996612,
+    "scatterFreeSpins": 0.346868158067964,
+    "chestFreeSpins": 0.035934976503881,
+    "preCapTotal": 0.960000649874079
+  },
+  "buy": {
+    "featureEv": 123.46689796447754,
+    "priceX": 128.6,
+    "rtp": 0.9600847431141333
+  },
+  "stripFacts": {
+    "baseLengths": [
+      96,
+      96,
+      96,
+      96,
+      96
+    ],
+    "freeLengths": [
+      96,
+      96,
+      96,
+      96,
+      96
+    ],
+    "freeChestBonusCount": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "schema": "skull-hunt-v4-cap-bound-1",
+  "method": "Chernoff upper bound over independent V4 feature-spin draws using the exhaustive 32^5 histogram; union bound across Chest/Scatter routes",
+  "featureHistogram": {
+    "combinations": 33554432,
+    "maxFeatureSpinUnits": 13899
+  },
+  "constants": {
+    "maxWinUnits": 100000,
+    "maxBaseUnits": 22700,
+    "maxNormalUnits": 1273610,
+    "maxBuyUnits": 833940
+  },
+  "normal": {
+    "chestConditional": [
+      {
+        "multiplier": 1,
+        "spins": 12,
+        "required": 77300,
+        "optimizingT": 0.0010727601483110066,
+        "logProbabilityBound": -71.53997157339573,
+        "probabilityBound": 8.52285520290542e-32
+      },
+      {
+        "multiplier": 2,
+        "spins": 12,
+        "required": 38650,
+        "optimizingT": 0.0009685641491162021,
+        "logProbabilityBound": -31.986667358923278,
+        "probabilityBound": 1.2834142928678558e-14
+      },
+      {
+        "multiplier": 5,
+        "spins": 12,
+        "required": 15460,
+        "optimizingT": 0.0008571192142275232,
+        "logProbabilityBound": -10.638314603766794,
+        "probabilityBound": 0.00002397941980128182
+      }
+    ],
+    "scatter": {
+      "spins": 30,
+      "required": 77300,
+      "optimizingT": 0.0009404843466679265,
+      "logProbabilityBound": -61.51244261370598,
+      "probabilityBound": 1.929681372142144e-27
+    },
+    "probabilityBound": 2.326399226034378e-9,
+    "rtpLossUpperBound": 0.00013651426978331034
+  },
+  "buy": {
+    "chestConditional": [
+      {
+        "multiplier": 1,
+        "spins": 12,
+        "required": 100000,
+        "optimizingT": 0.0011299342627887668,
+        "logProbabilityBound": -96.52953119559106,
+        "probabilityBound": 1.1960718274947436e-42
+      },
+      {
+        "multiplier": 2,
+        "spins": 12,
+        "required": 50000,
+        "optimizingT": 0.0010031145078947356,
+        "logProbabilityBound": -43.18152828145981,
+        "probabilityBound": 1.7640079871321754e-19
+      },
+      {
+        "multiplier": 5,
+        "spins": 12,
+        "required": 20000,
+        "optimizingT": 0.000887922988128829,
+        "logProbabilityBound": -14.602651317674571,
+        "probabilityBound": 4.551443035241426e-7
+      }
+    ],
+    "probabilityBound": 1.5171476784143965e-7,
+    "rtpLossUpperBound": 0.005567476835477311
+  },
+  "reachabilityLowerBound": {
+    "description": "Chest triggers, player selects 5x, and the first two of 12 independent feature spins both equal the unique maximum state; this alone exceeds the cap.",
+    "probability": 8.61679558633218e-20
+  }
+}

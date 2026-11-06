@@ -17,11 +17,11 @@ export const SYMBOL_ART: Record<string, { file: string; label: string }> = {
   TOMB: { file: 'tombstone', label: 'Tombstone' },
   WILD: { file: 'wild', label: 'Wild Skull' },
   LANTERN: { file: 'lantern', label: 'Lantern' },
-  CHEST: { file: 'magic-book', label: 'Gothic Magic Book' },   // ID unchanged (math untouched); art changed so it can never be confused with CHEST_BONUS
+  CHEST: { file: 'chest', label: 'Treasure Chest' },
   POTION: { file: 'potion', label: 'Purple Potion' },
   GHOST: { file: 'ghost', label: 'Blue Ghost' },
   KEY: { file: 'key', label: 'Golden Key' },
-  MAUSOLEUM: { file: 'book', label: 'Skull Spellbook' },
+  MAGIC_BOOK: { file: 'magic-book', label: 'Magic Book' },
   SCATTER: { file: 'scatter', label: 'Crypt Scatter' },
   SKULL: { file: 'coin', label: 'Skull Coin' },
   GARGOYLE: { file: 'gargoyle', label: 'Gargoyle' },

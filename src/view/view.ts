@@ -9,7 +9,7 @@ import {Particles} from './particles';
 import {createSkull} from './skull';import {createChase,type Chase} from '../chase/director';
 import type {SkullState} from '../animation/mascot';
 
-const INITIAL:SymbolId[][]=[['TOMB','CHEST','LANTERN'],['WILD','GHOST','SKULL'],['LANTERN','KEY','SCATTER'],['CHEST','POTION','MAUSOLEUM'],['POTION','SCATTER','GARGOYLE']];
+const INITIAL:SymbolId[][]=[['TOMB','CHEST','LANTERN'],['WILD','GHOST','SKULL'],['LANTERN','KEY','SCATTER'],['CHEST','POTION','MAGIC_BOOK'],['POTION','SCATTER','GARGOYLE']];
 const $=<T extends HTMLElement>(s:string)=>document.querySelector<T>(s)!;
 const place=(el:HTMLElement,x:number,y:number,w?:number,h?:number)=>{el.style.left=`${x}px`;el.style.top=`${y}px`;if(w!==undefined)el.style.width=`${w}px`;if(h!==undefined)el.style.height=`${h}px`;};
 const circle=(el:HTMLElement,c:{cx:number,cy:number,r:number})=>place(el,c.cx-c.r,c.cy-c.r,c.r*2,c.r*2);

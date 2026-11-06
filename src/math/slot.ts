@@ -1,1 +1,1 @@
-export {generateOutcome,type Outcome} from './v3/spin';
+export {generateOutcome,type Outcome} from './v4/spin';

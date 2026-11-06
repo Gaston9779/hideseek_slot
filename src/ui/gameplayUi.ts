@@ -4,7 +4,7 @@ import {urls} from '../view/assets';
 const mk=(tag:string,cls:string,parent:HTMLElement,html='')=>{const e=document.createElement(tag);e.className=cls;if(html)e.innerHTML=html;parent.appendChild(e);return e as HTMLElement;};
 const wait=(ms:number)=>new Promise<void>(r=>setTimeout(r,ms));
 
-export interface FsHudState{remaining:number;played:number;awarded:number;winCents:number}
+export interface FsHudState{remaining:number;played:number;awarded:number;winCents:number;featureType:'scatter'|'chest';multiplier:number;baseBonusWinCents:number;grossMultipliedBonusWinCents:number;effectiveBonusWinCents:number;status:'READY'|'ACTIVE'|'COMPLETED'}
 export function createFsHud(world:HTMLElement,money:(c:number)=>string,reduced:boolean){
  const root=mk('div','fs-hud',world,`<div class="fh-title">FREE SPINS</div><div class="fh-row"><span>GIRI RIMANENTI</span><b data-k="rem">0</b></div><div class="fh-row"><span>VINCITA BONUS</span><b data-k="win">0.00</b></div><div class="fh-sub" data-k="sub"></div><div class="fh-toast" aria-hidden="true"></div>`);
  root.hidden=true;root.setAttribute('role','status');root.setAttribute('aria-live','polite');
@@ -17,7 +17,7 @@ export function createFsHud(world:HTMLElement,money:(c:number)=>string,reduced:b
   /** Never negative; "played" counts only completed spins; remaining excludes them. */
   set(s:FsHudState){
    const rem=Math.max(0,s.remaining),win=Math.max(0,s.winCents);
-   q('rem').textContent=String(rem);q('win').textContent=money(win);q('sub').textContent=`GIRO ${Math.min(s.played,s.awarded)} / ${s.awarded}`;
+   q('rem').textContent=String(rem);q('win').textContent=money(win);q('sub').textContent=s.featureType==='chest'?`CHEST BONUS — ${s.awarded} FREE SPINS — ×${s.multiplier} · BASE ${money(s.baseBonusWinCents)} · TOTALE ${money(s.effectiveBonusWinCents)}`:`GIRO ${Math.min(s.played,s.awarded)} / ${s.awarded}`;root.querySelector<HTMLElement>('.fh-title')!.textContent=s.featureType==='chest'?`CHEST BONUS — ${s.awarded} FREE SPINS — ×${s.multiplier}`:'FREE SPINS';
    if(rem!==last.remaining&&last.remaining>=0)bump(q('rem'));if(win!==last.win&&last.win>=0)bump(q('win'));last={remaining:rem,win};
   },
   /** "+X FREE SPINS" message for a retrigger (X comes from the engine). */
@@ -25,7 +25,7 @@ export function createFsHud(world:HTMLElement,money:(c:number)=>string,reduced:b
  };
 }
 
-export interface FsSummary{spins:number;winCents:number;celebrate:()=>void}
+export interface FsSummary{spins:number;winCents:number;celebrate:()=>void;chest?:{baseBonusWinCents:number;multiplier:number;grossMultipliedBonusWinCents:number;effectiveBonusWinCents:number}}
 /** End-of-feature screen reusing the approved Free Spins art. Display only: the prize was credited spin by spin; this screen never credits. */
 export function createFsSummary(world:HTMLElement,money:(c:number)=>string,reduced:boolean){
  const root=mk('div','fs-summary',world,`<img alt="" draggable="false"><div class="fsm-plaque"><small>VINCITA TOTALE BONUS</small><b data-k="win">0.00</b><i data-k="spins"></i></div><button type="button" class="fsm-go">CONTINUA</button>`);
@@ -35,7 +35,7 @@ export function createFsSummary(world:HTMLElement,money:(c:number)=>string,reduc
  return {
   get open(){return open;},
   show(s:FsSummary):Promise<void>{
-   if(open)return Promise.resolve();open=true;spins.textContent=`${s.spins} GIRI EFFETTUATI`;
+   if(open)return Promise.resolve();open=true;spins.textContent=s.chest?`${s.spins} GIRI EFFETTUATI · VINCITA BASE ${money(s.chest.baseBonusWinCents)} · ×${s.chest.multiplier} · TOTALE BONUS ${money(s.chest.effectiveBonusWinCents)}`:`${s.spins} GIRI EFFETTUATI`;
    root.classList.toggle('zero',s.winCents===0);root.querySelector('small')!.textContent=s.winCents===0?'NESSUNA VINCITA IN QUESTO BONUS':'VINCITA TOTALE BONUS';
    win.textContent=money(0);root.classList.add('show');go.focus({preventScroll:true});
    const t0=performance.now(),dur=reduced||s.winCents===0?0:1400;

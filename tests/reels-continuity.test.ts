@@ -1,7 +1,7 @@
 import {describe,it,expect,beforeAll} from 'vitest';
-import {SeededRng} from '../src/math/v2/rng';import {generateOutcome} from '../src/math/v3/spin';import {SYMBOLS,type SymbolId} from '../src/math/v3/config';
+import {SeededRng} from '../src/math/v2/rng';import {generateOutcome} from '../src/math/v4/spin';import {SYMBOLS,type SymbolId} from '../src/math/v4/config';
 import {COL_CENTERS,ROW_CENTER0,ROW_PITCH} from '../src/layout';import {REEL_ANIM} from '../src/config/reelAnim';
-import type {Outcome} from '../src/math/v3/spin';
+import type {Outcome} from '../src/math/v4/spin';
 /** Headless run of the REAL Reels class with a recording canvas stub: every drawn symbol (id,x,y) is captured, frame by frame, at 60 fps. */
 type Draw={id:string,x:number,y:number};
 let Reels:typeof import('../src/view/reels').Reels;
@@ -13,13 +13,13 @@ beforeAll(async()=>{
 function stubCtx(sink:Draw[]){let tx=0,ty=0;const impl:Record<string,any>={translate:(x:number,y:number)=>{tx=x;ty=y;},drawImage:(img:any)=>{if(img&&img.__id)sink.push({id:img.__id,x:tx,y:ty});},createRadialGradient:()=>({addColorStop(){}}),createLinearGradient:()=>({addColorStop(){}})};
  return new Proxy({},{get:(_,p:string)=>impl[p]??(()=>undefined),set:()=>true}) as unknown as CanvasRenderingContext2D;}
 const images=Object.fromEntries(SYMBOLS.map(s=>[s,{__id:s}])) as any;
-const grid0=():SymbolId[][]=>[['TOMB','CHEST','LANTERN'],['WILD','GHOST','SKULL'],['LANTERN','KEY','SCATTER'],['CHEST','POTION','MAUSOLEUM'],['POTION','SCATTER','GARGOYLE']];
+const grid0=():SymbolId[][]=>[['TOMB','CHEST','LANTERN'],['WILD','GHOST','SKULL'],['LANTERN','KEY','SCATTER'],['CHEST','POTION','MAGIC_BOOK'],['POTION','SCATTER','GARGOYLE']];
 function frame(r:InstanceType<typeof Reels>,sink:Draw[]){sink.length=0;r.draw();return sink.map(d=>({...d}));}
 const colOf=(x:number)=>COL_CENTERS.findIndex(c=>Math.abs(c-x)<4);
 /** ordered (top→bottom) symbols of one column, restricted to the clip window rows -1..3 */
 const colSeq=(f:Draw[],col:number)=>f.filter(d=>colOf(d.x)===col).sort((a,b)=>a.y-b.y);
 const visible=(f:Draw[],col:number)=>colSeq(f,col).filter(d=>d.y>ROW_CENTER0-ROW_PITCH*.5&&d.y<ROW_CENTER0+ROW_PITCH*2.5).map(d=>d.id);
-function outcomeWith(grid:SymbolId[][],mode:'base'|'free'='base'):Outcome{return {mode,stops:[0,1,2,3,4],grid,evaluation:{lineWins:[],scatterCount:0,chestBonusCount:0,scatterUnits:0,scatterAmount:0,lineUnits:0,totalUnits:0,totalMultiplier:0,capped:false},chest:null} as unknown as Outcome;}
+function outcomeWith(grid:SymbolId[][],mode:'base'|'free'='base'):Outcome{return {mode,featureType:mode==='free'?'scatter':null,featureMultiplier:1,stops:[0,1,2,3,4],grid,evaluation:{lineWins:[],scatterCount:0,chestBonusCount:0,scatterUnits:0,scatterAmount:0,lineUnits:0,totalUnits:0,totalMultiplier:0,capped:false},chest:null};}
 function run(g0:SymbolId[][],o:Outcome,quick=false){
  const sink:Draw[]=[],r=new Reels(stubCtx(sink),images,g0);const before=frame(r,sink);
  const p=r.spin(o,quick);const first=frame(r,sink);              // first frame AFTER the click, before any update

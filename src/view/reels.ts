@@ -14,7 +14,7 @@ import {Particles} from './particles';
  * The strip of a reel is: [displayed column] → cosmetic ordinary symbols → [target column]. Because the displayed column is the first part of the strip,
  * the first animated frame is the continuation of the last static frame; the target column is reached by decelerating, never by swapping images.
  */
-const ORDINARY:SymbolId[]=['TOMB','LANTERN','CHEST','POTION','KEY','GHOST','MAUSOLEUM','BLASTER','SKULL','GARGOYLE','TOMB','LANTERN','CHEST','POTION','KEY','GHOST'];   // cosmetic blur symbols: never WILD/SCATTER/CHEST_BONUS (no fake bonus hints)
+const ORDINARY:SymbolId[]=['TOMB','LANTERN','CHEST','POTION','KEY','GHOST','MAGIC_BOOK','BLASTER','SKULL','GARGOYLE','TOMB','LANTERN','CHEST','POTION','KEY','GHOST'];   // cosmetic blur symbols: never WILD/SCATTER/CHEST_BONUS (no fake bonus hints)
 const hash=(n:number)=>{const x=Math.sin(n*127.1)*43758.5453;return x-Math.floor(x);};
 const easeBack=(q:number)=>{const c1=1.15,c3=c1+1;return 1+c3*Math.pow(q-1,3)+c1*Math.pow(q-1,2);};
 const clamp01=(x:number)=>Math.max(0,Math.min(1,x));
