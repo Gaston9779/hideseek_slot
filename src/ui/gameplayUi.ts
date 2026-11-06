@@ -1,5 +1,5 @@
 import './gameplay.css';
-import {urls,symbolUrl} from '../view/assets';import {keys} from './keyboard';import {cue} from '../audio/cues';
+import {urls,symbolUrl} from '../view/assets';import {BONUS_UI,medalFor} from './bonusAssets';import {HUD_FRAME,pctRect,medalImgStyle,type Rect} from './bonusAnchors';import {keys} from './keyboard';import {cue} from '../audio/cues';
 /** Presentation-only widgets: Free Spins HUD, Free Spins summary, Quick Spin control. They display numbers handed in by main.ts from the engine; they compute nothing economic. */
 const mk=(tag:string,cls:string,parent:HTMLElement,html='')=>{const e=document.createElement(tag);e.className=cls;if(html)e.innerHTML=html;parent.appendChild(e);return e as HTMLElement;};
 const wait=(ms:number)=>new Promise<void>(r=>setTimeout(r,ms));
@@ -11,7 +11,8 @@ export interface FsHudState{remaining:number;played:number;awarded:number;winCen
  */
 export function createFsHud(world:HTMLElement,money:(c:number)=>string,reduced:boolean){
  const ico=`<img class="fh-ico" src="${symbolUrl('SKULL')}" alt="" draggable="false">`;
- const root=mk('div','fs-hud',world,`<div class="fh-head">${ico}<span class="fh-title" data-k="title">FREE SPINS</span>${ico}</div><div class="fh-main"><div class="fh-mult" data-k="multBox" hidden><b data-k="mult">×1</b></div><div class="fh-body"><div class="fh-row"><span>GIRI RIMANENTI</span><b data-k="rem">0</b></div><div class="fh-row"><span data-k="winLbl">VINCITA BONUS</span><b data-k="win">0.00</b></div><div class="fh-sub" data-k="sub"></div></div></div><div class="fh-toast" aria-hidden="true"></div>`);
+ const HF=HUD_FRAME,rect=(r:Rect)=>pctRect(r,HF);
+ const root=mk('div','fs-hud',world,`<div class="fh-classic"><div class="fh-head">${ico}<span class="fh-title" data-k="title">FREE SPINS</span>${ico}</div><div class="fh-main"><div class="fh-mult" data-k="multBox" hidden><img data-k="multimg" alt="" draggable="false"></div><div class="fh-body"><div class="fh-row"><span>GIRI RIMANENTI</span><b data-k="rem">0</b></div><div class="fh-row"><span data-k="winLbl">VINCITA BONUS</span><b data-k="win">0.00</b></div><div class="fh-sub" data-k="sub"></div></div></div></div><div class="fh-art" hidden><img class="fh-frame" src="${BONUS_UI.hudFrame}" alt="" draggable="false"><img class="fh-medal" data-k="a-medal" alt="" draggable="false" hidden style="${medalImgStyle(HF.orb,HF,.97)}"><div class="fh-a-title" style="${rect(HF.title)}">CHEST FREE SPINS</div><div class="fh-a-row" style="${rect(HF.rows)}"><span>GIRI RIMANENTI</span><b data-k="a-rem">0</b></div><div class="fh-a-row" style="${rect(HF.base)}"><span>VINCITA BASE</span><b data-k="a-win">0.00</b></div><div class="fh-a-mode" style="${rect(HF.mode)}">CHEST BONUS ATTIVO</div></div><div class="fh-toast" aria-hidden="true"></div>`);
  root.hidden=true;root.setAttribute('role','status');root.setAttribute('aria-live','polite');
  const q=(k:string)=>root.querySelector<HTMLElement>(`[data-k="${k}"]`)!,toast=root.querySelector<HTMLElement>('.fh-toast')!;
  let last={remaining:-1,win:-1,type:''};
@@ -24,14 +25,16 @@ export function createFsHud(world:HTMLElement,money:(c:number)=>string,reduced:b
    const rem=Math.max(0,s.remaining),win=Math.max(0,s.winCents),chest=s.featureType==='chest';
    root.classList.toggle('chest',chest);root.classList.toggle('scatter',!chest);
    q('rem').textContent=String(rem);q('win').textContent=money(win);q('title').textContent=chest?'CHEST FREE SPINS':'FREE SPINS';
-   q('multBox').hidden=!(chest||s.multiplier>1);q('mult').textContent=`×${s.multiplier}`;
+   q('multBox').hidden=!(chest||s.multiplier>1);{const mi=q('multimg') as HTMLImageElement,src=medalFor(s.multiplier);if(src){if(mi.getAttribute('src')!==src)mi.src=src;mi.alt=`×${s.multiplier}`;}else mi.removeAttribute('src');}
+   // Chest HUD (artwork): medal = the REAL picked package, rows = real counters (BASE win only)
+   {const art=root.querySelector<HTMLElement>('.fh-art')!,classic=root.querySelector<HTMLElement>('.fh-classic')!;art.hidden=!chest;classic.hidden=chest;const med=q('a-medal') as HTMLImageElement,src=chest?medalFor(s.multiplier):null;if(src){if(med.getAttribute('src')!==src)med.src=src;med.alt=`Premio ottenuto ×${s.multiplier}`;med.hidden=false;}else{med.removeAttribute('src');med.hidden=true;}q('a-rem').textContent=String(rem);q('a-win').textContent=money(win);}
    // Chest: only the BASE win is shown while the spins run; the multiplied total is reserved for the final reveal.
-   if(chest){q('mult').textContent=`×${s.multiplier}`;q('winLbl').textContent='VINCITA BASE';q('sub').textContent='';}
+   if(chest){q('winLbl').textContent='VINCITA BASE';q('sub').textContent='';}
    else{q('winLbl').textContent='VINCITA CUMULATA';const extra=s.retriggerAwarded?`+${s.retriggerAwarded} GIRI EXTRA`:'';q('sub').textContent=`${extra}${extra&&s.wildMultiplier?' · ':''}${s.wildMultiplier?`WILD ×${s.wildMultiplier}`:''}`;}
-   if(rem!==last.remaining&&last.remaining>=0&&last.type===s.featureType)bump(q('rem'));if(win!==last.win&&last.win>=0&&last.type===s.featureType)bump(q('win'));last={remaining:rem,win,type:s.featureType};
+   if(rem!==last.remaining&&last.remaining>=0&&last.type===s.featureType)bump(q(chest?'a-rem':'rem'));if(win!==last.win&&last.win>=0&&last.type===s.featureType)bump(q(chest?'a-win':'win'));last={remaining:rem,win,type:s.featureType};
   },
   /** "+X FREE SPINS" message for a retrigger (X comes from the engine). */
-  async retrigger(n:number,suffix=''){toast.textContent=`+${n} FREE SPINS${suffix}`;toast.classList.remove('show');void toast.offsetWidth;toast.classList.add('show');bump(q('rem'));await wait(reduced?900:1500);toast.classList.remove('show');},
+  async retrigger(n:number,suffix=''){toast.textContent=`+${n} FREE SPINS${suffix}`;toast.classList.remove('show');void toast.offsetWidth;toast.classList.add('show');bump(q(root.classList.contains('chest')?'a-rem':'rem'));await wait(reduced?900:1500);toast.classList.remove('show');},
  };
 }
 

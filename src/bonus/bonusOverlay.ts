@@ -1,4 +1,4 @@
-import {cue} from '../audio/cues';import {ChestBonusController,type BonusPorts,type ChestBonusRound} from './controller';
+import {cue} from '../audio/cues';import {medalFor} from '../ui/bonusAssets';import {ChestBonusController,type BonusPorts,type ChestBonusRound} from './controller';
 import {PreviewAdapter,TestRoundProvider} from './provider';
 import {createBonusScene,type BonusScene} from './bonusScene';
 import {BONUS_IMG,LABEL_UP,PEDESTALS,SUMMARY_RECT} from './bonusLayout';
@@ -10,7 +10,7 @@ export function createBonusOverlay(d:{celebration?:(banner:HTMLElement)=>number,
  const previewProvider=new TestRoundProvider(),previewAdapter=new PreviewAdapter();let provider:{nextRound():ChestBonusRound}=previewProvider,adapter:{award(id:string,prize:number):boolean;awards?:{roundId:string,prize:number}[]}=previewAdapter;let real=false;
  let scene:BonusScene|undefined,controller:ChestBonusController|undefined,opening=false,timers=new Set<number>(),isOpen=false;
  const celebrateMs=(import.meta.env.DEV&&Number(new URLSearchParams(location.search).get('bonusCelebrateMs')))||3200;   // QA only: lets screenshots catch the celebration
- const labels=PEDESTALS.map((p,i)=>{const el=document.createElement('div');el.className='bprize';el.style.left=`calc(${p.u}px*var(--k))`;el.style.top=`calc(${p.v-LABEL_UP}px*var(--k))`;el.dataset.index=String(i);el.innerHTML='<i></i><b></b><small></small>';prizesEl.appendChild(el);return el;});
+ const labels=PEDESTALS.map((p,i)=>{const el=document.createElement('div');el.className='bprize';el.style.left=`calc(${p.u}px*var(--k))`;el.style.top=`calc(${p.v-LABEL_UP}px*var(--k))`;el.dataset.index=String(i);el.innerHTML='<img alt="" draggable="false" hidden><b></b><i></i><small></small>';prizesEl.appendChild(el);return el;});
  const track=(fn:()=>void,ms:number)=>{const id=window.setTimeout(()=>{timers.delete(id);fn();},ms);timers.add(id);return ()=>{clearTimeout(id);timers.delete(id);};};
  const clearAll=()=>{timers.forEach(clearTimeout);timers.clear();};
  const fmt=(n:number)=>real?`×${n}`:String(n);
@@ -21,7 +21,7 @@ export function createBonusOverlay(d:{celebration?:(banner:HTMLElement)=>number,
   return {
    setInteractive:on=>{scene?.setInteractive(on);titleEl.classList.toggle('picked',!on);},
    openChest:i=>{cue.chestOpen();if(round.selectedIndex===i){scene!.setSelected(i);live.textContent='Opening your chest';}else scene!.setUnselected(i);return scene!.openChest(i);},
-   showPrize:(i,kind,value)=>{if(real&&kind==='selected')cue.chestReveal(value);const el=labels[i];el.className=`bprize ${kind} x${value}`;el.querySelector('i')!.textContent=real?(kind==='selected'?'12 FREE SPINS':'NON SCELTA'):(kind==='selected'?'YOU WON':'NOT PICKED');el.querySelector('b')!.textContent=fmt(value);el.querySelector('small')!.textContent=real?(kind==='selected'?'MOLTIPLICATORE VINCITE':'12 FREE SPINS'):'TEST VALUE';
+   showPrize:(i,kind,value)=>{if(real&&kind==='selected')cue.chestReveal(value);const el=labels[i];el.className=`bprize ${kind} x${value}`;el.querySelector('i')!.textContent=real?(kind==='selected'?'12 FREE SPINS':'NON SCELTA'):(kind==='selected'?'YOU WON':'NOT PICKED');{const img=el.querySelector<HTMLImageElement>('img')!,src=real?medalFor(value):null;if(src){img.src=src;img.alt=`Premio ×${value}`;img.hidden=false;el.querySelector('b')!.textContent='';}else{img.hidden=true;el.querySelector('b')!.textContent=fmt(value);}}el.querySelector('small')!.textContent=real?(kind==='selected'?'MOLTIPLICATORE VINCITE':'12 FREE SPINS'):'TEST VALUE';
     void el.offsetWidth;el.classList.add('show');live.textContent=real?(kind==='selected'?`Hai vinto ${spinsLine(value)}`:`La cassa ${i+1} conteneva ${spinsLine(value)}, non assegnata`):(kind==='selected'?`You won ${fmt(value)} (test)`:`Chest ${i+1} held ${fmt(value)}, not awarded`);
     return new Promise<void>(res=>{track(res,anim);});},     // resolves once the plaque has finished appearing → value is really visible
    celebrate:()=>{cue.voice('win');const sel=round.selectedIndex!;scene!.highlightBest(sel);scene!.skullAppear('bigwin');d.burst?.();const extra=d.celebration?.(banner)??0;banner.style.animationDuration=extra?`${extra}ms`:'';banner.classList.remove('show');void banner.offsetWidth;banner.classList.add('show');live.textContent=extra?'Max win!':'Best pick!';

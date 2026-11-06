@@ -1,12 +1,12 @@
 import * as T from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {RoomEnvironment} from 'three/examples/jsm/environments/RoomEnvironment.js';
-import type {BuyBonusAdapter} from '../engine/buyBonus';import {cue} from '../audio/cues';import {urls,symbolUrl} from '../view/assets';
+import type {BuyBonusAdapter} from '../engine/buyBonus';import {cue} from '../audio/cues';import {BONUS_UI} from './bonusAssets';import {BUY_FRAME as F,pctRect,pctDisc,medalImgStyle} from './bonusAnchors';import {createBabySkullPortrait} from './babySkullPortrait';
 /**
  * BUY BONUS entry point: the original 3D chest (same GLB as the bonus screen) standing on the lower-right plinth, outside the reels and every control.
  * UI only. All gating/pricing comes from the adapter; with the default (disabled) adapter nothing can be bought, no credits move and no RNG is touched.
  */
-export interface BuyWidgetDeps{/** change the stake from inside the modal (only honoured when a new round may start) */changeBet:(delta:-1|1)=>void,betBounds:()=>{min:boolean;max:boolean},/** true only when a new round may start (idle, no feature/modal/cinematic in progress) */canOpen:()=>boolean,balance:()=>number,world:HTMLElement,dialogHost:HTMLElement,glbUrl:string,adapter:BuyBonusAdapter,bet:()=>number,money:(c:number)=>string,renderScale:()=>number,reduced:boolean}
+export interface BuyWidgetDeps{/** original rigged Baby Skull GLB (already loaded for the in-slot Skull) */skullTemplate?:()=>{scene:import('three').Object3D;animations:import('three').AnimationClip[]}|null,/** change the stake from inside the modal (only honoured when a new round may start) */changeBet:(delta:-1|1)=>void,betBounds:()=>{min:boolean;max:boolean},/** true only when a new round may start (idle, no feature/modal/cinematic in progress) */canOpen:()=>boolean,balance:()=>number,world:HTMLElement,dialogHost:HTMLElement,glbUrl:string,adapter:BuyBonusAdapter,bet:()=>number,money:(c:number)=>string,renderScale:()=>number,reduced:boolean}
 const W=240,H=150;
 export function createBuyBonusWidget(d:BuyWidgetDeps){
  const root=document.createElement('div');root.className='buy-widget';root.id='buy';
@@ -14,18 +14,24 @@ export function createBuyBonusWidget(d:BuyWidgetDeps){
  d.world.appendChild(root);
  const btn=root.querySelector<HTMLButtonElement>('.buy-hit')!,canvas=root.querySelector<HTMLCanvasElement>('canvas')!,priceEl=root.querySelector<HTMLElement>('.buy-price')!;
  // ---- confirmation dialog -----------------------------------------------------------------------
- const dlg=document.createElement('dialog');dlg.id='buy-dialog';dlg.className='skh-modal buy-modal';dlg.setAttribute('aria-labelledby','bd-title');
- dlg.innerHTML=`<div class="bm-glow"></div>
-  <header class="bm-head"><img class="bm-logo" src="${urls.logo}" alt="Hide &amp; Seek: Skull Hunt" draggable="false"><h1 id="bd-title">BUY BONUS</h1><p class="bd-sub">HIDE &amp; SEEK · CHEST BONUS</p></header>
-  <section class="bm-hero"><img class="bm-chest" src="${symbolUrl('CHEST_BONUS')}" alt="" draggable="false"><div class="bm-pitch"><p class="bd-desc">Entra subito nel bonus: <b>scegli una delle tre casse</b> e gioca <b>12 Free Spins</b> con moltiplicatore sulle vincite.</p><div class="bm-meds" aria-label="Premi possibili"><span class="bm-med m1"><b>×1</b></span><span class="bm-med m2"><b>×2</b></span><span class="bm-med m5"><b>×5</b></span></div><p class="bm-fine">Tre premi sempre diversi · deciso prima della tua scelta</p></div></section>
-  <section class="bm-stake"><span class="bm-lbl">PUNTATA</span><div class="bm-stepper"><button type="button" class="bd-minus" aria-label="Diminuisci puntata">−</button><output class="bd-bet" aria-live="polite"></output><button type="button" class="bd-plus" aria-label="Aumenta puntata">+</button></div></section>
-  <dl class="bd-rows"><div class="bm-cost"><dt>COSTO DEL BONUS</dt><dd class="bd-price"></dd></div><div><dt>SALDO</dt><dd class="bd-bal"></dd></div></dl>
-  <p class="bd-note fine" role="alert"></p>
-  <button type="button" class="bd-ok"><span class="bd-ok-main">GIOCA IL BONUS</span><span class="bd-ok-price"></span></button>
-  <button type="button" class="bd-cancel">Annulla</button>
-  <small class="bm-legal">Crediti virtuali · nessun denaro reale</small>`;
+ const dlg=document.createElement('dialog');dlg.id='buy-dialog';dlg.className='buy-modal';dlg.setAttribute('aria-labelledby','bd-title');
+ const R=(r:import('./bonusAnchors').Rect)=>pctRect(r,F),D=(c:import('./bonusAnchors').Disc)=>pctDisc(c,F);
+ dlg.innerHTML=`<div class="bm"><img class="bm-frame" src="${BONUS_UI.buyFrame}" alt="" draggable="false">
+  <h1 id="bd-title" class="bm-title" style="${R(F.title)}">BUY BONUS</h1>
+  <div class="bm-intro" style="${R(F.intro)}"><p class="bd-desc">Scegli una delle tre casse e ottieni <b>12 Free Spins</b> con moltiplicatore sulle vincite.</p><p class="bd-note" role="alert"></p></div>
+  <canvas class="bm-skull" aria-hidden="true" style="${R(F.skullCanvas)}"></canvas>
+  ${[1,2,5].map((m,i)=>`<img class="bm-medal" data-mult="${m}" src="${BONUS_UI.medals[m]}" alt="Premio possibile ×${m}" draggable="false" style="${medalImgStyle(F.medals[i]!,F)}">`).join('')}
+  <button type="button" class="bm-step bd-minus" aria-label="Diminuisci puntata" style="${D(F.minus)}"></button>
+  <output class="bd-bet" aria-live="polite" aria-label="Puntata" style="${R(F.stake)}"></output>
+  <button type="button" class="bm-step bd-plus" aria-label="Aumenta puntata" style="${D(F.plus)}"></button>
+  <dl class="bm-box bm-cost" style="${R(F.cost)}"><dt>COSTO DEL BONUS</dt><dd class="bd-price"></dd></dl>
+  <dl class="bm-box" style="${R(F.balance)}"><dt>SALDO</dt><dd class="bd-bal"></dd></dl>
+  <button type="button" class="bd-ok" style="${R(F.cta)}"><span class="bd-ok-main">GIOCA</span><span class="bd-ok-price"></span></button>
+  <button type="button" class="bd-cancel" style="${R(F.cancel)}">ANNULLA</button>
+  <button type="button" class="bm-close" aria-label="Chiudi" style="${D(F.close)}">×</button></div>`;
  d.dialogHost.appendChild(dlg);
  const okBtn=dlg.querySelector<HTMLButtonElement>('.bd-ok')!,cancel=dlg.querySelector<HTMLButtonElement>('.bd-cancel')!;
+ const portrait=createBabySkullPortrait({canvas:dlg.querySelector<HTMLCanvasElement>('canvas.bm-skull')!,template:()=>d.skullTemplate?.()??null,reduced:d.reduced});
  const qs=(k:string)=>dlg.querySelector<HTMLElement>(k)!;
  let submitting=false;
  /** Insufficient balance is checked here only to explain it; the engine still refuses the debit on its own. */
@@ -34,13 +40,14 @@ export function createBuyBonusWidget(d:BuyWidgetDeps){
   qs('.bd-bet').textContent=d.money(d.bet());qs('.bd-bal').textContent=d.money(d.balance());{const bb=d.betBounds();qs('.bd-minus').toggleAttribute('disabled',bb.min||submitting);qs('.bd-plus').toggleAttribute('disabled',bb.max||submitting);}
   if(q.available){const price=Math.round(q.priceX*d.bet()),short=price>d.balance();priceEl.textContent=`${q.priceX}× BET`;btn.setAttribute('aria-label',`Buy Bonus, ${q.priceX} volte la puntata`);qs('.bd-price').textContent=d.money(price);qs('.bd-ok-price').textContent=d.money(price);qs('.bd-note').textContent=short?'Saldo insufficiente per questa puntata: riduci la puntata. Nessun credito verrà addebitato.':'';okBtn.disabled=short||submitting;root.classList.remove('unavailable');}
   else{priceEl.textContent='PROSSIMAMENTE';btn.setAttribute('aria-label','Buy Bonus, non disponibile');qs('.bd-price').textContent='NON DISPONIBILE';qs('.bd-ok-price').textContent='';qs('.bd-note').textContent=q.reason+'. Nessun credito verrà addebitato.';okBtn.disabled=true;root.classList.add('unavailable');}
+ dlg.querySelector('.bm')!.classList.toggle('has-note',!!qs('.bd-note').textContent);
  }
  refresh();
  /** Focus after close: back to SPIN when a new round is possible, otherwise nothing keeps focus (a stale focus must never re-trigger Buy Bonus). */
- dlg.addEventListener('close',()=>{queueMicrotask(()=>{const a=document.activeElement as HTMLElement|null;if(d.canOpen())document.querySelector<HTMLElement>('#spin')?.focus({preventScroll:true});else a?.blur?.();refresh();});});
+ dlg.addEventListener('close',()=>{portrait.stop();queueMicrotask(()=>{const a=document.activeElement as HTMLElement|null;if(d.canOpen())document.querySelector<HTMLElement>('#spin')?.focus({preventScroll:true});else a?.blur?.();refresh();});});
  dlg.addEventListener('cancel',e=>{if(submitting)e.preventDefault();});   // Escape is inert while a purchase is in flight
- btn.addEventListener('click',()=>{if(btn.disabled||dlg.open||submitting||!d.canOpen())return;refresh();dlg.showModal();cancel.focus();});
- cancel.addEventListener('click',()=>{if(!submitting)dlg.close();});
+ btn.addEventListener('click',()=>{if(btn.disabled||dlg.open||submitting||!d.canOpen())return;refresh();dlg.showModal();portrait.start();cancel.focus();});
+ cancel.addEventListener('click',()=>{if(!submitting)dlg.close();});qs('.bm-close').addEventListener('click',()=>{if(!submitting)dlg.close();});
  for(const [sel,delta] of [['.bd-minus',-1],['.bd-plus',1]] as const)qs(sel).addEventListener('click',()=>{if(submitting||!d.canOpen())return;d.changeBet(delta);refresh();});
  okBtn.addEventListener('click',async()=>{if(okBtn.disabled||submitting||!d.canOpen())return;submitting=true;okBtn.disabled=true;cancel.disabled=true;let r;try{r=await d.adapter.purchase();}catch(e){r={ok:false as const,reason:e instanceof Error?e.message:'Acquisto non riuscito'};}
   if(!r.ok){cue.error();qs('.bd-note').textContent=r.reason;submitting=false;cancel.disabled=false;refresh();return;}
@@ -72,6 +79,6 @@ export function createBuyBonusWidget(d:BuyWidgetDeps){
    root.style.setProperty('--hover',String(hover));renderer.render(scene,cam);
   },
   resize,
-  dispose(){renderer?.dispose();root.remove();dlg.remove();},
+  dispose(){portrait.dispose();renderer?.dispose();root.remove();dlg.remove();},
  };
 }

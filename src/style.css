@@ -163,3 +163,17 @@ dialog small,.fine{color:#bda4c3}
 @keyframes medalSpin{to{transform:rotate(360deg)}}
 @keyframes medalPulse{from{filter:brightness(1)}to{filter:brightness(1.25)}}
 @media (prefers-reduced-motion:reduce){#bonus-prizes .bprize::before,#bonus-prizes .bprize b{animation:none!important}}
+
+/* ---- chest prizes: the official medal artwork (multiplier-x*.png) rises out of the opened chest; caption below ---- */
+#bonus-prizes .bprize{width:calc(250px*var(--k));height:auto;aspect-ratio:auto;border-radius:0;background:none;box-shadow:none;display:grid;justify-items:center;align-content:start;gap:calc(2px*var(--k));transform:translate(-50%,-100%) translateY(calc(30px*var(--k))) scale(.3);transform-origin:50% 100%}
+#bonus-prizes .bprize.show{transform:translate(-50%,-100%) scale(1)}
+#bonus-prizes .bprize img{width:100%;height:auto;display:block;filter:drop-shadow(0 calc(8px*var(--k)) calc(10px*var(--k)) #000b)}
+#bonus-prizes .bprize img[hidden]{display:none}
+#bonus-prizes .bprize b:empty{display:none}
+#bonus-prizes .bprize i{font:900 calc(15px*var(--k))/1 var(--ui);letter-spacing:.14em;color:#ffe9a8;text-shadow:0 1px 4px #000,0 0 calc(10px*var(--k)) #000;margin-top:calc(-16px*var(--k))}
+#bonus-prizes .bprize small{font:700 calc(11px*var(--k))/1.1 var(--ui);letter-spacing:.1em;color:#e8d6ff;text-shadow:0 1px 4px #000}
+#bonus-prizes .bprize.selected img{filter:drop-shadow(0 0 calc(22px*var(--k)) #ffd36aee) drop-shadow(0 calc(8px*var(--k)) calc(10px*var(--k)) #000b)}
+#bonus-prizes .bprize.x5.selected img{filter:drop-shadow(0 0 calc(34px*var(--k)) #fff0b0) drop-shadow(0 0 calc(60px*var(--k)) #ffb02aee) drop-shadow(0 calc(8px*var(--k)) calc(10px*var(--k)) #000b);animation:medalPulse 1.4s ease-in-out infinite alternate}
+#bonus-prizes .bprize.x5.selected::before,#bonus-prizes .bprize.x2.selected::before{display:none}
+#bonus-prizes .bprize.unselected{filter:saturate(.55) brightness(.8);opacity:.95;transform:translate(-50%,-100%) scale(.74)}
+#bonus-prizes .bprize.unselected.show{transform:translate(-50%,-100%) scale(.74)}

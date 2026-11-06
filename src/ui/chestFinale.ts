@@ -1,4 +1,4 @@
-import {urls} from '../view/assets';import {keys} from './keyboard';
+import {urls} from '../view/assets';import {medalFor} from './bonusAssets';import {keys} from './keyboard';
 import type {Chase} from '../chase/director';
 /**
  * CHEST BONUS COMPLETATO — final reveal inside the stone portal (the approved Hide & Seek arch art, no brown panel):
@@ -15,7 +15,7 @@ export function createChestFinale(d:{host:HTMLElement;sizeFrom:HTMLElement;money
  root.innerHTML=`<img class="cf-art" alt="" draggable="false"><div class="cf-vignette"></div><div class="cf-rays"></div><canvas class="cf-fx" aria-hidden="true"></canvas>
   <div class="cf-title"><span data-k="title">CHEST BONUS COMPLETATO</span></div>
   <div class="cf-stack"><div class="cf-label" data-k="label">VINCITA BASE</div><div class="cf-num" data-k="num">0.00</div><div class="cf-sub" data-k="sub"></div></div>
-  <div class="cf-mult" data-k="mult" aria-hidden="true"><i>MOLTIPLICATORE</i><b data-k="multv">×1</b></div>
+  <div class="cf-mult" data-k="mult"><img data-k="multimg" alt="" draggable="false"></div>
   <button type="button" class="cf-go" disabled>CONTINUA</button>`;
  root.querySelector<HTMLImageElement>('.cf-art')!.src=urls.bonus;d.host.appendChild(root);
  const q=<T extends HTMLElement>(k:string)=>root.querySelector<T>(`[data-k="${k}"]`)!;
@@ -41,7 +41,7 @@ export function createChestFinale(d:{host:HTMLElement;sizeFrom:HTMLElement;money
   show(data:FinaleData):Promise<void>{
    if(open)return Promise.resolve();open=true;settled=false;parts=[];const level=finaleLevel(data),m=d.money;
    layout();root.hidden=false;root.dataset.level=level;root.classList.remove('on','settled','mult-in','xform');void root.offsetWidth;root.classList.add('on');
-   q('title').textContent=level==='max'?'MAX WIN · CHEST BONUS':'CHEST BONUS COMPLETATO';q('label').textContent='VINCITA BASE';q('num').textContent=m(0);q('multv').textContent=`×${data.multiplier}`;q('sub').textContent='';go.disabled=true;
+   q('title').textContent=level==='max'?'MAX WIN · CHEST BONUS':'CHEST BONUS COMPLETATO';q('label').textContent='VINCITA BASE';q('num').textContent=m(0);{const mi=q<HTMLImageElement>('multimg'),src=medalFor(data.multiplier);if(src){mi.src=src;mi.alt=`Moltiplicatore ×${data.multiplier}`;}else mi.removeAttribute('src');}q('sub').textContent='';go.disabled=true;
    const noWin=data.baseCents<=0,R=d.reduced;
    const finish=()=>{if(settled)return;settled=true;clearAll();q('label').textContent=noWin?'NESSUNA VINCITA':'VINCITA TOTALE';q('num').textContent=m(data.totalCents);root.classList.add('mult-in','xform','settled');
     q('sub').textContent=data.capped?'LIMITE MAX WIN RAGGIUNTO · IMPORTO EFFETTIVO':'';if(!noWin)d.onReveal();go.disabled=false;go.focus({preventScroll:true});armedAt=performance.now();};
