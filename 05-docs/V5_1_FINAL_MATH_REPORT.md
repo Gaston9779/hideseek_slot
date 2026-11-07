@@ -28,3 +28,18 @@ Base lines 54.64889043%; base Scatter 2.80264020%; Scatter feature 34.80611123%;
 3. Selected base-only 4OAK trim: preserves triggers, feature economics and Buy; selected.
 
 No provider certification claim is made. Exact cap correction, full independent RNG review and lab certification remain open.
+
+## Final regression — 2026-11-07
+
+Profile verified: production build uses `MATH_VERSION=5.1.0` at commit `ea3b1c9f1b426e7f97469c2a9527c86669937dfa`. SHA-256: config `bbf1df15d97b0d4d06ded5afb84ab08f9d90600d852ef966a7e9bc1e67c7ece8`; strips `25dcf15b0583091204196994d7acf13fccf2300faf54a7b32003b7f924e50e40`; evaluator `8303aa7f6def899fe076f92305f4d8e37539efc5f0d2a8061338323476bf3e74`; engine `1436b1042d013159d17cb0473b9da5f6aa6bd50a1392e99a30c9ebca4c476a88`; UI paytable config `9503827b0e2d7aaff0e26adbede2a23b12e876e65de69e46e44db801ce5442bd`.
+
+| simulation | seeds (engine / choice) | observed RTP | 95% CI | cap hits | accounting failures | comparison |
+|---|---|---:|---:|---:|---:|---|
+| Normal 10,000,000 | 2026110721 / 2026110722 | 96.06935550% | 95.62080189%–96.51790911% | 0 | 0 | contains capped-theory interval 96.00150146%–96.00191961% |
+| Buy 1,000,000 | 2026110713 / 2026110714 | 96.08570791% | 95.85419766%–96.31721816% | 0 | 0 | contains capped-theory interval 96.00551179%–96.00557007% |
+
+Raw artefacts: `data/v5/normal-10000000-e2026110721-c2026110722.json` and `data/v5/buy-1000000-e2026110713-c2026110714.json`. Both use `SlotGame`, natural rounds / `buyChestBonus()` respectively, and independently seeded real chest position selection. They include all features through completion.
+
+Production evaluator assertion: a deterministic base Magic Book 4OAK pays **242** units. `src/config/game.ts` exposes the same `LINE_PAYS` table to the help/paytable. The V5 audit verifies all 13 mathematical IDs map one-to-one to the expected presentation assets and published paytable entries; 217/217 tests pass, as do `tsc --noEmit` and the production build. The intentional missing-audio test prints a handled 404 diagnostic only; it is not a test failure.
+
+Final regression status: **PASS**. The normal and Buy confidence intervals include their rigorous capped-theory intervals, no duplicate-credit/accounting failure occurred, and no obsolete V5 profile was used. Still not certification: the cap correction remains a rigorous upper bound rather than an exact point correction, and independent RNG/laboratory certification is outstanding.
