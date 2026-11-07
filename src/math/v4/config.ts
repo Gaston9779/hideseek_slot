@@ -3,7 +3,11 @@ export const MATH_VERSION='5.1.0';
 export const SYMBOLS=['WILD','SCATTER','CHEST_BONUS','MAGIC_BOOK','SKULL','BLASTER','GARGOYLE','CHEST','LANTERN','GHOST','TOMB','KEY','POTION'] as const;
 export type SymbolId=typeof SYMBOLS[number];
 export const REELS=5,ROWS=3,LINES=20,UNITS_PER_BET=LINES;
-export const BETS=[20,40,100,200,500] as const,START_BALANCE=100000;
+/** Market-deployable stake ceiling. Lowering this does not change game math. */
+export const MAX_BET_CENTS=5000;
+const BET_CATALOG=[20,40,100,200,500,1000,2000,5000] as const;
+/** Integer-cent stakes only; €0.50 is intentionally excluded (half-cent payouts). */
+export const BETS=BET_CATALOG.filter(b=>b<=MAX_BET_CENTS),START_BALANCE=100000;
 export const paylines:readonly (readonly number[])[]=[[1,1,1,1,1],[0,0,0,0,0],[2,2,2,2,2],[0,1,2,1,0],[2,1,0,1,2],[0,0,1,2,2],[2,2,1,0,0],[1,0,0,0,1],[1,2,2,2,1],[0,1,1,1,0],[2,1,1,1,2],[1,0,1,2,1],[1,2,1,0,1],[0,1,0,1,0],[2,1,2,1,2],[0,2,0,2,0],[2,0,2,0,2],[0,2,2,2,0],[2,0,0,0,2],[1,1,0,1,1]];
 /** MAGIC_BOOK is unambiguously the highest ordinary symbol. */
 /** V5.1: base-only 4OAK trim; feature/Buy values remain V5. */
