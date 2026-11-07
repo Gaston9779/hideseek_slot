@@ -132,7 +132,9 @@ export function createBonusCinematic(d:BonusCinematicDeps){
   /** true if the chest overlay should treat its celebration as the MAX WIN (single coordinated sequence) */
   get maxCoordinated(){return maxCoordinated;},
   /** DEV only (stripped from production): visual check of the standalone MAX WIN screen with a given amount. */
-  ...(import.meta.env.DEV?{debugMaxWin:(cents:number)=>playMaxWin(cents)}:{}),
+  ...(import.meta.env.DEV?{debugMaxWin:(cents:number)=>playMaxWin(cents),
+   /** DEV only: plays the existing Free Spins trigger chase (hologram Seeker → chase → fall → ending) with a synthetic event. Touches no engine state, balance or ledger. */
+   debugFreeSpins:async()=>{if(running)return;running=true;try{await playIntro({kind:'FREE_SPINS',ev:{type:'FREE_SPINS_TRIGGERED',awardedSpins:12} as Pending['ev']});}catch(e){console.error('[bonus-cinematic]',e);d.chase.abort();skip.hidden=true;}finally{running=false;cue.cinematicEnd();}}}:{}),
   dispose(){window.removeEventListener(GAME_EVENT_NAME,onEvent);glow.remove();flash.remove();announce.remove();maxEl.remove();skip.remove();live.remove();},
  };
 }

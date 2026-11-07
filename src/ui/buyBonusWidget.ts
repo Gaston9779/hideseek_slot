@@ -10,7 +10,7 @@ export interface BuyWidgetDeps{/** original rigged Baby Skull GLB (already loade
 const W=240,H=150;
 export function createBuyBonusWidget(d:BuyWidgetDeps){
  const root=document.createElement('div');root.className='buy-widget';root.id='buy';
- root.innerHTML=`<button type="button" class="buy-hit" aria-haspopup="dialog"><span class="buy-title">BUY BONUS</span><span class="buy-glow"></span><canvas class="buy-canvas" width="${W}" height="${H}" aria-hidden="true"></canvas><span class="buy-price"></span></button>`;
+ root.innerHTML=`<button type="button" class="buy-hit" aria-haspopup="dialog" aria-label="Buy Bonus"><span class="buy-title">BUY BONUS</span><span class="buy-glow"></span><canvas class="buy-canvas" width="${W}" height="${H}" aria-hidden="true"></canvas><span class="buy-price"></span></button>`;
  d.world.appendChild(root);
  const btn=root.querySelector<HTMLButtonElement>('.buy-hit')!,canvas=root.querySelector<HTMLCanvasElement>('canvas')!,priceEl=root.querySelector<HTMLElement>('.buy-price')!;
  // ---- confirmation dialog -----------------------------------------------------------------------

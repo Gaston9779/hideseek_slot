@@ -3,9 +3,10 @@ import type {Outcome} from '../math/slot';
 import type {WinTier} from '../config/presentation';
 import {createBonusOverlay} from '../bonus/bonusOverlay';import {BONUS_IMG} from '../bonus/bonusLayout';
 import {BG,DESIGN,FRAME,HUD,LOGO,OVERLAY,PANEL,SKULL,CELLS,PLAY_AREA} from '../layout';
-import {loadImage,loadSymbolImages,urls} from './assets';
+import {loadFxLayers,loadImage,loadSymbolImages,urls} from './assets';
 import {Reels} from './reels';
 import {Particles} from './particles';
+import {LAYER_FILES,SymbolAnimator,type FxLayers} from './symbolFx';
 import {createSkull} from './skull';import {createChase,type Chase} from '../chase/director';
 import type {SkullState} from '../animation/mascot';
 
@@ -40,6 +41,8 @@ export async function createView(onProgress:(s:string)=>void){
  fit();addEventListener('resize',fit);
  const reelsCtx=ctxs.get($('#reels'))!,fxCtx=ctxs.get($('#fx'))!,atmoCtx=ctxs.get($('#atmo'))!;
  const reels=new Reels(reelsCtx,symbols,INITIAL);const fx=new Particles(240);
+ // ---- WILD / SCATTER / CHEST_BONUS animation: composed in the reel canvas, where the real symbols are drawn
+ {const layers=await loadFxLayers(LAYER_FILES).catch(()=>null);if(layers){reels.anim=new SymbolAnimator(layers as unknown as FxLayers,reels.particles,reduced);reels.fxLayer=true;reels.refreshFx();}}
  // ---- real 3D skull
  onProgress('Waking the Skull…');
  skull=await createSkull(sk,`${import.meta.env.BASE_URL}assets/scenery/Skull_Horned_Creature_Rigged.glb`,rs);fit();

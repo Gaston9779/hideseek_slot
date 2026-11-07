@@ -5,6 +5,7 @@ import {CELLS,COL_CENTERS,ROW_CENTER0,ROW_PITCH,SYMBOL_SIZE,PLAY_AREA,type Rect}
 import {REEL_ANIM} from '../config/reelAnim';
 import {SYMBOL_ART} from '../config/presentation';
 import {Particles} from './particles';
+import {isFxSymbol,type CellFx,type FxState,type SymbolAnimator} from './symbolFx';
 
 /**
  * Reel presentation.
@@ -35,6 +36,8 @@ export class Reels{
  /** 0..1 energy added on big wins (glow intensity of outlines/lines) */
  energy=0;energyTarget=0;
  onLand:(col:number,anyScatter:boolean)=>void=()=>{};onReelStop:(col:number)=>void=()=>{};onAnticipate:(on:boolean)=>void=()=>{};onSuspense:(e:SuspenseEvent)=>void=()=>{};
+ /** Symbol animation (WILD / SCATTER / CHEST_BONUS): per-cell state set from what is already on screen; drawn in drawCell where the real symbol is drawn. */
+ anim?:SymbolAnimator;fxLayer=false;private fx:CellFx[]=Array.from({length:15},()=>({st:'off' as FxState,id:'',t0:-9}));
  private susp={s:0,c:0};private suspT={s:0,c:0};private suspActive={s:false,c:false};private resolveFx={s:-9,c:-9};private sweep?:{t0:number,tone:string};
  constructor(private ctx:CanvasRenderingContext2D,private images:Record<SymbolId,HTMLImageElement>,initial:SymbolId[][]){
   this.grid=initial.map(c=>[...c]);this.cells=initial.map(c=>c.map(id=>({id,landed:-9,win:0 as const})));
@@ -44,7 +47,17 @@ export class Reels{
  get isSpinning(){return !!this.spinning;}
  get activeWinCells(){return this.win?.cells.size??0;}
  center(c:number,r:number){return {x:COL_CENTERS[c],y:ROW_CENTER0+r*ROW_PITCH};}
- clearWin(){this.win=undefined;for(const col of this.cells)for(const cell of col)cell.win=0;this.energyTarget=0;}
+ clearWin(){this.win=undefined;for(const col of this.cells)for(const cell of col)cell.win=0;this.energyTarget=0;this.refreshFx();}
+ /** State of the FX layer for one cell. Reads only what is already on screen (landed reels + real win highlights); never the not-yet-revealed outcome. */
+ private fxFor(c:number,r:number):FxState{
+  const cell=this.cells[c][r],id=cell.id;if(!(id==='WILD'||id==='SCATTER'||id==='CHEST_BONUS')||!this.strips[c].done)return 'off';
+  const w=this.spinning?undefined:this.win;                              // a previous round's highlight never leaks into a running spin
+  if(w&&cell.win)return 'trigger';
+  if((id==='SCATTER'&&this.suspActive.s)||(id==='CHEST_BONUS'&&this.suspActive.c))return 'anticipation';
+  return 'idle';
+ }
+ /** Push state changes (only differences) to the FX layer. Cheap: 15 cells. */
+ refreshFx(){for(let c=0;c<5;c++)for(let r=0;r<3;r++){const st=this.fxFor(c,r),id=this.cells[c][r].id,f=this.fx[c*3+r];if(f.st===st&&f.id===id)continue;f.st=st;f.id=id;f.t0=this.time;}}
  // ---------------------------------------------------------------------------------------------------------------- plans
  private normalPlan(N:number,V:number,SET:number):Plan{const A=REEL_ANIM.accelSec,t0=(N-2.2)/V+A/2;
   return {N,end:t0+SET,at(tt){if(tt<A)return {pos:V*tt*tt/(2*A),speed:V*tt/A};if(tt<t0)return {pos:V*(tt-A/2),speed:V};const q=Math.min((tt-t0)/SET,1);return {pos:N-2.2+2.2*easeBack(q),speed:q<1?V*(1-q):0};}};}
@@ -81,7 +94,7 @@ export class Reels{
     const endAbs=plan.end+c*stag;if(endAbs<prevEnd+.12)plan=this.normalPlan(baseRows+Math.ceil((prevEnd+.12-endAbs)*V),V,SET);}   // reels always stop left→right
    prevEnd=plan.end+c*stag;st.plan=plan;st.N=plan.N;st.anticipate=anticipate;st.kind=ant[c];st.done=false;st.pos=0;st.speed=0;
   });
-  const displayed=this.cells.map(col=>col.map(c=>c.id));
+  const displayed=this.cells.map(col=>col.map(c=>c.id));this.refreshFx();
   return new Promise<void>(resolve=>{this.spinning={start:this.time,outcome,displayed,resolve,landedCount:0,quick,stag,V};});
  }
  /** Highlight outcome wins (called after the reels land) */
@@ -93,7 +106,7 @@ export class Reels{
   this.cells.forEach((col,c)=>col.forEach((cell,r)=>{const k=`${c},${r}`;cell.win=cells.has(k)?(scatter.has(k)?2:bonus.has(k)?3:1):0;}));
   this.win={cells,scatter,bonus,lines,t0:this.time,tier};
   if(!this.reduced)for(const k of cells){const[c,r]=k.split(',').map(Number);const p=this.center(c,r);this.particles.emit(p.x,p.y,scatter.has(k)?'#d58cff':'#ffd36a',tier==='small'?8:16,170,30);}
-  this.energyTarget=tier==='none'||tier==='small'?.15:tier==='medium'?.4:tier==='big'?.7:1;
+  this.energyTarget=tier==='none'||tier==='small'?.15:tier==='medium'?.4:tier==='big'?.7:1;this.refreshFx();
  }
  // ------------------------------------------------------------------------------------------------------- suspense state
  private countVisible(id:SymbolId){let n=0;this.strips.forEach((st,c)=>{if(st.done)for(const cell of this.cells[c])if(cell.id===id)n++;});return n;}
@@ -117,9 +130,9 @@ export class Reels{
    this.strips.forEach((st,c)=>{if(st.done)return;allDone=false;const tt=t-c*sp.stag;
     if(tt<=0){st.pos=0;st.speed=0;return;}
     const p=st.plan!.at(tt);st.pos=p.pos;st.speed=p.speed;
-    if(tt>=st.plan!.end){st.done=true;st.pos=st.N;st.speed=0;sp.landedCount++;let sc=false;for(let r=0;r<3;r++){const id=sp.outcome.grid[c][r];const cell=this.cells[c][r];cell.id=id;cell.win=0;cell.landed=this.time;this.grid[c][r]=id;if(id==='SCATTER')sc=true;if(!this.reduced&&(id==='WILD'||id==='SCATTER')){const q=this.center(c,r);this.particles.emit(q.x,q.y,id==='WILD'?'#ffc844':'#d58cff',14,190,34);}}this.onLand(c,sc);this.onReelStop(c);this.afterLand(c);}
+    if(tt>=st.plan!.end){st.done=true;st.pos=st.N;st.speed=0;sp.landedCount++;let sc=false;for(let r=0;r<3;r++){const id=sp.outcome.grid[c][r];const cell=this.cells[c][r];cell.id=id;cell.win=0;cell.landed=this.time;this.grid[c][r]=id;if(id==='SCATTER')sc=true;if(!this.reduced&&(id==='WILD'||id==='SCATTER')){const q=this.center(c,r);this.particles.emit(q.x,q.y,id==='WILD'?'#ffc844':'#d58cff',14,190,34);}}this.onLand(c,sc);this.onReelStop(c);this.afterLand(c);this.refreshFx();}
    });
-   if(this.win&&t>REEL_ANIM.carryFadeSec+4*sp.stag+.05){this.win=undefined;this.energyTarget=0;}      // previous round's highlights are fully faded by now
+   if(this.win&&t>REEL_ANIM.carryFadeSec+4*sp.stag+.05){this.win=undefined;this.energyTarget=0;this.refreshFx();}      // previous round's highlights are fully faded by now
    this.onAnticipate(this.suspActive.s||this.suspActive.c);
    if(allDone&&sp.finish===undefined)sp.finish=this.time+.3;
    if(sp.finish!==undefined&&this.time>=sp.finish){this.spinning=undefined;this.onAnticipate(false);sp.resolve();}
@@ -135,7 +148,8 @@ export class Reels{
   const special=cell.id==='WILD'||cell.id==='SCATTER',isChest=cell.id==='CHEST_BONUS';
   const sS=cell.id==='SCATTER'?this.susp.s:0,sC=isChest?this.susp.c:0,hotS=cell.id==='SCATTER'?clamp01(1-(t-this.resolveFx.s)/REEL_ANIM.anticipation.flashSec):0,hotC=isChest?clamp01(1-(t-this.resolveFx.c)/REEL_ANIM.anticipation.flashSec):0;
   c.save();rrect(c,{x:rect.x-3,y:rect.y-3,w:rect.w+6,h:rect.h+6},16);c.clip();
-  if((special||isChest)&&!this.reduced&&fa>0){const p=Math.sin(t*3+col*1.7);const col1=cell.id==='WILD'?'255,176,40':isChest?'255,92,34':'176,76,255';const g=c.createRadialGradient(x,y,6,x,y,rect.w*.62);g.addColorStop(0,`rgba(${col1},${(.45+.18*p)*fa})`);g.addColorStop(1,`rgba(${col1},0)`);c.fillStyle=g;c.fillRect(rect.x,rect.y,rect.w,rect.h);if(!mv){sx*=1+.03*p;sy*=1+.03*p;}}
+  if((special||isChest)&&!this.reduced&&fa>0){const p=Math.sin(t*3+col*1.7);const col1=cell.id==='WILD'?'255,176,40':isChest?'255,92,34':'176,76,255';const g=c.createRadialGradient(x,y,6,x,y,rect.w*.62);g.addColorStop(0,`rgba(${col1},${(.45+.18*p)*fa*(this.fxLayer?.55:1)})`);g.addColorStop(1,`rgba(${col1},0)`);c.fillStyle=g;c.fillRect(rect.x,rect.y,rect.w,rect.h);if(!mv){sx*=1+.03*p;sy*=1+.03*p;}}
+
   // suspense: progressive energy on the symbols that are waiting for their third (strength follows the real reveal state)
   if(sS>0||sC>0||hotS>0||hotC>0){const s=Math.max(sS,sC,hotS,hotC),pl=.78+.22*Math.sin(t*(this.reduced?2:8)+col),rgb=(sS>0||hotS>0)?'190,100,255':'255,200,70';
    const g=c.createRadialGradient(x,y,4,x,y,rect.w*.75);g.addColorStop(0,`rgba(${rgb},${Math.min(.95,(.55*s+.5*Math.max(hotS,hotC))*pl)})`);g.addColorStop(1,`rgba(${rgb},0)`);c.fillStyle=g;c.fillRect(rect.x,rect.y,rect.w,rect.h);
@@ -143,7 +157,8 @@ export class Reels{
   let pulse=0;
   if(cell.win&&this.win&&fw>0){pulse=Math.sin((t-this.win.t0)*6.5);if(!this.reduced){sx*=1+(.05+.035*pulse)*fw;sy*=1+(.05+.035*pulse)*fw;}
    const g=c.createRadialGradient(x,y,6,x,y,rect.w*.7);const rgb=cell.win===2?'190,90,255':cell.win===3?'255,74,38':'255,190,60';g.addColorStop(0,`rgba(${rgb},${(.5+.25*pulse+.2*this.energy)*fw})`);g.addColorStop(1,`rgba(${rgb},0)`);c.fillStyle=g;c.fillRect(rect.x,rect.y,rect.w,rect.h);}
-  this.drawSymbol(cell.id,x+dx,y+dy,sx,sy,mv?.alpha??1);
+  const fxc=this.fx[col*3+r];if(this.anim&&!mv&&!this.reduced&&isFxSymbol(cell.id)&&fxc.st!=='off'&&fxc.id===cell.id)this.anim.draw(c,cell.id,this.img(cell.id),x+dx,y+dy,sx,sy,1,fxc,this.time,`${col},${r}`);
+  else this.drawSymbol(cell.id,x+dx,y+dy,sx,sy,mv?.alpha??1);
   // Magic Book (ordinary CHEST id) taking part in a REAL winning line: refined sweep of light + violet/gold bloom
   if(SYMBOL_ART[cell.id]?.file==='magic-book'&&cell.win===1&&this.win&&fw>0&&!this.reduced){const ph=((t-this.win.t0)*.85)%1.7,gx=rect.x-rect.w*.4+ph*rect.w*1.4;const g=c.createLinearGradient(gx,rect.y,gx+rect.w*.45,rect.y+rect.h);g.addColorStop(0,'rgba(255,240,190,0)');g.addColorStop(.5,`rgba(255,236,170,${.42*fw})`);g.addColorStop(1,'rgba(255,240,190,0)');c.save();c.globalCompositeOperation='lighter';c.fillStyle=g;c.fillRect(rect.x,rect.y,rect.w,rect.h);c.restore();
    const g2=c.createRadialGradient(x,y,10,x,y,rect.w*.72);g2.addColorStop(0,`rgba(210,120,255,${.28*fw*(.7+.3*pulse)})`);g2.addColorStop(1,'rgba(210,120,255,0)');c.fillStyle=g2;c.fillRect(rect.x,rect.y,rect.w,rect.h);
@@ -158,7 +173,7 @@ export class Reels{
    c.save();rrect(c,{x:rect.x+3+dx,y:rect.y+3,w:rect.w-6,h:rect.h-6},14);c.shadowColor=rgb;c.shadowBlur=14+12*this.energy+22*sus;c.globalAlpha=Math.max(0,Math.min(1,a));c.lineWidth=cell.win?5:3+3*sus;c.strokeStyle=rgb;c.stroke();c.shadowBlur=0;c.lineWidth=1.6+1.4*sus;c.strokeStyle=hi;c.stroke();c.restore();}
  }
  draw(){
-  const c=this.ctx,t=this.time;
+  const c=this.ctx,t=this.time;this.anim?.begin();
   const sp=this.spinning,top=CELLS[0][0].y,bottom=CELLS[0][2].y+CELLS[0][2].h;
   for(let col=0;col<5;col++){
    const st=this.strips[col],win=CELLS[col][0];
@@ -194,6 +209,7 @@ export class Reels{
    c.shadowColor='#ff9a1e';c.shadowBlur=18+14*this.energy;c.strokeStyle='rgba(255,150,30,.55)';c.lineWidth=14;c.stroke(path);c.shadowBlur=8;c.strokeStyle='#fff3bd';c.lineWidth=5;c.stroke(path);c.restore();
    if(!sp&&!this.reduced&&Math.random()<.35){const q=pts[Math.floor(Math.random()*pts.length)];this.particles.emit(q.x,q.y,'#ffd36a',1,60,22,{up:60,gravity:-30});}
   }
+  if(this.anim){c.save();c.beginPath();c.rect(PLAY_AREA.x-26,PLAY_AREA.y-26,PLAY_AREA.w+52,PLAY_AREA.h+52);c.clip();this.anim.flush(c);c.restore();}   // rings / beams / light bursts of the animated symbols
   // particles clipped to the play area
   c.save();c.beginPath();c.rect(PLAY_AREA.x-30,PLAY_AREA.y-30,PLAY_AREA.w+60,PLAY_AREA.h+60);c.clip();this.particles.draw(c);c.restore();
  }

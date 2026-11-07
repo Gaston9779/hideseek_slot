@@ -15,6 +15,7 @@ export const LINE_PAYS:Record<string,readonly [number,number,number]>={
  MAGIC_BOOK:[64,242,1035],SKULL:[46,180,729],BLASTER:[31,118,440],GARGOYLE:[20,73,292],CHEST:[11,37,150],LANTERN:[8,27,106],GHOST:[7,19,74],TOMB:[5,14,53],KEY:[3,10,38],POTION:[3,9,30]};
 export const FEATURE_LINE_PAYS:Record<string,readonly [number,number,number]>={...LINE_PAYS,MAGIC_BOOK:[64,254,1035]};
 export const SCATTER_PAY_X:readonly [number,number,number]=[3,20,100];
+/** Approved V5.1 rule: both Scatter and Chest start at 12 spins. */
 export const SCATTER_FREE_SPINS={initial:{3:12,4:15,5:20} as Record<number,number>,retrigger:{3:5,4:8,5:10} as Record<number,number>,maxAwardedPerFeature:30,wildMultiplier:3};
 /** All three prizes exist once, shuffled uniformly before the player picks. */
 export const CHEST_PACKAGES=[

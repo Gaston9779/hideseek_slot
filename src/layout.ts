@@ -59,7 +59,7 @@ export const HUD = {
 export const SKULL_ANCHOR = { x: 420, y: by(831) };   // where the feet touch the stone (design px)
 /** Skull scale: previous configured height was 190 design px; v2 enlarges the character ×1.5 (newScale = currentScale × 1.5). The canvas grows with it so nothing is clipped;
  *  feet stay on SKULL_ANCHOR (the model is normalised from its real bounding box: min.y → ground, x/z centre → pivot). */
-export const SKULL_BASE_HEIGHT = 190, SKULL_SCALE = 1.5;
+export const SKULL_BASE_HEIGHT = 190, SKULL_SCALE = 1.5 * 0.9;   // v5.2: both 3D characters (Skull + Seeker, whose height derives from the Skull's) shown at 90 % of the previous size; feet anchor unchanged
 const SK_W = 600, SK_H = 600, SK_FOOT = 60;
 export const SKULL = { w: SK_W, h: SK_H, height: SKULL_BASE_HEIGHT * SKULL_SCALE, foot: SK_FOOT, x: SKULL_ANCHOR.x - SK_W / 2, y: SKULL_ANCHOR.y - (SK_H - SK_FOOT) };
 

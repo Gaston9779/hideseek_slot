@@ -15,3 +15,10 @@ export async function loadSymbolImages(){
  await Promise.all(SYMBOLS.map(async id=>{const file=SYMBOL_ART[id].file;const url=Object.entries(symbolUrls).find(([k])=>k.endsWith(`/${file}.png`))?.[1];if(!url)throw new Error(`Missing symbol art for ${id} (${file}.png)`);out[id]=await loadImage(url);}));
  return out;
 }
+const layerUrls=import.meta.glob('../../assets-2d/symbols/layers/*.png',{eager:true,query:'?url',import:'default'}) as Record<string,string>;
+/** Derived animation layers for WILD / SCATTER / CHEST_BONUS (scripts/extract-symbol-layers.py). A missing layer disables the animation, never the game. */
+export async function loadFxLayers(files:Record<string,string>){
+ const out:Record<string,HTMLImageElement>={};
+ for(const [k,f] of Object.entries(files)){const u=Object.entries(layerUrls).find(([p])=>p.endsWith(`/${f}.png`))?.[1];if(!u)return null;out[k]=await loadImage(u);}
+ return out;
+}

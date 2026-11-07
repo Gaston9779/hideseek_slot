@@ -16,11 +16,11 @@ export function createChestFinale(d:{host:HTMLElement;sizeFrom:HTMLElement;money
   <div class="cf-title"><span data-k="title">CHEST BONUS COMPLETATO</span></div>
   <div class="cf-stack"><div class="cf-label" data-k="label">VINCITA BASE</div><div class="cf-num" data-k="num">0.00</div><div class="cf-sub" data-k="sub"></div></div>
   <div class="cf-mult" data-k="mult"><img data-k="multimg" alt="" draggable="false"></div>
-  <button type="button" class="cf-go" disabled>CONTINUA</button>`;
+  <div class="cf-hint" aria-hidden="true">TOCCA PER CONTINUARE</div>`;
  root.querySelector<HTMLImageElement>('.cf-art')!.src=urls.bonus;d.host.appendChild(root);
  const q=<T extends HTMLElement>(k:string)=>root.querySelector<T>(`[data-k="${k}"]`)!;
- const go=root.querySelector<HTMLButtonElement>('.cf-go')!,fx=root.querySelector<HTMLCanvasElement>('.cf-fx')!,ctx=fx.getContext('2d')!;
- let timers:number[]=[],raf=0,fxRaf=0,open=false,settled=false;
+ const fx=root.querySelector<HTMLCanvasElement>('.cf-fx')!,ctx=fx.getContext('2d')!;
+ let tapOff=()=>{};let timers:number[]=[],raf=0,fxRaf=0,open=false,settled=false;
  const T=(fn:()=>void,ms:number)=>{timers.push(window.setTimeout(fn,ms));};
  const clearAll=()=>{timers.forEach(clearTimeout);timers=[];cancelAnimationFrame(raf);cancelAnimationFrame(fxRaf);};
  const tween=(from:number,to:number,ms:number,step:(v:number)=>void,ease=(k:number)=>1-Math.pow(1-k,3))=>{const t0=performance.now();cancelAnimationFrame(raf);const f=(now:number)=>{const k=ms?Math.min(1,(now-t0)/ms):1;step(from+(to-from)*ease(k));if(k<1&&open)raf=requestAnimationFrame(f);};raf=requestAnimationFrame(f);};
@@ -40,11 +40,11 @@ export function createChestFinale(d:{host:HTMLElement;sizeFrom:HTMLElement;money
   get open(){return open;},
   show(data:FinaleData):Promise<void>{
    if(open)return Promise.resolve();open=true;settled=false;parts=[];const level=finaleLevel(data),m=d.money;
-   layout();root.hidden=false;root.dataset.level=level;root.classList.remove('on','settled','mult-in','xform');void root.offsetWidth;root.classList.add('on');
-   q('title').textContent=level==='max'?'MAX WIN · CHEST BONUS':'CHEST BONUS COMPLETATO';q('label').textContent='VINCITA BASE';q('num').textContent=m(0);{const mi=q<HTMLImageElement>('multimg'),src=medalFor(data.multiplier);if(src){mi.src=src;mi.alt=`Moltiplicatore ×${data.multiplier}`;}else mi.removeAttribute('src');}q('sub').textContent='';go.disabled=true;
+   layout();root.hidden=false;root.dataset.level=level;root.classList.remove('on','settled','mult-in','xform','ready');(document.activeElement as HTMLElement|null)?.blur?.();void root.offsetWidth;root.classList.add('on');
+   q('title').textContent=level==='max'?'MAX WIN · CHEST BONUS':'CHEST BONUS COMPLETATO';q('label').textContent='VINCITA BASE';q('num').textContent=m(0);{const mi=q<HTMLImageElement>('multimg'),src=medalFor(data.multiplier);if(src){mi.src=src;mi.alt=`Moltiplicatore ×${data.multiplier}`;}else mi.removeAttribute('src');}q('sub').textContent='';
    const noWin=data.baseCents<=0,R=d.reduced;
    const finish=()=>{if(settled)return;settled=true;clearAll();q('label').textContent=noWin?'NESSUNA VINCITA':'VINCITA TOTALE';q('num').textContent=m(data.totalCents);root.classList.add('mult-in','xform','settled');
-    q('sub').textContent=data.capped?'LIMITE MAX WIN RAGGIUNTO · IMPORTO EFFETTIVO':'';if(!noWin)d.onReveal();go.disabled=false;go.focus({preventScroll:true});armedAt=performance.now();};
+    q('sub').textContent=data.capped?'LIMITE MAX WIN RAGGIUNTO · IMPORTO EFFETTIVO':'';if(!noWin)d.onReveal();root.classList.add('ready');armedAt=performance.now();};
    let armedAt=Infinity;
    const t=FINALE_T;
    if(R||noWin){T(finish,R?200:900);}
@@ -58,12 +58,16 @@ export function createChestFinale(d:{host:HTMLElement;sizeFrom:HTMLElement;money
     T(finish,t.settle);
    }
    return new Promise<void>(res=>{let release=()=>{};
-    const end=()=>{if(!open)return;if(!settled){finish();return;}if(performance.now()-armedAt<600)return;open=false;go.removeEventListener('click',end);release();clearAll();d.chase.stopCelebrate();root.classList.remove('on');root.hidden=true;ctx.clearRect(0,0,fx.width,fx.height);window.setTimeout(res,d.reduced?0:200);};
+    const end=()=>{if(!open)return;if(!settled){finish();return;}if(performance.now()-armedAt<600)return;open=false;tapOff();release();clearAll();d.chase.stopCelebrate();root.classList.remove('on');root.hidden=true;ctx.clearRect(0,0,fx.width,fx.height);window.setTimeout(res,d.reduced?0:200);};
     // Enter/Space first fast-forward the reveal, then (after 0.6 s) continue. Auto-repeat never counts.
     release=keys.push({id:'chest-finale',root,handle:e=>{if((e.code==='Enter'||e.code==='NumpadEnter'||e.code==='Space')&&!e.repeat){end();return true;}}});
-    go.addEventListener('click',end);});
+    // Tap/click ANYWHERE continues (no button). Captured so the click never reaches SPIN/Buy underneath; ignored while a native dialog is open and during the first 0.45 s
+    // (the click that opened the summary can never close it). Before the reveal has settled a tap only fast-forwards it; `end` is idempotent (no double transition).
+    const shownAt=performance.now();
+    function onTap(e:Event){if(!open)return;e.preventDefault();e.stopPropagation();if(performance.now()-shownAt<450)return;end();}
+    document.addEventListener('click',onTap,true);tapOff=()=>document.removeEventListener('click',onTap,true);});
   },
   /** hard close (tab/state recovery): never leaves an overlay or a celebrating Skull behind */
-  abort(){if(!open)return;open=false;clearAll();d.chase.stopCelebrate();root.classList.remove('on');root.hidden=true;},
+  abort(){if(!open)return;open=false;tapOff();clearAll();d.chase.stopCelebrate();root.classList.remove('on');root.hidden=true;},
  };
 }

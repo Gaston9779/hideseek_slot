@@ -177,3 +177,6 @@ dialog small,.fine{color:#bda4c3}
 #bonus-prizes .bprize.x5.selected::before,#bonus-prizes .bprize.x2.selected::before{display:none}
 #bonus-prizes .bprize.unselected{filter:saturate(.55) brightness(.8);opacity:.95;transform:translate(-50%,-100%) scale(.74)}
 #bonus-prizes .bprize.unselected.show{transform:translate(-50%,-100%) scale(.74)}
+
+/* chest-opening medals are transparent PNGs: the old per-multiplier rings were box-shadows on the rectangular label element (higher specificity than the later reset) */
+#bonus-prizes .bprize.x1,#bonus-prizes .bprize.x2,#bonus-prizes .bprize.x5,#bonus-prizes .bprize.selected,#bonus-prizes .bprize.unselected{background:none;border:0;box-shadow:none;outline:0}
