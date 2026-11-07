@@ -6,6 +6,8 @@ Status: analysis only. No production mathematical, RTP, strip, paytable, UI or B
 
 The existing 1,000,000-buy raw run (`05-docs/data/v5/buy-1000000-e2026110713-c2026110714.json`) is the primary RTP cross-check: 96.085708% observed, with package means x1 48.208181x, x2 96.425173x, x5 241.243814x. It contains no order statistics, so it cannot answer the requested medians/percentiles. The supplemental, reproducible 500,000-buy analysis is `data/v5_1/buy-commercial-500000-e2026110731-c2026110732.json`; it uses production `SlotGame.buyChestBonus()`, production free spins/extensions, Fisher–Yates package commit, and an independent random chest-position RNG. It is simulated evidence, not a claim of an exact distribution.
 
+A full 1,000,000-buy order-statistics artefact using the original V5.1 seeds is also retained as `data/v5_1/buy-commercial-1m.json`; it corroborates the 500k tabulation (overall median 76.10x, below-price 69.6952%, 92,773 extensions, zero cap/accounting failures).
+
 Exact/theoretical context: pre-cap package EVs are 48.242799x / 96.485598x / 241.213995x, uniform 128.647464x. The 134x pre-cap Buy RTP is 96.005570%; the capped value lies in 96.005512–96.005570% by the existing rigorous cap bound.
 
 ## Per selected chest — simulated 500k Buy sample
