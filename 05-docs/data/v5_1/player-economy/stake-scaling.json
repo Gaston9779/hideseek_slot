@@ -1,0 +1,337 @@
+{
+  "schema": "skull-hunt-v5_1-stake-scaling-1",
+  "stakesCents": [
+    20,
+    50,
+    100,
+    200,
+    500,
+    1000,
+    2000,
+    5000
+  ],
+  "cases": [
+    {
+      "name": "book4",
+      "units": 422,
+      "amounts": [
+        {
+          "stake": 20,
+          "baseCents": 422,
+          "chest1": 422,
+          "chest2": 844,
+          "chest5": 2110,
+          "integerCents": true
+        },
+        {
+          "stake": 50,
+          "baseCents": 1055,
+          "chest1": 1055,
+          "chest2": 2110,
+          "chest5": 5275,
+          "integerCents": true
+        },
+        {
+          "stake": 100,
+          "baseCents": 2110,
+          "chest1": 2110,
+          "chest2": 4220,
+          "chest5": 10550,
+          "integerCents": true
+        },
+        {
+          "stake": 200,
+          "baseCents": 4220,
+          "chest1": 4220,
+          "chest2": 8440,
+          "chest5": 21100,
+          "integerCents": true
+        },
+        {
+          "stake": 500,
+          "baseCents": 10550,
+          "chest1": 10550,
+          "chest2": 21100,
+          "chest5": 52750,
+          "integerCents": true
+        },
+        {
+          "stake": 1000,
+          "baseCents": 21100,
+          "chest1": 21100,
+          "chest2": 42200,
+          "chest5": 105500,
+          "integerCents": true
+        },
+        {
+          "stake": 2000,
+          "baseCents": 42200,
+          "chest1": 42200,
+          "chest2": 84400,
+          "chest5": 211000,
+          "integerCents": true
+        },
+        {
+          "stake": 5000,
+          "baseCents": 105500,
+          "chest1": 105500,
+          "chest2": 211000,
+          "chest5": 527500,
+          "integerCents": true
+        }
+      ]
+    },
+    {
+      "name": "book5",
+      "units": 1215,
+      "amounts": [
+        {
+          "stake": 20,
+          "baseCents": 1215,
+          "chest1": 1215,
+          "chest2": 2430,
+          "chest5": 6075,
+          "integerCents": true
+        },
+        {
+          "stake": 50,
+          "baseCents": 3037.5,
+          "chest1": 3037.5,
+          "chest2": 6075,
+          "chest5": 15187.5,
+          "integerCents": false
+        },
+        {
+          "stake": 100,
+          "baseCents": 6075,
+          "chest1": 6075,
+          "chest2": 12150,
+          "chest5": 30375,
+          "integerCents": true
+        },
+        {
+          "stake": 200,
+          "baseCents": 12150,
+          "chest1": 12150,
+          "chest2": 24300,
+          "chest5": 60750,
+          "integerCents": true
+        },
+        {
+          "stake": 500,
+          "baseCents": 30375,
+          "chest1": 30375,
+          "chest2": 60750,
+          "chest5": 151875,
+          "integerCents": true
+        },
+        {
+          "stake": 1000,
+          "baseCents": 60750,
+          "chest1": 60750,
+          "chest2": 121500,
+          "chest5": 303750,
+          "integerCents": true
+        },
+        {
+          "stake": 2000,
+          "baseCents": 121500,
+          "chest1": 121500,
+          "chest2": 243000,
+          "chest5": 607500,
+          "integerCents": true
+        },
+        {
+          "stake": 5000,
+          "baseCents": 303750,
+          "chest1": 303750,
+          "chest2": 607500,
+          "chest5": 1518750,
+          "integerCents": true
+        }
+      ]
+    },
+    {
+      "name": "scatter3",
+      "units": 240,
+      "amounts": [
+        {
+          "stake": 20,
+          "baseCents": 240,
+          "chest1": 240,
+          "chest2": 480,
+          "chest5": 1200,
+          "integerCents": true
+        },
+        {
+          "stake": 50,
+          "baseCents": 600,
+          "chest1": 600,
+          "chest2": 1200,
+          "chest5": 3000,
+          "integerCents": true
+        },
+        {
+          "stake": 100,
+          "baseCents": 1200,
+          "chest1": 1200,
+          "chest2": 2400,
+          "chest5": 6000,
+          "integerCents": true
+        },
+        {
+          "stake": 200,
+          "baseCents": 2400,
+          "chest1": 2400,
+          "chest2": 4800,
+          "chest5": 12000,
+          "integerCents": true
+        },
+        {
+          "stake": 500,
+          "baseCents": 6000,
+          "chest1": 6000,
+          "chest2": 12000,
+          "chest5": 30000,
+          "integerCents": true
+        },
+        {
+          "stake": 1000,
+          "baseCents": 12000,
+          "chest1": 12000,
+          "chest2": 24000,
+          "chest5": 60000,
+          "integerCents": true
+        },
+        {
+          "stake": 2000,
+          "baseCents": 24000,
+          "chest1": 24000,
+          "chest2": 48000,
+          "chest5": 120000,
+          "integerCents": true
+        },
+        {
+          "stake": 5000,
+          "baseCents": 60000,
+          "chest1": 60000,
+          "chest2": 120000,
+          "chest5": 300000,
+          "integerCents": true
+        }
+      ]
+    },
+    {
+      "name": "scatter5",
+      "units": 2180,
+      "amounts": [
+        {
+          "stake": 20,
+          "baseCents": 2180,
+          "chest1": 2180,
+          "chest2": 4360,
+          "chest5": 10900,
+          "integerCents": true
+        },
+        {
+          "stake": 50,
+          "baseCents": 5450,
+          "chest1": 5450,
+          "chest2": 10900,
+          "chest5": 27250,
+          "integerCents": true
+        },
+        {
+          "stake": 100,
+          "baseCents": 10900,
+          "chest1": 10900,
+          "chest2": 21800,
+          "chest5": 54500,
+          "integerCents": true
+        },
+        {
+          "stake": 200,
+          "baseCents": 21800,
+          "chest1": 21800,
+          "chest2": 43600,
+          "chest5": 109000,
+          "integerCents": true
+        },
+        {
+          "stake": 500,
+          "baseCents": 54500,
+          "chest1": 54500,
+          "chest2": 109000,
+          "chest5": 272500,
+          "integerCents": true
+        },
+        {
+          "stake": 1000,
+          "baseCents": 109000,
+          "chest1": 109000,
+          "chest2": 218000,
+          "chest5": 545000,
+          "integerCents": true
+        },
+        {
+          "stake": 2000,
+          "baseCents": 218000,
+          "chest1": 218000,
+          "chest2": 436000,
+          "chest5": 1090000,
+          "integerCents": true
+        },
+        {
+          "stake": 5000,
+          "baseCents": 545000,
+          "chest1": 545000,
+          "chest2": 1090000,
+          "chest5": 2725000,
+          "integerCents": true
+        }
+      ]
+    }
+  ],
+  "maxWin": [
+    {
+      "stake": 20,
+      "maxWinCents": 100000,
+      "buyCents": 2680
+    },
+    {
+      "stake": 50,
+      "maxWinCents": 250000,
+      "buyCents": 6700
+    },
+    {
+      "stake": 100,
+      "maxWinCents": 500000,
+      "buyCents": 13400
+    },
+    {
+      "stake": 200,
+      "maxWinCents": 1000000,
+      "buyCents": 26800
+    },
+    {
+      "stake": 500,
+      "maxWinCents": 2500000,
+      "buyCents": 67000
+    },
+    {
+      "stake": 1000,
+      "maxWinCents": 5000000,
+      "buyCents": 134000
+    },
+    {
+      "stake": 2000,
+      "maxWinCents": 10000000,
+      "buyCents": 268000
+    },
+    {
+      "stake": 5000,
+      "maxWinCents": 25000000,
+      "buyCents": 670000
+    }
+  ]
+}

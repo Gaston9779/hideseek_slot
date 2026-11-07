@@ -1,0 +1,30 @@
+{
+  "schema": "skull-hunt-v5_1-player-economy-1",
+  "mathVersion": "5.1.0",
+  "name": "session-12",
+  "rounds": 1000000,
+  "engineSeed": 2026110912,
+  "choiceSeed": 2026111912,
+  "betCents": 100,
+  "totalWageredCents": 100000000,
+  "totalPaidCents": 96538870,
+  "netCents": -3461130,
+  "rtp": 0.9653887,
+  "physicalFreeSpins": 95175,
+  "physicalSpins": 1095175,
+  "basePaidCents": 57578275,
+  "scatterFeaturePaidCents": 34883905,
+  "chestFeaturePaidCents": 4076690,
+  "dualRoundPaidCents": 2110695,
+  "note": "dualRoundPaidCents is a subset of other categories and is not added to total",
+  "maxNetCents": 124970,
+  "minNetCents": -3461230,
+  "maxRoundWinCents": 150710,
+  "chestPicks": {
+    "1x": 116,
+    "2x": 105,
+    "5x": 103
+  },
+  "maxWins": 0,
+  "accountingFailures": 0
+}
