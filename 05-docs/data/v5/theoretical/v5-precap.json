@@ -1,10 +1,10 @@
 {
   "schema": "skull-hunt-v5-theoretical-precap-1",
-  "mathVersion": "4.1.0",
+  "mathVersion": "5.1.0",
   "method": "exact reel-count enumeration for per-spin EV/trigger probabilities plus finite acyclic Markov reward DP for V5 feature state; numerical DP only (no Monte Carlo)",
   "assumption": "round cap excluded",
   "perSpin": {
-    "baseLineEV": 0.5491711133056216,
+    "baseLineEV": 0.546488904290729,
     "baseScatterEV": 0.028026401996612556,
     "featureLineEV": 3.8063141269448364,
     "featureScatterEV": 0.02802640199661255,
@@ -65,10 +65,10 @@
     }
   },
   "rtp": {
-    "baseLines": 0.5491711133056216,
+    "baseLines": 0.546488904290729,
     "baseScatter": 0.028026401996612556,
     "scatterFeature": 0.3480611122735955,
     "chestFeature": 0.037442777525299877,
-    "totalPreCap": 0.9627014051011296
+    "totalPreCap": 0.960019196086237
   }
 }

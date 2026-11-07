@@ -2,7 +2,7 @@
  * It does not import production evaluate() or SlotGame. Floating DP uses exact reel-count
  * transition probabilities; the error source is only IEEE-754 summation, not simulation. */
 import {mkdirSync,writeFileSync} from 'node:fs';
-import {CHEST_PACKAGES,FEATURE_RULES,SCATTER_FREE_SPINS} from '../../src/math/v4/config';
+import {CHEST_PACKAGES,FEATURE_RULES,MATH_VERSION,SCATTER_FREE_SPINS} from '../../src/math/v4/config';
 import {BASE_STRIPS,FS_STRIPS} from '../../src/math/v4/strips';
 import {specialDist,lineEv} from './v4/exact';import {refScatter} from './v4/ref';
 
@@ -29,5 +29,5 @@ function scatterVec(initial:number){const memo=new Map<string,Vec>();const go=(p
  }out=plusSpin(m,out);memo.set(key,out);return out;};return go(0,initial,1,initial,'',0);}
 const c1=chestVec(1),c2=chestVec(2),c5=chestVec(5),s3=scatterVec(12),s4=scatterVec(15),s5=scatterVec(20);const value=(v:Vec)=>fsSpinEV*(v.one+2*v.two+5*v.five);
 let scatterFeature=0;for(let sc=3;sc<pb.length;sc++)for(let cb=0;cb<pb[sc]!.length;cb++){const v=sc===3?s3:sc===4?s4:s5;scatterFeature+=pb[sc]![cb]!*value(v);}const chestAverage=(value(c1)+value(c2)+value(c5))/3,chestFeature=pChest*chestAverage,total=baseLineEV+baseScatterEV+scatterFeature+chestFeature;
-const report={schema:'skull-hunt-v5-theoretical-precap-1',mathVersion:'4.1.0',method:'exact reel-count enumeration for per-spin EV/trigger probabilities plus finite acyclic Markov reward DP for V5 feature state; numerical DP only (no Monte Carlo)',assumption:'round cap excluded',perSpin:{baseLineEV,baseScatterEV,featureLineEV:lineEV(FS_STRIPS,'feature'),featureScatterEV:fsScatterEV,featureEV:fsSpinEV},triggers:{scatter:pScatter,chest:pChest,dual:pDual},features:{scatter:{initial12:s3,value:value(s3),initial15:s4,value15:value(s4),initial20:s5,value20:value(s5)},chest:{x1:c1,value1:value(c1),x2:c2,value2:value(c2),x5:c5,value5:value(c5),averageValue:chestAverage}},rtp:{baseLines:baseLineEV,baseScatter:baseScatterEV,scatterFeature, chestFeature,totalPreCap:total}};
+const report={schema:'skull-hunt-v5-theoretical-precap-1',mathVersion:MATH_VERSION,method:'exact reel-count enumeration for per-spin EV/trigger probabilities plus finite acyclic Markov reward DP for V5 feature state; numerical DP only (no Monte Carlo)',assumption:'round cap excluded',perSpin:{baseLineEV,baseScatterEV,featureLineEV:lineEV(FS_STRIPS,'feature'),featureScatterEV:fsScatterEV,featureEV:fsSpinEV},triggers:{scatter:pScatter,chest:pChest,dual:pDual},features:{scatter:{initial12:s3,value:value(s3),initial15:s4,value15:value(s4),initial20:s5,value20:value(s5)},chest:{x1:c1,value1:value(c1),x2:c2,value2:value(c2),x5:c5,value5:value(c5),averageValue:chestAverage}},rtp:{baseLines:baseLineEV,baseScatter:baseScatterEV,scatterFeature, chestFeature,totalPreCap:total}};
 mkdirSync('05-docs/data/v5/theoretical',{recursive:true});writeFileSync('05-docs/data/v5/theoretical/v5-precap.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));

@@ -1,0 +1,40 @@
+{
+  "schema": "skull-hunt-v5_1-rigorous-cap-bound-1",
+  "method": "exhaustive 96^5 feature-spin distribution + Chernoff moment bound; conservative feature domination",
+  "exactInputs": {
+    "featureSpinOutcomes": 8153726976,
+    "maxFeatureSpinUnits": 13899,
+    "maxScatterFeatureSpins": 66,
+    "maxChestFeatureSpins": 48,
+    "baseUpperUnits": 22700,
+    "maxWinUnits": 100000,
+    "pScatter": 0.007124483585357666,
+    "pChest": 0.00029104948043823237
+  },
+  "bounds": {
+    "normal": {
+      "scatterFeature": {
+        "t": 0.00012499999999999976,
+        "logLoss": 4.405570221150323,
+        "loss": 81.90583396863258
+      },
+      "chestFeature": {
+        "t": 0.00013599999999999973,
+        "logLoss": 2.8817513938866934,
+        "loss": 17.845500326289624
+      },
+      "expectedLossUnitsPerBaseRound": 0.58873069325268,
+      "rtpFractionUpperBound": 0.029436534662634
+    },
+    "buy": {
+      "chestFeature": {
+        "t": 0.0001439999999999997,
+        "logLoss": -0.3002138134636656,
+        "loss": 0.7406598407044964
+      },
+      "expectedLossUnitsPerPurchase": 0.7406598407044964,
+      "rtpFractionUpperBound": 0.0002763656122031703
+    }
+  },
+  "note": "Bounds are valid but intentionally much wider than a cap distribution; no cap correction is asserted as exact."
+}
