@@ -18,6 +18,11 @@ const box=(el:HTMLElement,c:{cx:number,cy:number,w:number,h:number})=>place(el,c
 
 export async function createView(onProgress:(s:string)=>void){
  const world=$('#world'),stage=$('#stage');const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const sk=$<HTMLCanvasElement>('#skull');
+ // Begin every first-view request together. FX layers remain a progressive enhancement and never delay play.
+ const firstScale=()=>Math.max(.6,Math.min(2,Math.min(stage.clientWidth/DESIGN.w,stage.clientHeight/DESIGN.h)*(window.devicePixelRatio||1)));
+ const skullPromise=createSkull(sk,`${import.meta.env.BASE_URL}assets/scenery/Skull_Horned_Creature_Rigged.glb`,firstScale);
+ const fxLayersPromise=loadFxLayers(LAYER_FILES).catch(()=>null);
  // ---- static layers from layout
  onProgress('Lighting the lanterns…');
  const [bgImg,frameImg,panelImg,logoImg,symbols]=await Promise.all([loadImage(urls.bg),loadImage(urls.frame),loadImage(urls.panel),loadImage(urls.logo),loadSymbolImages()]);
@@ -37,15 +42,15 @@ export async function createView(onProgress:(s:string)=>void){
   const MIN=46;document.querySelectorAll<HTMLElement>('.hit').forEach(h=>{const b=hitBase.get(h)??(()=>{const o={x:parseFloat(h.style.left),y:parseFloat(h.style.top),w:parseFloat(h.style.width)};hitBase.set(h,o);return o;})();const size=Math.max(b.w,MIN/scale);h.style.left=`${b.x+b.w/2-size/2}px`;h.style.top=`${b.y+b.w/2-size/2}px`;h.style.width=h.style.height=`${size}px`;});
   skull?.resize();chase?.resize();}
  const frameHooks:((dt:number)=>void)[]=[];let chase:Chase|undefined;let skull:Awaited<ReturnType<typeof createSkull>>|undefined;
- const sk=$<HTMLCanvasElement>('#skull');place(sk,SKULL.x,SKULL.y,SKULL.w,SKULL.h);
+ place(sk,SKULL.x,SKULL.y,SKULL.w,SKULL.h);
  fit();addEventListener('resize',fit);
  const reelsCtx=ctxs.get($('#reels'))!,fxCtx=ctxs.get($('#fx'))!,atmoCtx=ctxs.get($('#atmo'))!;
  const reels=new Reels(reelsCtx,symbols,INITIAL);const fx=new Particles(240);
- // ---- WILD / SCATTER / CHEST_BONUS animation: composed in the reel canvas, where the real symbols are drawn
- {const layers=await loadFxLayers(LAYER_FILES).catch(()=>null);if(layers){reels.anim=new SymbolAnimator(layers as unknown as FxLayers,reels.particles,reduced);reels.fxLayer=true;reels.refreshFx();}}
+ // ---- WILD / SCATTER / CHEST_BONUS animation: a cosmetic enhancement, so it cannot hold up boot.
+ void fxLayersPromise.then(layers=>{if(layers){reels.anim=new SymbolAnimator(layers as unknown as FxLayers,reels.particles,reduced);reels.fxLayer=true;reels.refreshFx();}});
  // ---- real 3D skull
  onProgress('Waking the Skull…');
- skull=await createSkull(sk,`${import.meta.env.BASE_URL}assets/scenery/Skull_Horned_Creature_Rigged.glb`,rs);fit();
+ skull=await skullPromise;fit();
  let suspHook:((e:import('./reels').SuspenseEvent)=>void)|undefined;reels.onSuspense=e=>suspHook?.(e);
  reels.onReelStop=()=>cue.reelStop();reels.onAnticipate=on=>{if(on&&skull!.controller.state!=='anticipation')skull!.set('anticipation');};
  // ---- atmosphere: lantern flicker glows over the art + fireflies + slow mist (all subtle)
