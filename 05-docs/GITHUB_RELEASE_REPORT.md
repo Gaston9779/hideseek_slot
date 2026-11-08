@@ -1,14 +1,14 @@
 # GitHub release report
 
-Date: 2026-11-07
+Date: 2026-11-08
 
 ## Outcome
 
-**GITHUB PUSH NON COMPLETATO**
+**GITHUB PUSH COMPLETATO**
 
-The destination repository is [Gaston9779/hideseek_slot](https://github.com/Gaston9779/hideseek_slot). It was verified as **public** and empty (no default branch and no refs). No remote was added, no files were staged, no commit was created, and no push was attempted after the licensing gate failed.
+The destination repository is [Gaston9779/hideseek_slot](https://github.com/Gaston9779/hideseek_slot). The owner explicitly authorised publication to this **public** repository and confirmed ownership of the project assets. Commit `062fa76d414a2218f5b7a3a25e391a52ed8aea44` was pushed to `main` without force and independently verified through both Git and the GitHub API.
 
-The explicit release instruction requires a stop before publishing a public repository when asset redistribution rights are uncertain. `05-docs/ASSET_AUDIT.md` identifies supplied scenery/character material as Tripo-derived and records Mixamo skeleton naming, but neither a licence nor a complete attribution/redistribution record is present. The affected source and runtime 3D assets must be cleared for public redistribution (or removed/replaced with authorised alternatives) before publication.
+`05-docs/ASSET_AUDIT.md` identifies supplied scenery/character material as Tripo-derived and records Mixamo skeleton naming. This report does not independently verify third-party redistribution terms; the public publication was performed under the owner's explicit confirmation and authorisation.
 
 ## Repository and backup
 
@@ -16,9 +16,10 @@ The explicit release instruction requires a stop before publishing a public repo
 | --- | --- |
 | Destination | `https://github.com/Gaston9779/hideseek_slot` |
 | Visibility | Public |
-| Requested branch | `main` |
-| Remote state | Empty; compatible, but publication blocked before configuration |
-| Current local branch / HEAD | `main` / `940da9a` |
+| Published branch | `main` |
+| Published commit | `062fa76d414a2218f5b7a3a25e391a52ed8aea44` |
+| Remote state | `origin/main` verified at the published commit |
+| Current local branch before report update | `main` / `062fa76` |
 | Local release backup | `backups/skull-hunt-pre-github-release-20261107.tar.gz` |
 | Backup SHA-256 | `e52efb6ada870c00dab8b4788dd7ef80fd1a0f75e52142a1427adcc09ee5a516` |
 | Current tracked files | 706 |
@@ -60,6 +61,6 @@ The approved configuration remains 5×3, 20 paylines, 13 symbols, Scatter 12/15/
 
 The test run intentionally exercised the audio manager's missing-file fallback and printed an expected mocked 404 warning; the test passed.
 
-## Required next action
+## Residual note
 
-Provide licence/attribution evidence permitting public redistribution for every third-party 3D model, animation, texture, and any other uncertain asset—or change the repository to private and explicitly authorise that release scope. After that, the controlled staging, README/report commit, non-force push to `main`, and remote post-push verification can be completed.
+No Git LFS migration was needed because no published file exceeded GitHub's 50 MiB advisory threshold. The asset-rights note above is retained for traceability; it is not a blocker for this owner-authorised publication.
