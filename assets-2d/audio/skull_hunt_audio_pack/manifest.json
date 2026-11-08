@@ -1,13 +1,13 @@
 {
-  "pack": "Skull Hunt ORIGINAL audio prototype pack",
-  "license": "Original procedural synthesis created for this request; no third-party source samples",
-  "format": "32kHz 16-bit mono WAV master; OGG Vorbis deploy",
+  "pack": "Skull Hunt Audio Remaster v2 — drop-in replacement",
+  "license": "New audio rendering for this user. Instrumental loops rendered using system TimGM6mb.sf2 soundfont; verify soundfont redistribution permissions before public commercial distribution. No third-party recordings embedded apart from the soundfont samples included in rendered music.",
+  "format": "32kHz 16-bit mono WAV, OGG Vorbis deployment; original filenames and folder layout unchanged.",
   "items": [
     {
       "id": "amb_spooky_graveyard_loop",
       "category": "ambient",
       "duration": 20.0,
-      "description": "Original 20s atmospheric eerie loop, soft and non-intrusive",
+      "description": "Sampled-instrument chamber ambience; modal celesta, harp, strings, subtle atmosphere, loop 20 seconds",
       "wav": "ambient/amb_spooky_graveyard_loop.wav",
       "ogg": "ambient/amb_spooky_graveyard_loop.ogg"
     },
@@ -15,7 +15,7 @@
       "id": "amb_bonus_chest_loop",
       "category": "ambient",
       "duration": 20.0,
-      "description": "20s mysterious sustained chest ambience",
+      "description": "Instrumental bonus ambient music; harp, celesta, strings and warm chords; loop 20 seconds",
       "wav": "ambient/amb_bonus_chest_loop.wav",
       "ogg": "ambient/amb_bonus_chest_loop.ogg"
     },

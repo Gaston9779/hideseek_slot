@@ -1,5 +1,5 @@
 /** Sound catalogue of assets-2d/audio/skull_hunt_audio_pack (ids == manifest.json ids). Presentation only: audio never touches RNG, state or payouts. */
-export type Bus='music'|'sfx'|'voice';
+export type Bus='music'|'sfx'|'voice'|'cinematic';
 export interface SoundDef{id:string;dir:string;bus:Bus;gain:number;loop?:boolean;/** min ms between two starts of the same id (rate limit) */gapMs?:number;/** voices/important cues: higher wins */priority?:number;/** preloaded right after unlock (small, needed at once) */critical?:boolean}
 const d=(id:string,dir:string,bus:Bus,gain:number,o:Partial<SoundDef>={}):SoundDef=>({id,dir,bus,gain,...o});
 export const SOUNDS:SoundDef[]=[
@@ -11,7 +11,7 @@ export const SOUNDS:SoundDef[]=[
  d('scatter_trigger','bonus','sfx',.75,{priority:2}),d('chest_trigger','bonus','sfx',.75,{priority:2}),d('dual_trigger','bonus','sfx',.8,{priority:3}),d('chest_open','bonus','sfx',.6,{gapMs:150}),
  d('chest_reveal_x1','bonus','sfx',.7,{priority:2}),d('chest_reveal_x2','bonus','sfx',.75,{priority:2}),d('chest_reveal_x5','bonus','sfx',.85,{priority:3}),d('free_spin_retrigger','bonus','sfx',.7,{priority:2}),d('bonus_complete','bonus','sfx',.65,{priority:2}),
  d('baby_skull_happy','voice','voice',.8,{priority:1}),d('baby_skull_scared','voice','voice',.8,{priority:2}),d('baby_skull_angry','voice','voice',.8,{priority:1}),d('baby_skull_searching','voice','voice',.8,{priority:1}),d('baby_skull_win','voice','voice',.85,{priority:2}),
- d('hologram_beam','cinematic','sfx',.6,{priority:2}),d('skull_land','cinematic','sfx',.6,{priority:2}),d('skull_run','cinematic','sfx',.35,{loop:true}),d('skull_fall','cinematic','sfx',.6,{priority:2}),
+ d('hologram_beam','cinematic','cinematic',.52,{priority:2}),d('skull_land','cinematic','cinematic',.5,{priority:2}),d('skull_run','cinematic','cinematic',.3,{loop:true}),d('skull_fall','cinematic','cinematic',.52,{priority:2}),
 ];
 export const SOUND_BY_ID=new Map(SOUNDS.map(s=>[s.id,s]));
 export type SoundId=typeof SOUNDS[number]['id'];

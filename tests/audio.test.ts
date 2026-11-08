@@ -27,7 +27,7 @@ describe('audio manager',()=>{
  it('per-bus switches and volumes act on the right bus only',async()=>{
   const {m,st}=await unlocked();m.set({sfx:false});st.now+=1000;expect(m.play('reel_stop')).toBe(false);expect(m.play('baby_skull_happy')).toBe(true);m.set({sfx:true,voice:false});st.now+=5000;expect(m.play('baby_skull_win')).toBe(false);
   m.set({musicVol:2,sfxVol:-1});expect(m.settings.musicVol).toBe(1);expect(m.settings.sfxVol).toBe(0);});
- it('restores saved preferences and ignores a corrupt value',()=>{const a=rig({stored:JSON.stringify({master:false,musicVol:.1,sfxVol:'x'})});expect(a.m.settings.master).toBe(false);expect(a.m.settings.musicVol).toBe(.1);expect(a.m.settings.sfxVol).toBe(.8);});
+ it('restores saved preferences and ignores a corrupt value',()=>{const a=rig({stored:JSON.stringify({master:false,musicVol:.1,sfxVol:'x'})});expect(a.m.settings.master).toBe(false);expect(a.m.settings.musicVol).toBe(.1);expect(a.m.settings.sfxVol).toBe(.72);});
  it('rate limiting: the same cue cannot machine-gun',async()=>{const {m,st}=await unlocked();st.now+=1000;expect(m.play('reel_stop')).toBe(true);expect(m.play('reel_stop')).toBe(false);st.now+=100;expect(m.play('reel_stop')).toBe(true);});
  it('voices never overlap and are not played at every event (cooldown); a higher priority voice may interrupt',async()=>{
   const {m,st,flush}=await unlocked();st.now+=10_000;expect(m.play('baby_skull_happy')).toBe(true);await flush();expect(m.play('baby_skull_searching')).toBe(false);
@@ -40,6 +40,7 @@ describe('audio manager',()=>{
   const {m,flush}=await unlocked();m.ambient('amb_spooky_graveyard_loop',1);await flush();expect(m.activeCount).toBe(1);
   m.ambient('amb_bonus_chest_loop',1);await flush();expect(m.activeCount).toBe(1);m.ambient('amb_spooky_graveyard_loop',1);await flush();expect(m.activeCount).toBe(1);m.ambient(null);expect(m.activeCount).toBe(0);});
  it('ambience requested before unlock starts after unlock',async()=>{const r=rig();r.m.ambient('amb_spooky_graveyard_loop');expect(r.m.activeCount).toBe(0);await r.m.unlock();await r.flush();expect(r.m.activeCount).toBe(1);});
+ it('repeated ambience requests while decoding still create one loop instance',async()=>{const r=rig();await r.m.unlock();r.m.ambient('amb_spooky_graveyard_loop');r.m.ambient('amb_spooky_graveyard_loop');await r.flush();expect(r.m.activeCount).toBe(1);});
  it('ducking lowers and restores the music path',async()=>{const {m}=await unlocked();m.duck(.3);expect(m.duckLevel).toBe(.3);m.unduck();expect(m.duckLevel).toBe(1);});
  it('hidden tab: no new sounds; visibility listener registered once and removed on dispose',async()=>{
   const {m,st}=await unlocked();expect(st.visListeners).toBe(1);st.hidden=true;st.now+=1000;expect(m.play('ui_click')).toBe(false);st.visFn!();expect(st.suspended).toBe(1);st.hidden=false;st.visFn!();expect(st.resumed).toBeGreaterThan(0);

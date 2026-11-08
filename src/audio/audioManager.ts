@@ -10,8 +10,8 @@ export interface GainLike extends NodeLike{gain:GainParamLike}
 export interface SourceLike extends NodeLike{buffer:unknown;loop:boolean;onended:(()=>void)|null;start(when?:number):void;stop(when?:number):void}
 export interface CtxLike{state:string;currentTime:number;destination:unknown;createGain():GainLike;createBufferSource():SourceLike;decodeAudioData(b:ArrayBuffer):Promise<unknown>;resume():Promise<void>;suspend():Promise<void>;close():Promise<void>}
 export interface AudioDeps{createContext():CtxLike;load(id:string):Promise<ArrayBuffer>;storage?:{getItem(k:string):string|null;setItem(k:string,v:string):void};now():number;isHidden():boolean;onVisibility(fn:()=>void):()=>void}
-export interface AudioSettings{master:boolean;music:boolean;sfx:boolean;voice:boolean;masterVol:number;musicVol:number;sfxVol:number;voiceVol:number}
-export const DEFAULT_SETTINGS:AudioSettings={master:true,music:true,sfx:true,voice:true,masterVol:.8,musicVol:.35,sfxVol:.8,voiceVol:.8};
+export interface AudioSettings{master:boolean;music:boolean;sfx:boolean;voice:boolean;cinematic:boolean;masterVol:number;musicVol:number;sfxVol:number;voiceVol:number;cinematicVol:number}
+export const DEFAULT_SETTINGS:AudioSettings={master:true,music:true,sfx:true,voice:true,cinematic:true,masterVol:.8,musicVol:.3,sfxVol:.72,voiceVol:.72,cinematicVol:.62};
 const KEY='skull-hunt-audio-v1',FADE=.25,VOICE_COOLDOWN_MS=2500;
 const clamp=(x:number)=>Math.max(0,Math.min(1,Number.isFinite(x)?x:0));
 interface Inst{id:string;def:SoundDef;src:SourceLike;gain:GainLike;ended:boolean}
@@ -22,11 +22,11 @@ export function createAudioManager(deps:AudioDeps){
  const buffers=new Map<string,unknown>(),loading=new Map<string,Promise<unknown|null>>(),failed=new Set<string>(),active:Inst[]=[],lastStart=new Map<string,number>();
  let lastVoiceAt=-1e9,voiceInst:Inst|null=null,wantAmbient:string|null=null,ambInst:Inst|null=null,duckLevel=1;const listeners=new Set<()=>void>();let offVis:(()=>void)|null=null;
  const busEnabled=(b:Bus)=>s.master&&s[b];
- function applyGains(){if(!ctx)return;const t=ctx.currentTime;set(master.gain,s.master?s.masterVol:0,t,.05);set(buses.music.gain,busEnabled('music')?s.musicVol:0,t,.1);set(buses.sfx.gain,busEnabled('sfx')?s.sfxVol:0,t,.05);set(buses.voice.gain,busEnabled('voice')?s.voiceVol:0,t,.05);}
+ function applyGains(){if(!ctx)return;const t=ctx.currentTime;set(master.gain,s.master?s.masterVol:0,t,.05);set(buses.music.gain,busEnabled('music')?s.musicVol:0,t,.1);set(buses.sfx.gain,busEnabled('sfx')?s.sfxVol:0,t,.05);set(buses.voice.gain,busEnabled('voice')?s.voiceVol:0,t,.05);set(buses.cinematic.gain,busEnabled('cinematic')?s.cinematicVol:0,t,.08);}
  function set(p:GainParamLike,v:number,t:number,dur:number){p.cancelScheduledValues(t);p.setValueAtTime(p.value,t);p.linearRampToValueAtTime(v,t+dur);if(dur===0)p.value=v;}
  function save(){try{deps.storage?.setItem(KEY,JSON.stringify(s));}catch{/* ignore */}for(const l of listeners)l();}
- function ensureCtx(){if(ctx||disposed)return;ctx=deps.createContext();master=ctx.createGain();duck=ctx.createGain();buses={music:ctx.createGain(),sfx:ctx.createGain(),voice:ctx.createGain()};
-  buses.music.connect(duck);duck.connect(master);buses.sfx.connect(master);buses.voice.connect(master);master.connect(ctx.destination);applyGains();
+ function ensureCtx(){if(ctx||disposed)return;ctx=deps.createContext();master=ctx.createGain();duck=ctx.createGain();buses={music:ctx.createGain(),sfx:ctx.createGain(),voice:ctx.createGain(),cinematic:ctx.createGain()};
+  buses.music.connect(duck);duck.connect(master);buses.sfx.connect(master);buses.voice.connect(master);buses.cinematic.connect(master);master.connect(ctx.destination);applyGains();
   if(!offVis)offVis=deps.onVisibility(()=>{if(!ctx||!unlocked)return;if(deps.isHidden())void ctx.suspend().catch(()=>{});else if(s.master)void ctx.resume().catch(()=>{});});}
  function load(id:string):Promise<unknown|null>{if(buffers.has(id))return Promise.resolve(buffers.get(id)!);if(failed.has(id)||!ctx)return Promise.resolve(null);let p=loading.get(id);if(!p){const c=ctx;p=deps.load(id).then(b=>c.decodeAudioData(b)).then(b=>{buffers.set(id,b);loading.delete(id);return b;}).catch(e=>{failed.add(id);loading.delete(id);console.warn(`[audio] "${id}" unavailable`,e);return null;});loading.set(id,p);}return p;}
  function kill(i:Inst,fade=FADE){if(i.ended)return;i.ended=true;const t=ctx!.currentTime;try{set(i.gain.gain,0,t,fade);i.src.stop(t+fade+.02);}catch{/* already stopped */}remove(i);}
@@ -49,6 +49,9 @@ export function createAudioManager(deps:AudioDeps){
    try{const def=SOUND_BY_ID.get(id);if(!def||!ctx||!unlocked||disposed||deps.isHidden())return false;
     if(!busEnabled(def.bus))return false;const now=deps.now();if(now-(lastStart.get(id)??-1e9)<(def.gapMs??40))return false;
     if(def.bus==='voice'){const pr=def.priority??1;if(voiceInst&&!voiceInst.ended){if(pr<=(voiceInst.def.priority??1))return false;kill(voiceInst,.08);}else if(now-lastVoiceAt<VOICE_COOLDOWN_MS&&pr<2)return false;}
+    // A high-priority real event (trigger, win or cinematic hit) displaces lower-priority
+    // sounds on the same bus instead of stacking into a peak during fast spins.
+    const priority=def.priority??0;if(priority>=2)for(const i of [...active])if(i.def.bus===def.bus&&!i.def.loop&&(i.def.priority??0)<priority)kill(i,.04);
     lastStart.set(id,now);if(def.bus==='voice')lastVoiceAt=now;
     const buf=buffers.get(id);const go=(b:unknown)=>{if(disposed||!ctx)return;const i=start(def,b,o.volume??1,o.fade??0);if(i&&def.bus==='voice')voiceInst=i;};
     if(buf)go(buf);else if(!failed.has(id)){const asked=now;void load(id).then(b=>{if(b&&(def.loop||deps.now()-asked<1200))go(b);});}
@@ -58,7 +61,9 @@ export function createAudioManager(deps:AudioDeps){
   stopAll(fade=.1){for(const i of [...active])kill(i,fade);},
   /** Looping music/ambience: one at a time; switching crossfades. null = fade out. */
   ambient(id:string|null,fade=1.5){wantAmbient=id;if(!ctx||!unlocked)return;if(ambInst&&ambInst.id===id)return;const old=ambInst;if(old){kill(old,fade);ambInst=null;}if(!id)return;const def=SOUND_BY_ID.get(id);if(!def)return;
-   const run=(b:unknown)=>{if(wantAmbient!==id||disposed)return;ambInst=start(def,b,1,fade);};const b=buffers.get(id);if(b)run(b);else void load(id).then(x=>{if(x)run(x);});},
+   // Multiple calls can happen while a loop is decoding (initial unlock, view startup and a
+   // resumed scene). Start only one instance once that shared request resolves.
+   const run=(b:unknown)=>{if(wantAmbient!==id||disposed||ambInst?.id===id)return;ambInst=start(def,b,1,fade);};const b=buffers.get(id);if(b)run(b);else void load(id).then(x=>{if(x)run(x);});},
   /** Lower the music bus under important cues; unduck() restores gradually. */
   duck(level=.35,attack=.25){if(!ctx)return;duckLevel=clamp(level);set(duck.gain,duckLevel,ctx.currentTime,attack);},
   unduck(release=1.2){if(!ctx)return;duckLevel=1;set(duck.gain,1,ctx.currentTime,release);},
