@@ -67,7 +67,7 @@ button:focus-visible{outline:3px solid #fff1bb;outline-offset:3px}
 #fs-patch i{font:900 64px/1 var(--font);font-style:normal;color:#ffd53a;-webkit-text-stroke:3px #7a3a08;paint-order:stroke fill;text-shadow:0 5px 0 #8a4a10;letter-spacing:.02em}
 #loading{position:absolute;z-index:20;inset:0;display:grid;align-content:center;justify-items:center;grid-template-rows:auto auto auto;gap:18px;background:radial-gradient(circle,#2b1a4af2,#0d0818f7);transition:opacity .3s ease-out;font:30px var(--font);color:#ffe2a8}
 #loading.done{opacity:0;visibility:hidden;pointer-events:none}
-#loading-logo{display:block;max-width:min(460px,62vw);max-height:150px;object-fit:contain;filter:drop-shadow(0 7px 18px #000a);animation:loadingLogo 1.5s ease-in-out infinite alternate}
+#loading-logo{display:block;width:min(460px,62vw);height:150px;object-fit:contain;filter:drop-shadow(0 7px 18px #000a);animation:loadingLogo 1.5s ease-in-out infinite alternate}
 .loading-ring{width:58px;height:58px;border:4px solid #68527c;border-top-color:#ffcc68;border-radius:50%;animation:load 1s linear infinite}
 #loading p{margin:0;text-align:center}
 @keyframes load{to{transform:rotate(360deg)}}

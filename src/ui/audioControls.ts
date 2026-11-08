@@ -1,7 +1,7 @@
 import {audio} from '../audio';import {cue} from '../audio/cues';import type {AudioSettings} from '../audio/audioManager';
 /** AUDIO section of the existing menu + the control-bar audio button, both bound to the same manager state (they can never disagree). */
 const ROWS:{label:string;on:keyof AudioSettings;vol:keyof AudioSettings}[]=[
- {label:'Master',on:'master',vol:'masterVol'},{label:'Ambiente',on:'music',vol:'musicVol'},{label:'Effetti',on:'sfx',vol:'sfxVol'},{label:'Voce Skull',on:'voice',vol:'voiceVol'},{label:'Cinematiche',on:'cinematic',vol:'cinematicVol'},
+ {label:'Master',on:'master',vol:'masterVol'},{label:'Music',on:'music',vol:'musicVol'},{label:'Sound Effects',on:'sfx',vol:'sfxVol'},{label:'Skull Voice',on:'voice',vol:'voiceVol'},{label:'Cinematics',on:'cinematic',vol:'cinematicVol'},
 ];
 export function createAudioControls(menu:HTMLDialogElement,btn:HTMLButtonElement){
  const sec=document.createElement('section');sec.className='audio-menu';sec.setAttribute('aria-label','Audio');

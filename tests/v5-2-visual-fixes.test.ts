@@ -16,7 +16,7 @@ describe('v5.2 visual fixes',()=>{
   const css=r('src/style.css');expect(css).toMatch(/#bonus-prizes \.bprize\.x2,#bonus-prizes \.bprize\.x5[^}]*box-shadow:none/);});
  it('finale has no button: tap/click anywhere (captured, idempotent), quiet hint only',()=>{
   const ts=r('src/ui/chestFinale.ts'),css=r('src/ui/gameplay.css');expect(ts).not.toMatch(/<button/);expect(ts).not.toContain('cf-go');expect(css).not.toContain('.cf-go');
-  expect(ts).toMatch(/addEventListener\('click',onTap,true\)/);expect(ts).toMatch(/removeEventListener\('click',onTap,true\)/);expect(ts).toMatch(/performance\.now\(\)-shownAt<450/);expect(ts).toContain('TOCCA PER CONTINUARE');
+  expect(ts).toMatch(/addEventListener\('click',onTap,true\)/);expect(ts).toMatch(/removeEventListener\('click',onTap,true\)/);expect(ts).toMatch(/performance\.now\(\)-shownAt<450/);expect(ts).toContain('TAP TO CONTINUE');
  });
  it('Buy Bonus name is a hover/focus tooltip, never a permanent plate',()=>{
   const css=r('src/ui/gameplay.css');expect(css).toMatch(/\.buy-title\{[^}]*opacity:0/);expect(css).toMatch(/@media \(hover:hover\)\{\.buy-hit:hover \.buy-title\{opacity:1\}\}/);expect(css).toMatch(/\.buy-hit:focus-visible \.buy-title\{opacity:1\}/);

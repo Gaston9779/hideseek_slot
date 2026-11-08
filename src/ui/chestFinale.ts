@@ -1,8 +1,8 @@
 import {urls} from '../view/assets';import {medalFor} from './bonusAssets';import {keys} from './keyboard';
 import type {Chase} from '../chase/director';
 /**
- * CHEST BONUS COMPLETATO — final reveal inside the stone portal (the approved Hide & Seek arch art, no brown panel):
- * VINCITA BASE → multiplier medal → the number transforms into VINCITA TOTALE. Presentation only: every figure is handed in from the engine's
+ * CHEST BONUS COMPLETE — final reveal inside the stone portal (the approved Hide & Seek arch art, no brown panel):
+ * BASE WIN → multiplier medal → the number transforms into TOTAL WIN. Presentation only: every figure is handed in from the engine's
  * FeatureState / ledger; nothing is multiplied or credited here. For ×5 the original Skull and the Seeker (blaster at rest) cheer on the portal steps.
  */
 export interface FinaleData{baseCents:number;multiplier:number;/** effective (post-cap) credited total from the engine */totalCents:number;/** engine reached the 5,000× round cap */capped:boolean;spins:number}
@@ -11,12 +11,12 @@ export function finaleLevel(d:FinaleData):FinaleLevel{return d.capped?'max':d.mu
 /** Timeline (ms from the start). Exported for tests. */
 export const FINALE_T={title:250,baseIn:700,baseCount:900,mult:1900,transform:3000,transformMs:2100,settle:5300};
 export function createChestFinale(d:{host:HTMLElement;sizeFrom:HTMLElement;money:(c:number)=>string;reduced:boolean;chase:Chase;/** called exactly when the multiplied total is revealed (balance catches up) */onReveal:()=>void}){
- const root=document.createElement('div');root.className='cf';root.hidden=true;root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-label','Chest Bonus completato');
+ const root=document.createElement('div');root.className='cf';root.hidden=true;root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-label','Chest Bonus complete');
  root.innerHTML=`<img class="cf-art" alt="" draggable="false"><div class="cf-vignette"></div><div class="cf-rays"></div><canvas class="cf-fx" aria-hidden="true"></canvas>
-  <div class="cf-title"><span data-k="title">CHEST BONUS COMPLETATO</span></div>
-  <div class="cf-stack"><div class="cf-label" data-k="label">VINCITA BASE</div><div class="cf-num" data-k="num">0.00</div><div class="cf-sub" data-k="sub"></div></div>
+  <div class="cf-title"><span data-k="title">CHEST BONUS COMPLETE</span></div>
+  <div class="cf-stack"><div class="cf-label" data-k="label">BASE WIN</div><div class="cf-num" data-k="num">0.00</div><div class="cf-sub" data-k="sub"></div></div>
   <div class="cf-mult" data-k="mult"><img data-k="multimg" alt="" draggable="false"></div>
-  <div class="cf-hint" aria-hidden="true">TOCCA PER CONTINUARE</div>`;
+  <div class="cf-hint" aria-hidden="true">TAP TO CONTINUE</div>`;
  root.querySelector<HTMLImageElement>('.cf-art')!.src=urls.bonus;d.host.appendChild(root);
  const q=<T extends HTMLElement>(k:string)=>root.querySelector<T>(`[data-k="${k}"]`)!;
  const fx=root.querySelector<HTMLCanvasElement>('.cf-fx')!,ctx=fx.getContext('2d')!;
@@ -41,17 +41,17 @@ export function createChestFinale(d:{host:HTMLElement;sizeFrom:HTMLElement;money
   show(data:FinaleData):Promise<void>{
    if(open)return Promise.resolve();open=true;settled=false;parts=[];const level=finaleLevel(data),m=d.money;
    layout();root.hidden=false;root.dataset.level=level;root.classList.remove('on','settled','mult-in','xform','ready');(document.activeElement as HTMLElement|null)?.blur?.();void root.offsetWidth;root.classList.add('on');
-   q('title').textContent=level==='max'?'MAX WIN · CHEST BONUS':'CHEST BONUS COMPLETATO';q('label').textContent='VINCITA BASE';q('num').textContent=m(0);{const mi=q<HTMLImageElement>('multimg'),src=medalFor(data.multiplier);if(src){mi.src=src;mi.alt=`Moltiplicatore ×${data.multiplier}`;}else mi.removeAttribute('src');}q('sub').textContent='';
+   q('title').textContent=level==='max'?'MAX WIN · CHEST BONUS':'CHEST BONUS COMPLETE';q('label').textContent='BASE WIN';q('num').textContent=m(0);{const mi=q<HTMLImageElement>('multimg'),src=medalFor(data.multiplier);if(src){mi.src=src;mi.alt=`Multiplier ×${data.multiplier}`;}else mi.removeAttribute('src');}q('sub').textContent='';
    const noWin=data.baseCents<=0,R=d.reduced;
-   const finish=()=>{if(settled)return;settled=true;clearAll();q('label').textContent=noWin?'NESSUNA VINCITA':'VINCITA TOTALE';q('num').textContent=m(data.totalCents);root.classList.add('mult-in','xform','settled');
-    q('sub').textContent=data.capped?'LIMITE MAX WIN RAGGIUNTO · IMPORTO EFFETTIVO':'';if(!noWin)d.onReveal();root.classList.add('ready');armedAt=performance.now();};
+   const finish=()=>{if(settled)return;settled=true;clearAll();q('label').textContent=noWin?'NO WIN':'TOTAL WIN';q('num').textContent=m(data.totalCents);root.classList.add('mult-in','xform','settled');
+    q('sub').textContent=data.capped?'MAX WIN LIMIT REACHED · ACTUAL PAID AMOUNT':'';if(!noWin)d.onReveal();root.classList.add('ready');armedAt=performance.now();};
    let armedAt=Infinity;
    const t=FINALE_T;
    if(R||noWin){T(finish,R?200:900);}
    else{
     T(()=>tween(0,data.baseCents,t.baseCount,v=>{q('num').textContent=m(Math.round(v));}),t.baseIn);
     T(()=>root.classList.add('mult-in'),t.mult);
-    T(()=>{root.classList.add('xform');q('label').textContent='VINCITA TOTALE';d.onReveal();tween(data.baseCents,data.totalCents,t.transformMs,v=>{q('num').textContent=m(Math.round(v));},k=>k*k*(3-2*k));
+    T(()=>{root.classList.add('xform');q('label').textContent='TOTAL WIN';d.onReveal();tween(data.baseCents,data.totalCents,t.transformMs,v=>{q('num').textContent=m(Math.round(v));},k=>k*k*(3-2*k));
      burst(level==='x1'?18:level==='x2'?46:level==='x5'?90:140,level==='max'?1.25:1);},t.transform);
     T(()=>{if(level==='x5'||level==='max'){void d.chase.celebrate(feetPositions());burst(level==='max'?100:60,1.1);}},t.transform+t.transformMs-350);
     if(level==='max')T(()=>burst(90,1.2),t.transform+t.transformMs+700);

@@ -18,17 +18,17 @@ export function createBuyBonusWidget(d:BuyWidgetDeps){
  const R=(r:import('./bonusAnchors').Rect)=>pctRect(r,F),D=(c:import('./bonusAnchors').Disc)=>pctDisc(c,F);
  dlg.innerHTML=`<div class="bm"><img class="bm-frame" src="${BONUS_UI.buyFrame}" alt="" draggable="false">
   <h1 id="bd-title" class="bm-title" style="${R(F.title)}">BUY BONUS</h1>
-  <div class="bm-intro" style="${R(F.intro)}"><p class="bd-desc">Scegli una delle tre casse e ottieni <b>12 Free Spins</b> con moltiplicatore sulle vincite.</p><p class="bd-note" role="alert"></p></div>
+  <div class="bm-intro" style="${R(F.intro)}"><p class="bd-desc">Choose one of three chests to receive <b>12 Free Spins</b> with a win multiplier.</p><p class="bd-note" role="alert"></p></div>
   <canvas class="bm-skull" aria-hidden="true" style="${R(F.skullCanvas)}"></canvas>
-  ${[1,2,5].map((m,i)=>`<img class="bm-medal" data-mult="${m}" src="${BONUS_UI.medals[m]}" alt="Premio possibile ×${m}" draggable="false" style="${medalImgStyle(F.medals[i]!,F)}">`).join('')}
-  <button type="button" class="bm-step bd-minus" aria-label="Diminuisci puntata" style="${D(F.minus)}"></button>
-  <output class="bd-bet" aria-live="polite" aria-label="Puntata" style="${R(F.stake)}"></output>
-  <button type="button" class="bm-step bd-plus" aria-label="Aumenta puntata" style="${D(F.plus)}"></button>
-  <dl class="bm-box bm-cost" style="${R(F.cost)}"><dt>COSTO DEL BONUS</dt><dd class="bd-price"></dd></dl>
-  <dl class="bm-box" style="${R(F.balance)}"><dt>SALDO</dt><dd class="bd-bal"></dd></dl>
-  <button type="button" class="bd-ok" style="${R(F.cta)}"><span class="bd-ok-main">GIOCA</span><span class="bd-ok-price"></span></button>
-  <button type="button" class="bd-cancel" style="${R(F.cancel)}">ANNULLA</button>
-  <button type="button" class="bm-close" aria-label="Chiudi" style="${D(F.close)}">×</button></div>`;
+  ${[1,2,5].map((m,i)=>`<img class="bm-medal" data-mult="${m}" src="${BONUS_UI.medals[m]}" alt="Possible prize ×${m}" draggable="false" style="${medalImgStyle(F.medals[i]!,F)}">`).join('')}
+  <button type="button" class="bm-step bd-minus" aria-label="Decrease bet" style="${D(F.minus)}"></button>
+  <output class="bd-bet" aria-live="polite" aria-label="Bet" style="${R(F.stake)}"></output>
+  <button type="button" class="bm-step bd-plus" aria-label="Increase bet" style="${D(F.plus)}"></button>
+  <dl class="bm-box bm-cost" style="${R(F.cost)}"><dt>BONUS COST</dt><dd class="bd-price"></dd></dl>
+  <dl class="bm-box" style="${R(F.balance)}"><dt>BALANCE</dt><dd class="bd-bal"></dd></dl>
+  <button type="button" class="bd-ok" style="${R(F.cta)}"><span class="bd-ok-main">PLAY</span><span class="bd-ok-price"></span></button>
+  <button type="button" class="bd-cancel" style="${R(F.cancel)}">CANCEL</button>
+  <button type="button" class="bm-close" aria-label="Close" style="${D(F.close)}">×</button></div>`;
  d.dialogHost.appendChild(dlg);
  const okBtn=dlg.querySelector<HTMLButtonElement>('.bd-ok')!,cancel=dlg.querySelector<HTMLButtonElement>('.bd-cancel')!;
  const portrait=createBabySkullPortrait({canvas:dlg.querySelector<HTMLCanvasElement>('canvas.bm-skull')!,template:()=>d.skullTemplate?.()??null,reduced:d.reduced});
@@ -38,8 +38,8 @@ export function createBuyBonusWidget(d:BuyWidgetDeps){
  function refresh(){const q=d.adapter.quote(d.bet());const locked=!d.canOpen()&&!dlg.open;
   btn.disabled=locked;btn.setAttribute('aria-disabled',String(locked));root.classList.toggle('locked',locked);if(locked&&document.activeElement===btn)btn.blur();
   qs('.bd-bet').textContent=d.money(d.bet());qs('.bd-bal').textContent=d.money(d.balance());{const bb=d.betBounds();qs('.bd-minus').toggleAttribute('disabled',bb.min||submitting);qs('.bd-plus').toggleAttribute('disabled',bb.max||submitting);}
-  if(q.available){const price=Math.round(q.priceX*d.bet()),short=price>d.balance();priceEl.textContent=`${q.priceX}× BET`;btn.setAttribute('aria-label',`Buy Bonus, ${q.priceX} volte la puntata`);qs('.bd-price').textContent=d.money(price);qs('.bd-ok-price').textContent=d.money(price);qs('.bd-note').textContent=short?'Saldo insufficiente per questa puntata: riduci la puntata. Nessun credito verrà addebitato.':'';okBtn.disabled=short||submitting;root.classList.remove('unavailable');}
-  else{priceEl.textContent='PROSSIMAMENTE';btn.setAttribute('aria-label','Buy Bonus, non disponibile');qs('.bd-price').textContent='NON DISPONIBILE';qs('.bd-ok-price').textContent='';qs('.bd-note').textContent=q.reason+'. Nessun credito verrà addebitato.';okBtn.disabled=true;root.classList.add('unavailable');}
+  if(q.available){const price=Math.round(q.priceX*d.bet()),short=price>d.balance();priceEl.textContent=`${q.priceX}× BET`;btn.setAttribute('aria-label',`Buy Bonus, ${q.priceX} times the bet`);qs('.bd-price').textContent=d.money(price);qs('.bd-ok-price').textContent=d.money(price);qs('.bd-note').textContent=short?'Insufficient balance for this bet. Reduce your bet; no credits will be deducted.':'';okBtn.disabled=short||submitting;root.classList.remove('unavailable');}
+  else{priceEl.textContent='COMING SOON';btn.setAttribute('aria-label','Buy Bonus, unavailable');qs('.bd-price').textContent='UNAVAILABLE';qs('.bd-ok-price').textContent='';qs('.bd-note').textContent=q.reason+'. No credits will be deducted.';okBtn.disabled=true;root.classList.add('unavailable');}
  dlg.querySelector('.bm')!.classList.toggle('has-note',!!qs('.bd-note').textContent);
  }
  refresh();
@@ -49,7 +49,7 @@ export function createBuyBonusWidget(d:BuyWidgetDeps){
  btn.addEventListener('click',()=>{if(btn.disabled||dlg.open||submitting||!d.canOpen())return;refresh();dlg.showModal();portrait.start();cancel.focus();});
  cancel.addEventListener('click',()=>{if(!submitting)dlg.close();});qs('.bm-close').addEventListener('click',()=>{if(!submitting)dlg.close();});
  for(const [sel,delta] of [['.bd-minus',-1],['.bd-plus',1]] as const)qs(sel).addEventListener('click',()=>{if(submitting||!d.canOpen())return;d.changeBet(delta);refresh();});
- okBtn.addEventListener('click',async()=>{if(okBtn.disabled||submitting||!d.canOpen())return;submitting=true;okBtn.disabled=true;cancel.disabled=true;let r;try{r=await d.adapter.purchase();}catch(e){r={ok:false as const,reason:e instanceof Error?e.message:'Acquisto non riuscito'};}
+ okBtn.addEventListener('click',async()=>{if(okBtn.disabled||submitting||!d.canOpen())return;submitting=true;okBtn.disabled=true;cancel.disabled=true;let r;try{r=await d.adapter.purchase();}catch(e){r={ok:false as const,reason:e instanceof Error?e.message:'Purchase could not be completed'};}
   if(!r.ok){cue.error();qs('.bd-note').textContent=r.reason;submitting=false;cancel.disabled=false;refresh();return;}
   dlg.close();try{await d.adapter.afterPurchase?.();}catch(e){console.error('[buy-bonus] accepted purchase follow-up failed',e);}finally{submitting=false;cancel.disabled=false;refresh();}});
  // ---- 3D chest ---------------------------------------------------------------------------------

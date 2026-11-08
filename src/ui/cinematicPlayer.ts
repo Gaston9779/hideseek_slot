@@ -6,7 +6,7 @@ import {keys} from './keyboard';
  * One <video> element is created once and reused for every playback (intro + bonus).
  */
 export type CinematicResult='ended'|'skipped'|'failed';
-export interface CinematicOptions{host:HTMLElement;webm:string;mp4:string;poster:string;loadTimeoutMs?:number;stallTimeoutMs?:number}
+export interface CinematicOptions{host:HTMLElement;mp4:string;poster:string;loadTimeoutMs?:number;stallTimeoutMs?:number}
 export interface CinematicPlayer{
  play():Promise<CinematicResult>;
  /** Plays only the first time per browser session (sessionStorage, with in-memory fallback). */
@@ -24,12 +24,12 @@ function markSeen(key:string):boolean{ // returns true if this is the first time
 }
 export function createCinematicPlayer(o:CinematicOptions):CinematicPlayer{
  const loadTimeout=o.loadTimeoutMs??6000,stallTimeout=o.stallTimeoutMs??4000;
- const root=document.createElement('div');root.className='cine';root.hidden=true;root.setAttribute('role','dialog');root.setAttribute('aria-label','Filmato introduttivo');
+ const root=document.createElement('div');root.className='cine';root.hidden=true;root.setAttribute('role','dialog');root.setAttribute('aria-label','Introductory cinematic');
  const video=document.createElement('video');video.className='cine-video';video.muted=true;video.defaultMuted=true;video.playsInline=true;video.setAttribute('playsinline','');video.setAttribute('webkit-playsinline','');
  video.preload='none';video.poster=o.poster;video.disablePictureInPicture=true;video.controls=false;video.setAttribute('aria-hidden','true');
- for(const [src,type] of [[o.webm,'video/webm; codecs="vp9"'],[o.mp4,'video/mp4; codecs="avc1.640028"']]){const s=document.createElement('source');s.src=src;s.type=type;video.appendChild(s);}
- const playBtn=document.createElement('button');playBtn.type='button';playBtn.className='cine-play';playBtn.textContent='▶  TOCCA PER GUARDARE';playBtn.hidden=true;
- const skipBtn=document.createElement('button');skipBtn.type='button';skipBtn.className='cine-skip';skipBtn.textContent='SALTA';skipBtn.setAttribute('aria-label','Salta il filmato');
+ const source=document.createElement('source');source.src=o.mp4;source.type='video/mp4; codecs="avc1.640028"';video.appendChild(source);
+ const playBtn=document.createElement('button');playBtn.type='button';playBtn.className='cine-play';playBtn.textContent='▶  TAP TO WATCH';playBtn.hidden=true;
+ const skipBtn=document.createElement('button');skipBtn.type='button';skipBtn.className='cine-skip';skipBtn.textContent='SKIP';skipBtn.setAttribute('aria-label','Skip cinematic');
  const flash=document.createElement('div');flash.className='cine-flash';const fx=document.createElement('canvas');fx.className='cine-fx';fx.setAttribute('aria-hidden','true');
  root.append(video,flash,fx,playBtn,skipBtn);o.host.appendChild(root);
  let seq=0,current:Promise<CinematicResult>|undefined,finish:((r:CinematicResult)=>void)|undefined;
@@ -60,8 +60,7 @@ export function createCinematicPlayer(o:CinematicOptions):CinematicPlayer{
   on(skipBtn,'click',()=>done('skipped'));
   releaseKeys=keys.push({id:'intro-video',handle:e=>{if(e.code==='Escape'||e.code==='Space'||e.code==='Enter'||e.code==='NumpadEnter'){done('skipped');return true;}}});
   on(video,'ended',()=>{startTransition();done('ended');});
-  const lastSource=video.lastElementChild;
-  on(video,'error',e=>{if(e.target===video||e.target===lastSource)done('failed');},true); // <source> errors don't bubble: capture; fail only when the last fallback fails
+  on(video,'error',e=>{if(e.target===video||e.target===source)done('failed');},true);
   on(video,'playing',()=>{root.classList.add('playing');playBtn.hidden=true;lastProgress=performance.now();});
   const watch=window.setInterval(()=>{ // stall watchdog: a frozen/starved video must never hold the game
    if(video.paused||video.ended)return;if(video.currentTime!==lastT){lastT=video.currentTime;lastProgress=performance.now();}else if(performance.now()-lastProgress>stallTimeout)done('failed');},500);
@@ -71,7 +70,7 @@ export function createCinematicPlayer(o:CinematicOptions):CinematicPlayer{
    let p:Promise<void>|undefined;try{p=video.play();}catch{p=undefined;}
    if(!p)return;
    p.catch((err:unknown)=>{if(settled)return;
-    if((err as DOMException)?.name==='NotAllowedError'){ // autoplay blocked → poster + explicit tap; SALTA stays available
+    if((err as DOMException)?.name==='NotAllowedError'){ // autoplay blocked → poster + explicit tap; skip remains available
      timers.forEach(clearTimeout);playBtn.hidden=false;playBtn.focus({preventScroll:true});
      playBtn.onclick=()=>{playBtn.hidden=true;video.play().catch(()=>done('failed'));};
     }else if((err as DOMException)?.name!=='AbortError'){done('failed');}});};
