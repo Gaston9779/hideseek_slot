@@ -9,10 +9,17 @@ const logo=`${import.meta.env.BASE_URL}assets/ui/skull-hunt-logo-cropped.png`;
 const symbolUrls=import.meta.glob('../../assets-2d/symbols/exported/*.png',{eager:true,query:'?url',import:'default'}) as Record<string,string>;
 export const symbolUrl=(id:SymbolId)=>Object.entries(symbolUrls).find(([k])=>k.endsWith(`/${SYMBOL_ART[id].file}.png`))?.[1]??'';
 export const urls={bg,frame,panel,logo,bonus,freeSpins};
-export function loadImage(src:string){return new Promise<HTMLImageElement>((res,rej)=>{const i=new Image();i.decoding='async';i.onload=()=>res(i);i.onerror=()=>rej(new Error(`Missing asset: ${src}`));i.src=src;});}
+/** A request which neither loads nor errors used to hold the loading screen forever. */
+export function loadImage(src:string,timeoutMs=15_000){return new Promise<HTMLImageElement>((res,rej)=>{const i=new Image();let done=false;
+ const finish=(fn:()=>void)=>{if(done)return;done=true;clearTimeout(timeout);i.onload=null;i.onerror=null;fn();};
+ const timeout=window.setTimeout(()=>finish(()=>rej(new Error(`Timed out loading image: ${src}`))),timeoutMs);
+ i.decoding='async';i.onload=()=>finish(()=>res(i));i.onerror=()=>finish(()=>rej(new Error(`Missing asset: ${src}`)));i.src=src;
+});}
 export async function loadSymbolImages(){
  const out={} as Record<SymbolId,HTMLImageElement>;
- await Promise.all(SYMBOLS.map(async id=>{const file=SYMBOL_ART[id].file;const url=Object.entries(symbolUrls).find(([k])=>k.endsWith(`/${file}.png`))?.[1];if(!url)throw new Error(`Missing symbol art for ${id} (${file}.png)`);out[id]=await loadImage(url);}));
+ // Safari keeps decoded image surfaces while Image instances are live. Serial loading keeps
+ // the first-frame memory peak predictable instead of decoding every reel symbol at once.
+ for(const id of SYMBOLS){const file=SYMBOL_ART[id].file;const url=Object.entries(symbolUrls).find(([k])=>k.endsWith(`/${file}.png`))?.[1];if(!url)throw new Error(`Missing symbol art for ${id} (${file}.png)`);out[id]=await loadImage(url);}
  return out;
 }
 const layerUrls=import.meta.glob('../../assets-2d/symbols/layers/*.png',{eager:true,query:'?url',import:'default'}) as Record<string,string>;

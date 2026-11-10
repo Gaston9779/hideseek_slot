@@ -9,7 +9,7 @@ import {Particles} from './particles';
 import {LAYER_FILES,SymbolAnimator,type FxLayers} from './symbolFx';
 import {createSkull} from './skull';import {createChase,type Chase} from '../chase/director';
 import type {SkullState} from '../animation/mascot';
-import {coalescedResize,renderPixelRatio} from './quality';
+import {coalescedResize,renderPixelRatio} from './quality';import {createStartupTrace} from '../platform/startup';
 
 const INITIAL:SymbolId[][]=[['TOMB','CHEST','LANTERN'],['WILD','GHOST','SKULL'],['LANTERN','KEY','SCATTER'],['CHEST','POTION','MAGIC_BOOK'],['POTION','SCATTER','GARGOYLE']];
 const $=<T extends HTMLElement>(s:string)=>document.querySelector<T>(s)!;
@@ -18,15 +18,19 @@ const circle=(el:HTMLElement,c:{cx:number,cy:number,r:number})=>place(el,c.cx-c.
 const box=(el:HTMLElement,c:{cx:number,cy:number,w:number,h:number})=>place(el,c.cx-c.w/2,c.cy-c.h/2,c.w,c.h);
 
 export async function createView(onProgress:(s:string)=>void){
+ const startup=createStartupTrace();startup.mark('view-start');
  const world=$('#world'),stage=$('#stage');const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  const sk=$<HTMLCanvasElement>('#skull');
- // Begin every first-view request together. FX layers remain a progressive enhancement and never delay play.
+ // Keep the boot path bounded. The GLB and FX are cosmetic and must not compete with the reel art.
  const firstScale=()=>Math.max(.55,Math.min(2,Math.min(stage.clientWidth/DESIGN.w,stage.clientHeight/DESIGN.h)*renderPixelRatio()));
- const skullPromise=createSkull(sk,`${import.meta.env.BASE_URL}assets/scenery/Skull_Horned_Creature_Rigged.glb`,firstScale);
- const fxLayersPromise=loadFxLayers(LAYER_FILES).catch(()=>null);
+ const assetRev='v=5.1.2';const skullUrl=`${import.meta.env.BASE_URL}assets/scenery/Skull_Horned_Creature_Rigged.glb?${assetRev}`;
  // ---- static layers from layout
  onProgress('Lighting the lanterns…');
- const [bgImg,frameImg,panelImg,logoImg,symbols]=await Promise.all([loadImage(urls.bg),loadImage(urls.frame),loadImage(urls.panel),loadImage(urls.logo),loadSymbolImages()]);
+ const [bgImg,frameImg,panelImg,logoImg]=await Promise.all([loadImage(urls.bg),loadImage(urls.frame),loadImage(urls.panel),loadImage(urls.logo)]);
+ startup.mark('shell-art-ready');
+ const symbols=await loadSymbolImages();startup.mark('reel-art-ready');
+ const skullPromise=createSkull(sk,skullUrl,firstScale);
+ const fxLayersPromise=loadFxLayers(LAYER_FILES).catch(error=>{console.warn('[view] optional symbol FX unavailable',error);return null;});
  const bg=$<HTMLImageElement>('#bg');bg.src=bgImg.src;place(bg,BG.x,BG.y,BG.src[0]*BG.scale,BG.src[1]*BG.scale);
  const frame=$<HTMLImageElement>('#frame');frame.src=frameImg.src;place(frame,FRAME.x,FRAME.y,FRAME.src[0]*FRAME.scale,FRAME.src[1]*FRAME.scale);
  const panel=$<HTMLImageElement>('#panel');panel.src=panelImg.src;place(panel,PANEL.x,PANEL.y,PANEL.src[0]*PANEL.scale,PANEL.src[1]*PANEL.scale);
@@ -52,6 +56,7 @@ export async function createView(onProgress:(s:string)=>void){
  // ---- real 3D skull
  onProgress('Waking the Skull…');
  skull=await skullPromise;fit();
+ startup.mark('skull-ready');startup.expose();
  let suspHook:((e:import('./reels').SuspenseEvent)=>void)|undefined;reels.onSuspense=e=>suspHook?.(e);
  reels.onReelStop=()=>cue.reelStop();reels.onAnticipate=on=>{if(on&&skull!.controller.state!=='anticipation')skull!.set('anticipation');};
  // ---- atmosphere: lantern flicker glows over the art + fireflies + slow mist (all subtle)
@@ -72,8 +77,8 @@ export async function createView(onProgress:(s:string)=>void){
  const backdrop=$('#backdrop'),fsOverlay=$('#fs-overlay'),bonusOverlay=$('#bonus-overlay'),banner=$('#bigwin'),flash=$('#flash');
  const fsImg=$<HTMLImageElement>('#fs-img');fsImg.src=urls.freeSpins;{const w=OVERLAY.freeSpins.w,h=w*941/1672;place(fsOverlay,OVERLAY.freeSpins.cx-w/2,OVERLAY.freeSpins.cy-h/2,w,h);}
  const bonusImg=$<HTMLImageElement>('#bonus-img');bonusImg.src=urls.bonus;{const w=OVERLAY.bonus.w,h=w*BONUS_IMG.h/BONUS_IMG.w;place(bonusOverlay,OVERLAY.bonus.cx-w/2,OVERLAY.bonus.cy-h/2,w,h);bonusOverlay.style.setProperty('--k',String(w/BONUS_IMG.w));}
- const bonus=createBonusOverlay({celebration:b=>celebHook?.(b)??0,root:bonusOverlay,chestUrl:`${import.meta.env.BASE_URL}bonus-chest/bonus-chest-animated.glb`,skullUrl:`${import.meta.env.BASE_URL}assets/scenery/Skull_Horned_Creature_Rigged.glb`,renderScale:()=>rs()*OVERLAY.bonus.w/BONUS_IMG.w,reduced,onClosed:()=>{backdrop.classList.remove('on');skull!.set('idle');const r=chestClosed;chestClosed=undefined;r?.();},burst:()=>{if(!reduced)fx.emit(DESIGN.w/2,420,'#ffd36a',40,420,40,{gravity:120});}});
- chase=createChase({world,skullCanvas:sk,renderScale:rs,skullTemplate:()=>skull!.template(),frameImg,panelImg,seekerUrl:`${import.meta.env.BASE_URL}assets/scenery/Skull_Seeker.glb`,crateUrl:`${import.meta.env.BASE_URL}bonus-chest/bonus-chest-animated.glb`,skullHeight:SKULL.height});
+ const bonus=createBonusOverlay({celebration:b=>celebHook?.(b)??0,root:bonusOverlay,chestUrl:`${import.meta.env.BASE_URL}bonus-chest/bonus-chest-animated.glb?${assetRev}`,skullUrl,renderScale:()=>rs()*OVERLAY.bonus.w/BONUS_IMG.w,reduced,onClosed:()=>{backdrop.classList.remove('on');skull!.set('idle');const r=chestClosed;chestClosed=undefined;r?.();},burst:()=>{if(!reduced)fx.emit(DESIGN.w/2,420,'#ffd36a',40,420,40,{gravity:120});}});
+ chase=createChase({world,skullCanvas:sk,renderScale:rs,skullTemplate:()=>skull!.template(),frameImg,panelImg,seekerUrl:`${import.meta.env.BASE_URL}assets/scenery/Skull_Seeker.glb?${assetRev}`,crateUrl:`${import.meta.env.BASE_URL}bonus-chest/bonus-chest-animated.glb?${assetRev}`,skullHeight:SKULL.height});
  let celebHook:((b:HTMLElement)=>number)|undefined;let chestClosed:(()=>void)|undefined;let bannerTimer=0,fsResolve:(()=>void)|undefined;
  const api={
   reels,skull:skull!,chase:chase!,setSuspenseHook(f:((e:import('./reels').SuspenseEvent)=>void)|undefined){suspHook=f;},onFrame(cb:(dt:number)=>void){frameHooks.push(cb);},

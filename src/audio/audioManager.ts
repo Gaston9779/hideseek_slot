@@ -9,7 +9,7 @@ export interface NodeLike{connect(n:unknown):unknown;disconnect():void}
 export interface GainLike extends NodeLike{gain:GainParamLike}
 export interface SourceLike extends NodeLike{buffer:unknown;loop:boolean;onended:(()=>void)|null;start(when?:number):void;stop(when?:number):void}
 export interface CtxLike{state:string;currentTime:number;destination:unknown;createGain():GainLike;createBufferSource():SourceLike;decodeAudioData(b:ArrayBuffer):Promise<unknown>;resume():Promise<void>;suspend():Promise<void>;close():Promise<void>}
-export interface AudioDeps{createContext():CtxLike;load(id:string):Promise<ArrayBuffer>;storage?:{getItem(k:string):string|null;setItem(k:string,v:string):void};now():number;isHidden():boolean;onVisibility(fn:()=>void):()=>void}
+export interface AudioDeps{createContext():CtxLike;load(id:string):Promise<ArrayBuffer>;storage?:{getItem(k:string):string|null;setItem(k:string,v:string):void;removeItem?(k:string):void};now():number;isHidden():boolean;onVisibility(fn:()=>void):()=>void}
 export interface AudioSettings{master:boolean;music:boolean;sfx:boolean;voice:boolean;cinematic:boolean;masterVol:number;musicVol:number;sfxVol:number;voiceVol:number;cinematicVol:number}
 export const DEFAULT_SETTINGS:AudioSettings={master:true,music:true,sfx:true,voice:true,cinematic:true,masterVol:.8,musicVol:.3,sfxVol:.72,voiceVol:.72,cinematicVol:.62};
 const KEY='skull-hunt-audio-v1',FADE=.25,VOICE_COOLDOWN_MS=2500;
@@ -18,7 +18,7 @@ interface Inst{id:string;def:SoundDef;src:SourceLike;gain:GainLike;ended:boolean
 export function createAudioManager(deps:AudioDeps){
  let ctx:CtxLike|null=null,master:GainLike,buses:Record<Bus,GainLike>,duck:GainLike,unlocked=false,disposed=false;
  const s:AudioSettings={...DEFAULT_SETTINGS};
- try{const raw=deps.storage?.getItem(KEY);if(raw){const o=JSON.parse(raw) as Partial<AudioSettings>;for(const k of Object.keys(s) as (keyof AudioSettings)[]){const v=o[k];if(typeof v==='boolean'&&typeof s[k]==='boolean')(s as unknown as Record<string,unknown>)[k]=v;else if(typeof v==='number'&&typeof s[k]==='number')(s as unknown as Record<string,unknown>)[k]=clamp(v);}}}catch{/* ignore corrupt prefs */}
+ try{const raw=deps.storage?.getItem(KEY);if(raw){const o=JSON.parse(raw) as Partial<AudioSettings>;for(const k of Object.keys(s) as (keyof AudioSettings)[]){const v=o[k];if(typeof v==='boolean'&&typeof s[k]==='boolean')(s as unknown as Record<string,unknown>)[k]=v;else if(typeof v==='number'&&typeof s[k]==='number')(s as unknown as Record<string,unknown>)[k]=clamp(v);}}}catch(error){console.warn('[audio] discarded malformed saved settings',error);try{deps.storage?.removeItem?.(KEY);}catch(removeError){console.warn('[audio] could not remove malformed saved settings',removeError);}}
  const buffers=new Map<string,unknown>(),loading=new Map<string,Promise<unknown|null>>(),failed=new Set<string>(),active:Inst[]=[],lastStart=new Map<string,number>();
  let lastVoiceAt=-1e9,voiceInst:Inst|null=null,wantAmbient:string|null=null,ambInst:Inst|null=null,duckLevel=1;const listeners=new Set<()=>void>();let offVis:(()=>void)|null=null;
  const busEnabled=(b:Bus)=>s.master&&s[b];

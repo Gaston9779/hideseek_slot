@@ -15,7 +15,17 @@ export async function createSkull(canvas:HTMLCanvasElement,glbUrl:string,renderS
  const key=new T.DirectionalLight('#ffb36b',3.1);key.position.set(-500,600,700);scene.add(key);       // lantern from the upper left
  const rim=new T.DirectionalLight('#7b5cff',3.2);rim.position.set(500,300,-500);scene.add(rim);      // moonlit rim
  const fill=new T.DirectionalLight('#ff8f4a',.8);fill.position.set(600,-200,600);scene.add(fill);
- const gltf=await new GLTFLoader().loadAsync(glbUrl);gltf.scene.traverse(o=>{if(o instanceof T.Mesh){o.frustumCulled=false;}});
+ // A static public URL can be served as a partial response after a CDN deploy. Validate the
+ // GLB envelope before passing it to GLTFLoader so an invalid response has a useful error and
+ // a bounded failure instead of an unhandled JSON.parse rejection.
+ const controllerAbort=new AbortController();const timeout=window.setTimeout(()=>controllerAbort.abort(),15_000);
+ let bytes:ArrayBuffer;
+ try{const response=await fetch(glbUrl,{signal:controllerAbort.signal,cache:'no-store'});if(!response.ok)throw new Error(`Skull model request failed: HTTP ${response.status}`);bytes=await response.arrayBuffer();}
+ catch(error){throw new Error(`Skull model unavailable (${glbUrl}): ${error instanceof Error?error.message:String(error)}`);}
+ finally{clearTimeout(timeout);}
+ if(bytes.byteLength<20)throw new Error(`Skull model is truncated (${bytes.byteLength} bytes)`);
+ const header=new DataView(bytes);if(header.getUint32(0,true)!==0x46546c67||header.getUint32(4,true)!==2||header.getUint32(8,true)!==bytes.byteLength)throw new Error(`Skull model has an invalid GLB header (${bytes.byteLength} bytes)`);
+ const gltf=await new Promise<import('three/examples/jsm/loaders/GLTFLoader.js').GLTF>((resolve,reject)=>new GLTFLoader().parse(bytes,glbUrl.slice(0,glbUrl.lastIndexOf('/')+1),resolve,reject));gltf.scene.traverse(o=>{if(o instanceof T.Mesh){o.frustumCulled=false;}});
  const root=normalize(gltf.scene,height);const base=new T.Vector3(0,-h/2+foot,0);root.position.copy(base);root.rotation.y=.38;scene.add(root);
  // no root motion: strip position tracks so clips can never move the feet off the anchor
  for(const c of gltf.animations)c.tracks=c.tracks.filter(t=>!t.name.endsWith('.position'));

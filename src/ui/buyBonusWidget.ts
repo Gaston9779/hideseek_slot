@@ -46,7 +46,7 @@ export function createBuyBonusWidget(d:BuyWidgetDeps){
  /** Focus after close: back to SPIN when a new round is possible, otherwise nothing keeps focus (a stale focus must never re-trigger Buy Bonus). */
  dlg.addEventListener('close',()=>{portrait.stop();queueMicrotask(()=>{const a=document.activeElement as HTMLElement|null;if(d.canOpen())document.querySelector<HTMLElement>('#spin')?.focus({preventScroll:true});else a?.blur?.();refresh();});});
  dlg.addEventListener('cancel',e=>{if(submitting)e.preventDefault();});   // Escape is inert while a purchase is in flight
- btn.addEventListener('click',()=>{if(btn.disabled||dlg.open||submitting||!d.canOpen())return;refresh();dlg.showModal();portrait.start();cancel.focus();});
+ btn.addEventListener('click',()=>{if(btn.disabled||dlg.open||submitting||!d.canOpen())return;void ready();refresh();dlg.showModal();portrait.start();cancel.focus();});
  cancel.addEventListener('click',()=>{if(!submitting)dlg.close();});qs('.bm-close').addEventListener('click',()=>{if(!submitting)dlg.close();});
  for(const [sel,delta] of [['.bd-minus',-1],['.bd-plus',1]] as const)qs(sel).addEventListener('click',()=>{if(submitting||!d.canOpen())return;d.changeBet(delta);refresh();});
  okBtn.addEventListener('click',async()=>{if(okBtn.disabled||submitting||!d.canOpen())return;submitting=true;okBtn.disabled=true;cancel.disabled=true;let r;try{r=await d.adapter.purchase();}catch(e){r={ok:false as const,reason:e instanceof Error?e.message:'Purchase could not be completed'};}
@@ -64,10 +64,11 @@ export function createBuyBonusWidget(d:BuyWidgetDeps){
   model=new T.Group();model.add(m);model.position.y=-H/2+14;scene.add(model);resize();
  }
  function resize(){if(!renderer)return;const s=Math.max(1,Math.min(2,d.renderScale()*1.5));renderer.setPixelRatio(1);renderer.setSize(Math.round(W*s),Math.round(H*s),false);}
- btn.addEventListener('pointerenter',()=>{hoverTarget=1;});btn.addEventListener('pointerleave',()=>{hoverTarget=0;});btn.addEventListener('focus',()=>{hoverTarget=1;});btn.addEventListener('blur',()=>{hoverTarget=0;});
+ const ready=()=>loadP??=load().catch(e=>{console.error('[buy-bonus] chest model unavailable',e);root.classList.add('no3d');});
+ btn.addEventListener('pointerenter',()=>{hoverTarget=1;void ready();});btn.addEventListener('pointerleave',()=>{hoverTarget=0;});btn.addEventListener('focus',()=>{hoverTarget=1;void ready();});btn.addEventListener('blur',()=>{hoverTarget=0;});
  return {
   root,refresh,
-  ready(){return loadP??=load().catch(e=>{console.error('[buy-bonus] chest model unavailable',e);root.classList.add('no3d');});},
+  ready,
   /** hide while a cinematic runs (no overlap with the Seeker / crate) */
   setVisible(v:boolean){visible=v;root.classList.toggle('away',!v);},
   setEnabledByMarket(on:boolean){root.hidden=!on;},
