@@ -1,4 +1,4 @@
-import {SOUND_BY_ID,SOUNDS,type Bus,type SoundDef} from './catalog';
+import {SOUND_BY_ID,type Bus,type SoundDef} from './catalog';
 /**
  * Central Audio Manager — ONE AudioContext, bus graph: source → voiceGain → bus (music|sfx|voice) → [music duck] → master → destination.
  * Everything environment-specific is injected (context factory, loader, storage, visibility) so the logic is unit-testable.
@@ -41,8 +41,9 @@ export function createAudioManager(deps:AudioDeps){
   /** true when nothing is audible (master off) */
   get muted(){return !s.master;},
   subscribe(fn:()=>void){listeners.add(fn);return()=>{listeners.delete(fn);};},
-  /** Call from a user gesture. Idempotent. Starts the wanted ambience and preloads the small critical cues. */
-  async unlock(){if(disposed)return;ensureCtx();if(!ctx)return;unlocked=true;applyGains();const c=ctx;api.preload(SOUNDS.filter(x=>x.critical).map(x=>x.id));if(wantAmbient)api.ambient(wantAmbient,1.2);try{if(c.state!=='running'&&s.master)await c.resume();}catch{/* autoplay still blocked */}},
+  /** Call from a user gesture. Idempotent. Do not decode the sound pack here: on iOS the
+   * first SPIN is that gesture, and concurrent WAV decoding can terminate the WebContent process. */
+  async unlock(){if(disposed)return;ensureCtx();if(!ctx)return;unlocked=true;applyGains();const c=ctx;try{if(c.state!=='running'&&s.master)await c.resume();}catch{/* autoplay still blocked */}},
   preload(ids:string[]){for(const id of ids)void load(id);},
   /** Fire-and-forget one-shot. Returns false when ignored (locked, muted bus, rate-limited, unknown id, voice busy). Never throws. */
   play(id:string,o:{volume?:number;fade?:number}={}):boolean{

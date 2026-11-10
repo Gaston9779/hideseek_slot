@@ -72,7 +72,7 @@ async function doSpin(){if(busy||spin.disabled||cinematic?.isPlaying||document.q
    fs.active=false;fsHud!.hide();atmos?.set(null);cue.ambientBase();fsPersist();if(devTest){endDevTest();return;}
    const next=game.featureState;if(next&&game.phase==='free-spins'){await view.freeSpinsIntro(next.spinsAwarded,false);beginFeatureUi();}}   // dual bonus: the queued Scatter feature starts only after the Chest summary was confirmed
  }catch(e){status.textContent=e instanceof Error?e.message:'The crypt could not be opened.';}
- finally{bonusCine?.endSpin();busy=false;spin.classList.remove('busy');update();scheduleAuto();}}
+ finally{bonusCine?.endSpin();busy=false;spin.classList.remove('busy');update();scheduleAuto();cue.ambientBase();}}
 spin.onclick=()=>void doSpin();
 /** UI sounds: one delegated listener (no per-button handlers, nothing to duplicate on remount). */
 document.addEventListener('click',e=>{const b=(e.target as HTMLElement|null)?.closest?.('button');if(!b||(b as HTMLButtonElement).disabled)return;

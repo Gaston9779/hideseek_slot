@@ -39,7 +39,7 @@ describe('audio manager',()=>{
  it('ambience: one loop at a time, crossfades to the chest loop and back; fades out',async()=>{
   const {m,flush}=await unlocked();m.ambient('amb_spooky_graveyard_loop',1);await flush();expect(m.activeCount).toBe(1);
   m.ambient('amb_bonus_chest_loop',1);await flush();expect(m.activeCount).toBe(1);m.ambient('amb_spooky_graveyard_loop',1);await flush();expect(m.activeCount).toBe(1);m.ambient(null);expect(m.activeCount).toBe(0);});
- it('ambience requested before unlock starts after unlock',async()=>{const r=rig();r.m.ambient('amb_spooky_graveyard_loop');expect(r.m.activeCount).toBe(0);await r.m.unlock();await r.flush();expect(r.m.activeCount).toBe(1);});
+ it('unlock does not decode or start ambience on the first user gesture',async()=>{const r=rig();r.m.ambient('amb_spooky_graveyard_loop');expect(r.m.activeCount).toBe(0);await r.m.unlock();await r.flush();expect(r.m.activeCount).toBe(0);r.m.ambient('amb_spooky_graveyard_loop');await r.flush();expect(r.m.activeCount).toBe(1);});
  it('repeated ambience requests while decoding still create one loop instance',async()=>{const r=rig();await r.m.unlock();r.m.ambient('amb_spooky_graveyard_loop');r.m.ambient('amb_spooky_graveyard_loop');await r.flush();expect(r.m.activeCount).toBe(1);});
  it('ducking lowers and restores the music path',async()=>{const {m}=await unlocked();m.duck(.3);expect(m.duckLevel).toBe(.3);m.unduck();expect(m.duckLevel).toBe(1);});
  it('hidden tab: no new sounds; visibility listener registered once and removed on dispose',async()=>{
