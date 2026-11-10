@@ -1,6 +1,6 @@
 import * as T from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
-import {RoomEnvironment} from 'three/examples/jsm/environments/RoomEnvironment.js';
+import {createEnvironment,createGlRenderer} from '../view/quality';
 import {buildChest,loadChestTemplate} from '../bonus-chest/chest';
 import {MascotController,type SkullState} from '../animation/mascot';
 import {BONUS_IMG,CAMERA_PITCH_DEG,CHEST_PX,PEDESTALS,SKULL_ANCHOR} from './bonusLayout';
@@ -18,8 +18,8 @@ export interface BonusScene{
 }
 export async function createBonusScene(o:{canvas:HTMLCanvasElement,chestUrl:string,skullUrl:string,renderScale:()=>number,onPick:(i:number)=>void}):Promise<BonusScene>{
  const errors:string[]=[];
- const renderer=new T.WebGLRenderer({canvas:o.canvas,antialias:true,alpha:true,premultipliedAlpha:true});renderer.setClearColor(0,0);renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.outputColorSpace=T.SRGBColorSpace;
- const scene=new T.Scene();const pmrem=new T.PMREMGenerator(renderer);scene.environment=pmrem.fromScene(new RoomEnvironment(),.04).texture;scene.environmentIntensity=.5;
+ const renderer=createGlRenderer('bonus',o.canvas);
+ const scene=new T.Scene();scene.environment=createEnvironment(renderer);scene.environmentIntensity=.5;
  // chest unit = 1; the camera frustum is expressed in chest units so on-screen size is CHEST_PX per unit and identical for all three
  const halfW=BONUS_IMG.w/CHEST_PX/2,halfH=BONUS_IMG.h/CHEST_PX/2;const cam=new T.OrthographicCamera(-halfW,halfW,halfH,-halfH,.1,100);
  const pitch=T.MathUtils.degToRad(CAMERA_PITCH_DEG);cam.position.set(0,Math.sin(pitch)*30,Math.cos(pitch)*30);cam.lookAt(0,0,0);cam.updateMatrixWorld(true);

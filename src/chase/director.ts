@@ -1,11 +1,11 @@
 import * as T from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
-import {RoomEnvironment} from 'three/examples/jsm/environments/RoomEnvironment.js';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
 import {DESIGN,FRAME,HUD,PANEL,SKULL,SKULL_ANCHOR} from '../layout';
 import {CHASE,HOLO_INTRO,HOLO_INTRO_TOTAL} from '../config/chase';import {cue} from '../audio/cues';import {HologramMaterialization,HoloBeamFx,introState} from './hologram';
 import {RigPoser} from './rigPose';
 import * as P from './poses';
+import {mobileDebug} from '../mobileDebug';import {createEnvironment,createGlRenderer} from '../view/quality';
 /**
  * 3D "Seeker chase" gag. One extra transparent WebGL canvas covering the whole 1920×1080 design space (1 unit = 1 design px, y up),
  * driven by the existing main loop (no second rAF). Occlusion is explicit and depth-based:
@@ -91,25 +91,27 @@ export function createChase(d:{world:HTMLElement,skullCanvas:HTMLCanvasElement,r
   const m=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshBasicMaterial({map:tx,alphaTest:.5,colorWrite:false,depthWrite:true,side:T.DoubleSide}));
   m.position.set(x+w/2,DESIGN.h-(y+h/2),0);m.renderOrder=-10;scene.add(m);occluders.push(m);
  }
+ const isolated=import.meta.env.DEV&&new URLSearchParams(location.search).has('debugNoChase');
  async function load(){
-  const gl=new T.WebGLRenderer({canvas,antialias:true,alpha:true,premultipliedAlpha:true});gl.setClearColor(0,0);gl.toneMapping=T.ACESFilmicToneMapping;gl.toneMappingExposure=1.05;gl.outputColorSpace=T.SRGBColorSpace;renderer=gl;
-  scene=new T.Scene();const pm=new T.PMREMGenerator(gl);scene.environment=pm.fromScene(new RoomEnvironment(),.04).texture;scene.environmentIntensity=.55;pm.dispose();
+  if(isolated){mobileDebug.event('chase:isolated');return;}
+  const gl=createGlRenderer('chase',canvas);renderer=gl;
+  scene=new T.Scene();scene.environment=createEnvironment(gl);scene.environmentIntensity=.55;
   cam=new T.OrthographicCamera(0,DESIGN.w,DESIGN.h,0,-2000,2000);cam.position.set(0,0,1000);
   // identical lighting recipe as the in-slot Skull so the two stay visually matched
   lights.push(new T.HemisphereLight('#9a8cff','#4a3050',.9));const key=new T.DirectionalLight('#ffb36b',3.1);key.position.set(-500,600,700);const rim=new T.DirectionalLight('#7b5cff',3.2);rim.position.set(500,300,-500);const fill=new T.DirectionalLight('#ff8f4a',.8);fill.position.set(600,-200,600);lights.push(key,rim,fill);scene.add(...lights);
   occluder(d.frameImg,FRAME.x,FRAME.y,FRAME.src[0]*FRAME.scale,FRAME.src[1]*FRAME.scale);occluder(d.panelImg,PANEL.x,PANEL.y,PANEL.src[0]*PANEL.scale,PANEL.src[1]*PANEL.scale);
   const sc=document.createElement('canvas');sc.width=256;sc.height=64;{const g=sc.getContext('2d')!;const r=g.createRadialGradient(128,32,4,128,32,128);r.addColorStop(0,'rgba(8,2,20,.7)');r.addColorStop(1,'rgba(8,2,20,0)');g.save();g.scale(1,.26);g.fillStyle=r;g.fillRect(0,0,256,246);g.restore();}
   const shTex=new T.CanvasTexture(sc);tex.push(shTex);
-  const gltf=await new GLTFLoader().loadAsync(d.seekerUrl);                    // loaded once, reused by every run
+  mobileDebug.asset('Skull_Seeker.glb','start');const gltf=await new GLTFLoader().loadAsync(d.seekerUrl);mobileDebug.asset('Skull_Seeker.glb','success');                    // loaded once, reused by every run
   const tpl=d.skullTemplate();
   skull=new Actor(SkeletonUtils.clone(tpl.scene),d.skullHeight,false,tpl.animations,shTex);
   seeker=new Actor(gltf.scene,d.skullHeight*CHASE.seekerHeightRatio,true,[],shTex);
   for(const a of [skull,seeker]){scene.add(a.root,a.shadow);}
   beamFx=new HoloBeamFx(SEEKER_LANDING.x,DESIGN.h-YF,DESIGN.h,ZF+20,d.renderScale()<.8?18:44);scene.add(beamFx.group);
   if(d.crateUrl){try{const cg=await new GLTFLoader().loadAsync(d.crateUrl);const m=cg.scene;m.traverse(o=>{if((o as T.Mesh).isMesh)o.frustumCulled=false;});const b=new T.Box3().setFromObject(m),sz=b.getSize(new T.Vector3()),c=b.getCenter(new T.Vector3()),k=140/sz.y;m.scale.multiplyScalar(k);m.position.sub(new T.Vector3(c.x,b.min.y,c.z).multiplyScalar(k));m.rotation.y=0;crate=new T.Group();const w=new T.Group();w.add(m);w.rotation.y=-.35;crate.add(w);crate.visible=false;scene.add(crate);}catch(e){console.warn('[chase] crate prop unavailable',e);}}
-  loaded=true;resize();
+  loaded=true;resize();mobileDebug.renderer('chase:ready',{...renderer.info.memory,programs:renderer.info.programs?.length??0});
  }
- function resize(){if(!renderer)return;const s=d.renderScale();renderer.setPixelRatio(1);renderer.setSize(Math.round(DESIGN.w*s),Math.round(DESIGN.h*s),false);}
+ function resize(){if(!renderer)return;const s=d.renderScale(),w=Math.round(DESIGN.w*s),h=Math.round(DESIGN.h*s);renderer.setPixelRatio(1);renderer.setSize(w,h,false);mobileDebug.canvas('chase',w,h);}
  function pick(segs:Seg[],time:number){for(const s of segs)if(time>=s.t0&&time<s.t1)return s;return null;}
  const lerp=(a:number,b:number,u:number)=>a+(b-a)*u;
  let groundY=YF;     // feet line used by place(); the finale celebration temporarily moves it

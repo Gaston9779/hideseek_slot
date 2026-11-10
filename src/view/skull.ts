@@ -1,15 +1,15 @@
 import * as T from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
-import {RoomEnvironment} from 'three/examples/jsm/environments/RoomEnvironment.js';
 import {MascotController,type SkullEvent,type SkullState} from '../animation/mascot';
 import {SKULL} from '../layout';
+import {mobileDebug} from '../mobileDebug';import {createEnvironment,createGlRenderer} from './quality';
 
 /** The real rigged Skull GLB in a transparent WebGL canvas, lit to match the 2D scene (warm lantern key, violet moon rim). */
 function normalize(obj:T.Object3D,height:number){const w=new T.Group();w.add(obj);obj.updateMatrixWorld(true);const b=new T.Box3().setFromObject(obj),size=b.getSize(new T.Vector3()),c=b.getCenter(new T.Vector3());const s=height/size.y;obj.scale.multiplyScalar(s);obj.position.sub(new T.Vector3(c.x,b.min.y,c.z).multiplyScalar(s));return w;}
 export async function createSkull(canvas:HTMLCanvasElement,glbUrl:string,renderScale:()=>number){
- const renderer=new T.WebGLRenderer({canvas,antialias:true,alpha:true,premultipliedAlpha:true});renderer.setClearColor(0,0);renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.outputColorSpace=T.SRGBColorSpace;
- let contextLost=false;const onLost=(e:Event)=>{e.preventDefault();contextLost=true;};const onRestored=()=>{contextLost=false;resize();};canvas.addEventListener('webglcontextlost',onLost,false);canvas.addEventListener('webglcontextrestored',onRestored,false);
- const scene=new T.Scene();const pm=new T.PMREMGenerator(renderer),env=pm.fromScene(new RoomEnvironment(),.04).texture;pm.dispose();scene.environment=env;scene.environmentIntensity=.55;
+ const renderer=createGlRenderer('skull',canvas);
+  let contextLost=false;const onLost=(e:Event)=>{e.preventDefault();contextLost=true;mobileDebug.event('webgl:skull-lost');};const onRestored=()=>{contextLost=false;mobileDebug.event('webgl:skull-restored');resize();};canvas.addEventListener('webglcontextlost',onLost,false);canvas.addEventListener('webglcontextrestored',onRestored,false);
+ const scene=new T.Scene();const env=createEnvironment(renderer);scene.environment=env;scene.environmentIntensity=.55;
  const {w,h,height,foot}=SKULL;const cam=new T.OrthographicCamera(-w/2,w/2,h/2,-h/2,-2000,2000);cam.position.set(0,0,1000);
  scene.add(new T.HemisphereLight('#9a8cff','#4a3050',.9));
  const key=new T.DirectionalLight('#ffb36b',3.1);key.position.set(-500,600,700);scene.add(key);       // lantern from the upper left
@@ -20,8 +20,8 @@ export async function createSkull(canvas:HTMLCanvasElement,glbUrl:string,renderS
  // a bounded failure instead of an unhandled JSON.parse rejection.
  const controllerAbort=new AbortController();const timeout=window.setTimeout(()=>controllerAbort.abort(),15_000);
  let bytes:ArrayBuffer;
- try{const response=await fetch(glbUrl,{signal:controllerAbort.signal,cache:'no-store'});if(!response.ok)throw new Error(`Skull model request failed: HTTP ${response.status}`);bytes=await response.arrayBuffer();}
- catch(error){throw new Error(`Skull model unavailable (${glbUrl}): ${error instanceof Error?error.message:String(error)}`);}
+ try{mobileDebug.asset('Skull_Horned_Creature_Rigged.glb','start');const response=await fetch(glbUrl,{signal:controllerAbort.signal});if(!response.ok)throw new Error(`Skull model request failed: HTTP ${response.status}`);bytes=await response.arrayBuffer();mobileDebug.asset('Skull_Horned_Creature_Rigged.glb','success',{bytes:bytes.byteLength});}
+ catch(error){mobileDebug.asset('Skull_Horned_Creature_Rigged.glb','failure');throw new Error(`Skull model unavailable (${glbUrl}): ${error instanceof Error?error.message:String(error)}`);}
  finally{clearTimeout(timeout);}
  if(bytes.byteLength<20)throw new Error(`Skull model is truncated (${bytes.byteLength} bytes)`);
  const header=new DataView(bytes);if(header.getUint32(0,true)!==0x46546c67||header.getUint32(4,true)!==2||header.getUint32(8,true)!==bytes.byteLength)throw new Error(`Skull model has an invalid GLB header (${bytes.byteLength} bytes)`);
@@ -35,7 +35,7 @@ export async function createSkull(canvas:HTMLCanvasElement,glbUrl:string,renderS
  const shadow=new T.Mesh(new T.PlaneGeometry(height*1.0,height*.26),new T.MeshBasicMaterial({map:new T.CanvasTexture(sc),transparent:true,depthWrite:false}));shadow.position.set(base.x,base.y+4,-300);scene.add(shadow);
  const pulseColor=new T.Color('#ff8f4a');let pulseK=0;const fillBase=new T.Color('#ff8f4a');
  let hop=0,elapsed=0,raf=0,last=performance.now(),running=true;const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
- function resize(){if(contextLost)return;const s=renderScale();renderer.setPixelRatio(1);renderer.setSize(Math.max(1,Math.round(w*s)),Math.max(1,Math.round(h*s)),false);}
+ function resize(){if(contextLost)return;const s=renderScale(),rw=Math.max(1,Math.round(w*s)),rh=Math.max(1,Math.round(h*s));renderer.setPixelRatio(1);renderer.setSize(rw,rh,false);mobileDebug.canvas('skull',rw,rh);}
  resize();
  function tick(now:number){if(!running)return;raf=requestAnimationFrame(tick);if(document.hidden){last=now;return;}const dt=Math.min((now-last)/1000,.05);last=now;elapsed+=dt;controller.update(dt);
   // dynamic light: the lantern key flickers in sync with the 2D lamps (same frequencies as the atmosphere layer); result-driven colour pulse on the fill light

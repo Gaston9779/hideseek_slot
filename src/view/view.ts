@@ -9,7 +9,7 @@ import {Particles} from './particles';
 import {LAYER_FILES,SymbolAnimator,type FxLayers} from './symbolFx';
 import {createSkull} from './skull';import {createChase,type Chase} from '../chase/director';
 import type {SkullState} from '../animation/mascot';
-import {coalescedResize,renderPixelRatio} from './quality';import {createStartupTrace} from '../platform/startup';
+import {coalescedResize,renderPixelRatio} from './quality';import {deferSrc} from '../ui/deferredArt';import {createStartupTrace} from '../platform/startup';
 
 const INITIAL:SymbolId[][]=[['TOMB','CHEST','LANTERN'],['WILD','GHOST','SKULL'],['LANTERN','KEY','SCATTER'],['CHEST','POTION','MAGIC_BOOK'],['POTION','SCATTER','GARGOYLE']];
 const $=<T extends HTMLElement>(s:string)=>document.querySelector<T>(s)!;
@@ -44,7 +44,8 @@ export async function createView(onProgress:(s:string)=>void){
  const ctxs=new Map<HTMLCanvasElement,CanvasRenderingContext2D>();
  function fit(){const vw=Math.max(1,stage.clientWidth),vh=Math.max(1,stage.clientHeight);scale=Math.min(vw/DESIGN.w,vh/DESIGN.h);world.style.transform=`translate(${(vw-DESIGN.w*scale)/2}px,${(vh-DESIGN.h*scale)/2}px) scale(${scale})`;
   for(const c of canvases){if(c.id==='skull')continue;const r=rs(),w=Math.max(1,Math.round(DESIGN.w*r)),h=Math.max(1,Math.round(DESIGN.h*r));if(c.width!==w||c.height!==h){c.width=w;c.height=h;}const x=c.getContext('2d')!;x.setTransform(r,0,0,r,0,0);ctxs.set(c,x);}
-  const MIN=46;document.querySelectorAll<HTMLElement>('.hit').forEach(h=>{const b=hitBase.get(h)??(()=>{const o={x:parseFloat(h.style.left),y:parseFloat(h.style.top),w:parseFloat(h.style.width)};hitBase.set(h,o);return o;})();const size=Math.max(b.w,MIN/scale);h.style.left=`${b.x+b.w/2-size/2}px`;h.style.top=`${b.y+b.w/2-size/2}px`;h.style.width=h.style.height=`${size}px`;});
+  const MIN=46;document.querySelectorAll<HTMLElement>('.hit').forEach(h=>{if(!hitBase.has(h))hitBase.set(h,{x:parseFloat(h.style.left),y:parseFloat(h.style.top),w:parseFloat(h.style.width)});});document.querySelectorAll<HTMLElement>('.hit').forEach(h=>{const b=hitBase.get(h)??(()=>{const o={x:parseFloat(h.style.left),y:parseFloat(h.style.top),w:parseFloat(h.style.width)};hitBase.set(h,o);return o;})();const cx=b.x+b.w/2,cy=b.y+b.w/2;let near=Infinity;hitBase.forEach((o,k)=>{if(k!==h)near=Math.min(near,Math.hypot(o.x+o.w/2-cx,o.y+o.w/2-cy));});   // never let two touch targets overlap (Sound / Quick are neighbours)
+  const size=Math.max(b.w,Math.min(MIN/scale,near));h.style.setProperty('--art',`${b.w}px`);h.style.left=`${b.x+b.w/2-size/2}px`;h.style.top=`${b.y+b.w/2-size/2}px`;h.style.width=h.style.height=`${size}px`;});
   skull?.resize();chase?.resize();}
  const frameHooks:((dt:number)=>void)[]=[];let chase:Chase|undefined;let skull:Awaited<ReturnType<typeof createSkull>>|undefined;
  place(sk,SKULL.x,SKULL.y,SKULL.w,SKULL.h);
@@ -75,8 +76,8 @@ export async function createView(onProgress:(s:string)=>void){
  let shower=0;raf=requestAnimationFrame(frameLoop);
  // ---- overlays
  const backdrop=$('#backdrop'),fsOverlay=$('#fs-overlay'),bonusOverlay=$('#bonus-overlay'),banner=$('#bigwin'),flash=$('#flash');
- const fsImg=$<HTMLImageElement>('#fs-img');fsImg.src=urls.freeSpins;{const w=OVERLAY.freeSpins.w,h=w*941/1672;place(fsOverlay,OVERLAY.freeSpins.cx-w/2,OVERLAY.freeSpins.cy-h/2,w,h);}
- const bonusImg=$<HTMLImageElement>('#bonus-img');bonusImg.src=urls.bonus;{const w=OVERLAY.bonus.w,h=w*BONUS_IMG.h/BONUS_IMG.w;place(bonusOverlay,OVERLAY.bonus.cx-w/2,OVERLAY.bonus.cy-h/2,w,h);bonusOverlay.style.setProperty('--k',String(w/BONUS_IMG.w));}
+ const fsImg=$<HTMLImageElement>('#fs-img');deferSrc(fsImg,urls.freeSpins);{const w=OVERLAY.freeSpins.w,h=w*941/1672;place(fsOverlay,OVERLAY.freeSpins.cx-w/2,OVERLAY.freeSpins.cy-h/2,w,h);}
+ const bonusImg=$<HTMLImageElement>('#bonus-img');deferSrc(bonusImg,urls.bonus);{const w=OVERLAY.bonus.w,h=w*BONUS_IMG.h/BONUS_IMG.w;place(bonusOverlay,OVERLAY.bonus.cx-w/2,OVERLAY.bonus.cy-h/2,w,h);bonusOverlay.style.setProperty('--k',String(w/BONUS_IMG.w));}
  const bonus=createBonusOverlay({celebration:b=>celebHook?.(b)??0,root:bonusOverlay,chestUrl:`${import.meta.env.BASE_URL}bonus-chest/bonus-chest-animated.glb?${assetRev}`,skullUrl,renderScale:()=>rs()*OVERLAY.bonus.w/BONUS_IMG.w,reduced,onClosed:()=>{backdrop.classList.remove('on');skull!.set('idle');const r=chestClosed;chestClosed=undefined;r?.();},burst:()=>{if(!reduced)fx.emit(DESIGN.w/2,420,'#ffd36a',40,420,40,{gravity:120});}});
  chase=createChase({world,skullCanvas:sk,renderScale:rs,skullTemplate:()=>skull!.template(),frameImg,panelImg,seekerUrl:`${import.meta.env.BASE_URL}assets/scenery/Skull_Seeker.glb?${assetRev}`,crateUrl:`${import.meta.env.BASE_URL}bonus-chest/bonus-chest-animated.glb?${assetRev}`,skullHeight:SKULL.height});
  let celebHook:((b:HTMLElement)=>number)|undefined;let chestClosed:(()=>void)|undefined;let bannerTimer=0,fsResolve:(()=>void)|undefined;

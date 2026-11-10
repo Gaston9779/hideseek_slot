@@ -129,7 +129,7 @@ body:not([data-ready]) #orientation{display:none!important}
 
 /* ---- audio button: lives on the blanked ring of the panel art; icon colours/shadow mirror the neighbouring lightning icon ---- */
 #audio{background:transparent;border:0;padding:0;border-radius:50%;cursor:pointer}
-#audio svg{position:absolute;left:50%;top:50%;width:68%;height:68%;transform:translate(-50%,-50%);filter:drop-shadow(0 1.5px 1px #2a0f0acc) drop-shadow(0 0 5px #ffb54a88);pointer-events:none;transition:filter .2s,opacity .2s}
+#audio svg{position:absolute;left:50%;top:50%;width:calc(var(--art,100%)*.68);height:calc(var(--art,100%)*.68);transform:translate(-50%,-50%);filter:drop-shadow(0 1.5px 1px #2a0f0acc) drop-shadow(0 0 5px #ffb54a88);pointer-events:none;transition:filter .2s,opacity .2s}
 #audio .spk-slash{opacity:0}
 #audio[aria-pressed=false] .spk-waves{opacity:0}
 #audio[aria-pressed=false] .spk-slash{opacity:1}

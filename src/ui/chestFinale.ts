@@ -1,4 +1,4 @@
-import {urls} from '../view/assets';import {medalFor} from './bonusAssets';import {keys} from './keyboard';
+import {urls} from '../view/assets';import {deferSrc} from './deferredArt';import {medalFor} from './bonusAssets';import {keys} from './keyboard';
 import type {Chase} from '../chase/director';
 /**
  * CHEST BONUS COMPLETE — final reveal inside the stone portal (the approved Hide & Seek arch art, no brown panel):
@@ -17,7 +17,7 @@ export function createChestFinale(d:{host:HTMLElement;sizeFrom:HTMLElement;money
   <div class="cf-stack"><div class="cf-label" data-k="label">BASE WIN</div><div class="cf-num" data-k="num">0.00</div><div class="cf-sub" data-k="sub"></div></div>
   <div class="cf-mult" data-k="mult"><img data-k="multimg" alt="" draggable="false"></div>
   <div class="cf-hint" aria-hidden="true">TAP TO CONTINUE</div>`;
- root.querySelector<HTMLImageElement>('.cf-art')!.src=urls.bonus;d.host.appendChild(root);
+ deferSrc(root.querySelector<HTMLImageElement>('.cf-art')!,urls.bonus);d.host.appendChild(root);
  const q=<T extends HTMLElement>(k:string)=>root.querySelector<T>(`[data-k="${k}"]`)!;
  const fx=root.querySelector<HTMLCanvasElement>('.cf-fx')!,ctx=fx.getContext('2d')!;
  let tapOff=()=>{};let timers:number[]=[],raf=0,fxRaf=0,open=false,settled=false;

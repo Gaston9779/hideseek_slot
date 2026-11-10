@@ -1,4 +1,5 @@
 import * as T from 'three';
+import {createGlRenderer} from '../view/quality';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
 import {RigPoser} from '../chase/rigPose';import * as P from '../chase/poses';
 /**
@@ -25,7 +26,7 @@ export function createBabySkullPortrait(d:PortraitDeps){
  function build(){
   if(renderer||failed)return !failed;const tpl=d.template();if(!tpl){return false;}
   try{
-   renderer=new T.WebGLRenderer({canvas:d.canvas,antialias:true,alpha:true,premultipliedAlpha:true,preserveDrawingBuffer:true});renderer.setClearColor(0,0);renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.outputColorSpace=T.SRGBColorSpace;
+   renderer=createGlRenderer('baby',d.canvas,{preserveDrawingBuffer:true});
    scene=new T.Scene();lights.push(new T.HemisphereLight('#9a8cff','#4a3050',.95));const key=new T.DirectionalLight('#ffb36b',3.1);key.position.set(-2,3,4);const rim=new T.DirectionalLight('#7b5cff',3);rim.position.set(2,1.5,-2.5);const fill=new T.DirectionalLight('#ff8f4a',.8);fill.position.set(3,-1,3);lights.push(key,rim,fill);scene.add(...lights);
    const model=SkeletonUtils.clone(tpl.scene);model.position.set(0,0,0);model.quaternion.identity();model.scale.set(1,1,1);model.visible=true;model.traverse(o=>{if((o as T.Mesh).isMesh)o.frustumCulled=false;});
    const inner=new T.Group();inner.add(model);inner.updateMatrixWorld(true);const b=new T.Box3().setFromObject(model),size=b.getSize(new T.Vector3()),c=b.getCenter(new T.Vector3()),s=1/size.y;

@@ -1,7 +1,7 @@
 import * as T from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
-import {RoomEnvironment} from 'three/examples/jsm/environments/RoomEnvironment.js';
-import type {BuyBonusAdapter} from '../engine/buyBonus';import {cue} from '../audio/cues';import {BONUS_UI} from './bonusAssets';import {BUY_FRAME as F,pctRect,pctDisc,medalImgStyle} from './bonusAnchors';import {createBabySkullPortrait} from './babySkullPortrait';
+import {createEnvironment,createGlRenderer} from '../view/quality';
+import type {BuyBonusAdapter} from '../engine/buyBonus';import {cue} from '../audio/cues';import {BONUS_UI} from './bonusAssets';import {artAttr,deferSrc,loadDeferredArt} from './deferredArt';import {BUY_FRAME as F,pctRect,pctDisc,medalImgStyle} from './bonusAnchors';import {createBabySkullPortrait} from './babySkullPortrait';
 /**
  * BUY BONUS entry point: the original 3D chest (same GLB as the bonus screen) standing on the lower-right plinth, outside the reels and every control.
  * UI only. All gating/pricing comes from the adapter; with the default (disabled) adapter nothing can be bought, no credits move and no RNG is touched.
@@ -16,11 +16,11 @@ export function createBuyBonusWidget(d:BuyWidgetDeps){
  // ---- confirmation dialog -----------------------------------------------------------------------
  const dlg=document.createElement('dialog');dlg.id='buy-dialog';dlg.className='buy-modal';dlg.setAttribute('aria-labelledby','bd-title');
  const R=(r:import('./bonusAnchors').Rect)=>pctRect(r,F),D=(c:import('./bonusAnchors').Disc)=>pctDisc(c,F);
- dlg.innerHTML=`<div class="bm"><img class="bm-frame" src="${BONUS_UI.buyFrame}" alt="" draggable="false">
+ dlg.innerHTML=`<div class="bm"><img class="bm-frame" ${artAttr(BONUS_UI.buyFrame)} alt="" draggable="false">
   <h1 id="bd-title" class="bm-title" style="${R(F.title)}">BUY BONUS</h1>
   <div class="bm-intro" style="${R(F.intro)}"><p class="bd-desc">Choose one of three chests to receive <b>12 Free Spins</b> with a win multiplier.</p><p class="bd-note" role="alert"></p></div>
   <canvas class="bm-skull" aria-hidden="true" style="${R(F.skullCanvas)}"></canvas>
-  ${[1,2,5].map((m,i)=>`<img class="bm-medal" data-mult="${m}" src="${BONUS_UI.medals[m]}" alt="Possible prize ×${m}" draggable="false" style="${medalImgStyle(F.medals[i]!,F)}">`).join('')}
+  ${[1,2,5].map((m,i)=>`<img class="bm-medal" data-mult="${m}" ${artAttr(BONUS_UI.medals[m])} alt="Possible prize ×${m}" draggable="false" style="${medalImgStyle(F.medals[i]!,F)}">`).join('')}
   <button type="button" class="bm-step bd-minus" aria-label="Decrease bet" style="${D(F.minus)}"></button>
   <output class="bd-bet" aria-live="polite" aria-label="Bet" style="${R(F.stake)}"></output>
   <button type="button" class="bm-step bd-plus" aria-label="Increase bet" style="${D(F.plus)}"></button>
@@ -46,7 +46,7 @@ export function createBuyBonusWidget(d:BuyWidgetDeps){
  /** Focus after close: back to SPIN when a new round is possible, otherwise nothing keeps focus (a stale focus must never re-trigger Buy Bonus). */
  dlg.addEventListener('close',()=>{portrait.stop();queueMicrotask(()=>{const a=document.activeElement as HTMLElement|null;if(d.canOpen())document.querySelector<HTMLElement>('#spin')?.focus({preventScroll:true});else a?.blur?.();refresh();});});
  dlg.addEventListener('cancel',e=>{if(submitting)e.preventDefault();});   // Escape is inert while a purchase is in flight
- btn.addEventListener('click',()=>{if(btn.disabled||dlg.open||submitting||!d.canOpen())return;void ready();refresh();dlg.showModal();portrait.start();cancel.focus();});
+ btn.addEventListener('click',()=>{if(btn.disabled||dlg.open||submitting||!d.canOpen())return;void ready();void loadDeferredArt();refresh();dlg.showModal();portrait.start();cancel.focus();});
  cancel.addEventListener('click',()=>{if(!submitting)dlg.close();});qs('.bm-close').addEventListener('click',()=>{if(!submitting)dlg.close();});
  for(const [sel,delta] of [['.bd-minus',-1],['.bd-plus',1]] as const)qs(sel).addEventListener('click',()=>{if(submitting||!d.canOpen())return;d.changeBet(delta);refresh();});
  okBtn.addEventListener('click',async()=>{if(okBtn.disabled||submitting||!d.canOpen())return;submitting=true;okBtn.disabled=true;cancel.disabled=true;let r;try{r=await d.adapter.purchase();}catch(e){r={ok:false as const,reason:e instanceof Error?e.message:'Purchase could not be completed'};}
@@ -55,8 +55,8 @@ export function createBuyBonusWidget(d:BuyWidgetDeps){
  // ---- 3D chest ---------------------------------------------------------------------------------
  let renderer:T.WebGLRenderer|undefined,scene:T.Scene,cam:T.OrthographicCamera,model:T.Group,t=0,hover=0,hoverTarget=0,loadP:Promise<void>|undefined,visible=true;
  async function load(){
-  const gl=new T.WebGLRenderer({canvas,antialias:true,alpha:true,premultipliedAlpha:true});gl.setClearColor(0,0);gl.toneMapping=T.ACESFilmicToneMapping;gl.toneMappingExposure=1.05;gl.outputColorSpace=T.SRGBColorSpace;renderer=gl;
-  scene=new T.Scene();const pm=new T.PMREMGenerator(gl);scene.environment=pm.fromScene(new RoomEnvironment(),.04).texture;scene.environmentIntensity=.6;pm.dispose();
+  const gl=createGlRenderer('buy',canvas);renderer=gl;
+  scene=new T.Scene();scene.environment=createEnvironment(gl);scene.environmentIntensity=.6;
   scene.add(new T.HemisphereLight('#9a8cff','#4a3050',.9));const key=new T.DirectionalLight('#ffb36b',3);key.position.set(-300,500,700);const rim=new T.DirectionalLight('#7b5cff',2.6);rim.position.set(400,200,-400);const fill=new T.DirectionalLight('#ff8f4a',.9);fill.position.set(400,-100,600);scene.add(key,rim,fill);
   cam=new T.OrthographicCamera(-W/2,W/2,H/2,-H/2,-1000,1000);cam.position.set(0,0,500);
   const g=await new GLTFLoader().loadAsync(d.glbUrl);const m=g.scene;m.traverse(o=>{if((o as T.Mesh).isMesh)o.frustumCulled=false;});
@@ -65,6 +65,7 @@ export function createBuyBonusWidget(d:BuyWidgetDeps){
  }
  function resize(){if(!renderer)return;const s=Math.max(1,Math.min(2,d.renderScale()*1.5));renderer.setPixelRatio(1);renderer.setSize(Math.round(W*s),Math.round(H*s),false);}
  const ready=()=>loadP??=load().catch(e=>{console.error('[buy-bonus] chest model unavailable',e);root.classList.add('no3d');});
+ void ready(); // The chest is the Buy Bonus affordance, so render it before any pointer/focus interaction.
  btn.addEventListener('pointerenter',()=>{hoverTarget=1;void ready();});btn.addEventListener('pointerleave',()=>{hoverTarget=0;});btn.addEventListener('focus',()=>{hoverTarget=1;void ready();});btn.addEventListener('blur',()=>{hoverTarget=0;});
  return {
   root,refresh,
