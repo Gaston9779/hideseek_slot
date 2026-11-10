@@ -9,6 +9,7 @@ import {Particles} from './particles';
 import {LAYER_FILES,SymbolAnimator,type FxLayers} from './symbolFx';
 import {createSkull} from './skull';import {createChase,type Chase} from '../chase/director';
 import type {SkullState} from '../animation/mascot';
+import {coalescedResize,renderPixelRatio} from './quality';
 
 const INITIAL:SymbolId[][]=[['TOMB','CHEST','LANTERN'],['WILD','GHOST','SKULL'],['LANTERN','KEY','SCATTER'],['CHEST','POTION','MAGIC_BOOK'],['POTION','SCATTER','GARGOYLE']];
 const $=<T extends HTMLElement>(s:string)=>document.querySelector<T>(s)!;
@@ -20,7 +21,7 @@ export async function createView(onProgress:(s:string)=>void){
  const world=$('#world'),stage=$('#stage');const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  const sk=$<HTMLCanvasElement>('#skull');
  // Begin every first-view request together. FX layers remain a progressive enhancement and never delay play.
- const firstScale=()=>Math.max(.6,Math.min(2,Math.min(stage.clientWidth/DESIGN.w,stage.clientHeight/DESIGN.h)*(window.devicePixelRatio||1)));
+ const firstScale=()=>Math.max(.55,Math.min(2,Math.min(stage.clientWidth/DESIGN.w,stage.clientHeight/DESIGN.h)*renderPixelRatio()));
  const skullPromise=createSkull(sk,`${import.meta.env.BASE_URL}assets/scenery/Skull_Horned_Creature_Rigged.glb`,firstScale);
  const fxLayersPromise=loadFxLayers(LAYER_FILES).catch(()=>null);
  // ---- static layers from layout
@@ -35,15 +36,15 @@ export async function createView(onProgress:(s:string)=>void){
  for(const [id,s] of [['balance-field',.62],['bet-field',.56],['win-field',.66]] as const)$(`#${id}`).style.fontSize=`${72*PANEL.scale*s}px`;   // same type size for all three fields (reference pill height 72 art px)
  // ---- scaling
  const hitBase=new Map<HTMLElement,{x:number,y:number,w:number}>();let scale=1;const canvases=[...document.querySelectorAll<HTMLCanvasElement>('canvas.layer')];
- const rs=()=>Math.max(.6,Math.min(2,scale*(window.devicePixelRatio||1)));
+ const rs=()=>Math.max(.55,Math.min(2,scale*renderPixelRatio()));
  const ctxs=new Map<HTMLCanvasElement,CanvasRenderingContext2D>();
- function fit(){const vw=stage.clientWidth,vh=stage.clientHeight;scale=Math.min(vw/DESIGN.w,vh/DESIGN.h);world.style.transform=`translate(${(vw-DESIGN.w*scale)/2}px,${(vh-DESIGN.h*scale)/2}px) scale(${scale})`;
-  for(const c of canvases){if(c.id==='skull')continue;const r=rs();c.width=Math.round(DESIGN.w*r);c.height=Math.round(DESIGN.h*r);const x=c.getContext('2d')!;x.setTransform(r,0,0,r,0,0);ctxs.set(c,x);}
+ function fit(){const vw=Math.max(1,stage.clientWidth),vh=Math.max(1,stage.clientHeight);scale=Math.min(vw/DESIGN.w,vh/DESIGN.h);world.style.transform=`translate(${(vw-DESIGN.w*scale)/2}px,${(vh-DESIGN.h*scale)/2}px) scale(${scale})`;
+  for(const c of canvases){if(c.id==='skull')continue;const r=rs(),w=Math.max(1,Math.round(DESIGN.w*r)),h=Math.max(1,Math.round(DESIGN.h*r));if(c.width!==w||c.height!==h){c.width=w;c.height=h;}const x=c.getContext('2d')!;x.setTransform(r,0,0,r,0,0);ctxs.set(c,x);}
   const MIN=46;document.querySelectorAll<HTMLElement>('.hit').forEach(h=>{const b=hitBase.get(h)??(()=>{const o={x:parseFloat(h.style.left),y:parseFloat(h.style.top),w:parseFloat(h.style.width)};hitBase.set(h,o);return o;})();const size=Math.max(b.w,MIN/scale);h.style.left=`${b.x+b.w/2-size/2}px`;h.style.top=`${b.y+b.w/2-size/2}px`;h.style.width=h.style.height=`${size}px`;});
   skull?.resize();chase?.resize();}
  const frameHooks:((dt:number)=>void)[]=[];let chase:Chase|undefined;let skull:Awaited<ReturnType<typeof createSkull>>|undefined;
  place(sk,SKULL.x,SKULL.y,SKULL.w,SKULL.h);
- fit();addEventListener('resize',fit);
+ fit();const removeResize=coalescedResize(fit);
  const reelsCtx=ctxs.get($('#reels'))!,fxCtx=ctxs.get($('#fx'))!,atmoCtx=ctxs.get($('#atmo'))!;
  const reels=new Reels(reelsCtx,symbols,INITIAL);const fx=new Particles(240);
  // ---- WILD / SCATTER / CHEST_BONUS animation: a cosmetic enhancement, so it cannot hold up boot.
@@ -105,7 +106,7 @@ export async function createView(onProgress:(s:string)=>void){
   hideBonusPreview(){bonus.close();},
   bonus,
   inspect(){return {skull:skull!.inspect(),grid:reels.grid,spinning:reels.isSpinning,scale,renderScale:rs(),fxParticles:fx.count,winCells:reels.activeWinCells};},
-  dispose(){cancelAnimationFrame(raf);skull!.dispose();},
+  dispose(){cancelAnimationFrame(raf);removeResize();bonus.dispose();chase?.dispose();skull!.dispose();},
  };
  function burst(tier:WinTier){const big=tier!=='medium';if(reduced)return;const cx=(PLAY_AREA.x+PLAY_AREA.w/2),cy=PLAY_AREA.y+PLAY_AREA.h/2;fx.emit(cx,cy,'#ffd36a',big?34:16,big?520:300,big?44:30,{gravity:120});if(big)fx.emit(cx,cy,'#fff0b0',16,300,56,{gravity:0,star:true});if(tier==='mega'||tier==='max'){shower=tier==='max'?4:2.6;fx.emit(cx,cy,'#ff9ae8',30,600,40);}
   flash.classList.remove('go');void flash.offsetWidth;flash.classList.add('go');}

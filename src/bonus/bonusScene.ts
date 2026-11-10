@@ -57,7 +57,7 @@ export async function createBonusScene(o:{canvas:HTMLCanvasElement,chestUrl:stri
  let raf=0,running=false,last=0,t=0;const selected={i:-1};const dimmed=new Set<number>();
  const resize=()=>{const s=o.renderScale(),w=Math.round(BONUS_IMG.w*s),h=Math.round(BONUS_IMG.h*s);if(o.canvas.width!==w||o.canvas.height!==h){renderer.setPixelRatio(1);renderer.setSize(w,h,false);}};
  const base=chests.map(c=>c.object.scale.x);
- function frame(now:number){raf=requestAnimationFrame(frame);const dt=Math.min((now-last)/1000,.05);last=now;t+=dt;
+ function frame(now:number){raf=requestAnimationFrame(frame);if(document.hidden){last=now;return;}const dt=Math.min((now-last)/1000,.05);last=now;t+=dt;
   chests.forEach((c,i)=>{c.update(dt);
    const closed=c.state==='closed';
    // idle: tiny breathing + lid rattle about the hinge; the base never leaves the pedestal
@@ -85,7 +85,7 @@ export async function createBonusScene(o:{canvas:HTMLCanvasElement,chestUrl:stri
   start(){if(running)return;running=true;last=performance.now();raf=requestAnimationFrame(frame);},
   stop(){running=false;cancelAnimationFrame(raf);},
   resize,
-  dispose(){api.stop();o.canvas.removeEventListener('pointermove',onMove);o.canvas.removeEventListener('pointerdown',onDown);o.canvas.removeEventListener('pointerleave',onLeave);renderer.dispose();},
+  dispose(){api.stop();o.canvas.removeEventListener('pointermove',onMove);o.canvas.removeEventListener('pointerdown',onDown);o.canvas.removeEventListener('pointerleave',onLeave);renderer.dispose();renderer.forceContextLoss();},
   inspect(){return {running,chests:chests.map(c=>({progress:c.progress,angle:c.angleDeg,state:c.state,pos:c.object.position.toArray(),scale:c.object.scale.x})),skull:{visible:skullRoot.visible,state:skullCtl.state,pos:skullRoot.position.toArray()},errors};},
  };
  // route GL problems into the inspector

@@ -8,7 +8,8 @@ import {SKULL} from '../layout';
 function normalize(obj:T.Object3D,height:number){const w=new T.Group();w.add(obj);obj.updateMatrixWorld(true);const b=new T.Box3().setFromObject(obj),size=b.getSize(new T.Vector3()),c=b.getCenter(new T.Vector3());const s=height/size.y;obj.scale.multiplyScalar(s);obj.position.sub(new T.Vector3(c.x,b.min.y,c.z).multiplyScalar(s));return w;}
 export async function createSkull(canvas:HTMLCanvasElement,glbUrl:string,renderScale:()=>number){
  const renderer=new T.WebGLRenderer({canvas,antialias:true,alpha:true,premultipliedAlpha:true});renderer.setClearColor(0,0);renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.outputColorSpace=T.SRGBColorSpace;
- const scene=new T.Scene();const pm=new T.PMREMGenerator(renderer);scene.environment=pm.fromScene(new RoomEnvironment(),.04).texture;scene.environmentIntensity=.55;
+ let contextLost=false;const onLost=(e:Event)=>{e.preventDefault();contextLost=true;};const onRestored=()=>{contextLost=false;resize();};canvas.addEventListener('webglcontextlost',onLost,false);canvas.addEventListener('webglcontextrestored',onRestored,false);
+ const scene=new T.Scene();const pm=new T.PMREMGenerator(renderer),env=pm.fromScene(new RoomEnvironment(),.04).texture;pm.dispose();scene.environment=env;scene.environmentIntensity=.55;
  const {w,h,height,foot}=SKULL;const cam=new T.OrthographicCamera(-w/2,w/2,h/2,-h/2,-2000,2000);cam.position.set(0,0,1000);
  scene.add(new T.HemisphereLight('#9a8cff','#4a3050',.9));
  const key=new T.DirectionalLight('#ffb36b',3.1);key.position.set(-500,600,700);scene.add(key);       // lantern from the upper left
@@ -24,14 +25,14 @@ export async function createSkull(canvas:HTMLCanvasElement,glbUrl:string,renderS
  const shadow=new T.Mesh(new T.PlaneGeometry(height*1.0,height*.26),new T.MeshBasicMaterial({map:new T.CanvasTexture(sc),transparent:true,depthWrite:false}));shadow.position.set(base.x,base.y+4,-300);scene.add(shadow);
  const pulseColor=new T.Color('#ff8f4a');let pulseK=0;const fillBase=new T.Color('#ff8f4a');
  let hop=0,elapsed=0,raf=0,last=performance.now(),running=true;const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
- function resize(){const s=renderScale();renderer.setPixelRatio(1);renderer.setSize(w*s,h*s,false);}
+ function resize(){if(contextLost)return;const s=renderScale();renderer.setPixelRatio(1);renderer.setSize(Math.max(1,Math.round(w*s)),Math.max(1,Math.round(h*s)),false);}
  resize();
- function tick(now:number){if(!running)return;raf=requestAnimationFrame(tick);const dt=Math.min((now-last)/1000,.05);last=now;elapsed+=dt;controller.update(dt);
+ function tick(now:number){if(!running)return;raf=requestAnimationFrame(tick);if(document.hidden){last=now;return;}const dt=Math.min((now-last)/1000,.05);last=now;elapsed+=dt;controller.update(dt);
   // dynamic light: the lantern key flickers in sync with the 2D lamps (same frequencies as the atmosphere layer); result-driven colour pulse on the fill light
   const fl=reduced?0:.06*Math.sin(elapsed*9)*Math.sin(elapsed*3.1)+.03*Math.sin(elapsed*17);key.intensity=3.1*(1+fl);pulseK=Math.max(0,pulseK-dt*1.1);fill.color.copy(fillBase).lerp(pulseColor,Math.min(1,pulseK));fill.intensity=.8+pulseK*2.4;rim.intensity=3.2+pulseK*1.2;
   if(hop>0){hop=Math.max(0,hop-dt);const k=1-hop/1.2;root.position.y=base.y+Math.abs(Math.sin(k*Math.PI*3))*(reduced?0:height*.04)*(1-k*.4);}else root.position.y=base.y+Math.sin(elapsed*1.8)*(reduced?0:height*.004);
-  root.scale.y=1+Math.sin(elapsed*1.8)*(reduced?0:.006);renderer.render(scene,cam);}
+  root.scale.y=1+Math.sin(elapsed*1.8)*(reduced?0:.006);if(!contextLost)renderer.render(scene,cam);}
  function pulse(e:SkullEvent){if(reduced)return;const m:Partial<Record<SkullEvent,[string,number]>>={WIN:['#ffd36a',.7],BIG_WIN:['#ffe08a',1.3],BONUS_TRIGGER:['#c06cff',1.1],BEST_CHEST_PICK:['#ffe08a',1.3]};const v=m[e];if(!v)return;pulseColor.set(v[0]);pulseK=v[1];}
  raf=requestAnimationFrame(tick);
- return {controller,resize,template:()=>({scene:gltf.scene,animations:gltf.animations}),set(state:SkullState){controller.setState(state);if(state==='bigwin')hop=1.2;},dispatch(e:SkullEvent,o?:{freeSpin?:boolean}){controller.dispatch(e,o);if(e==='BIG_WIN'||e==='BEST_CHEST_PICK')hop=1.2;pulse(e);},inspect:()=>controller.inspect(),dispose(){running=false;cancelAnimationFrame(raf);renderer.dispose();}};
+ return {controller,resize,template:()=>({scene:gltf.scene,animations:gltf.animations}),set(state:SkullState){controller.setState(state);if(state==='bigwin')hop=1.2;},dispatch(e:SkullEvent,o?:{freeSpin?:boolean}){controller.dispatch(e,o);if(e==='BIG_WIN'||e==='BEST_CHEST_PICK')hop=1.2;pulse(e);},inspect:()=>controller.inspect(),dispose(){running=false;cancelAnimationFrame(raf);canvas.removeEventListener('webglcontextlost',onLost);canvas.removeEventListener('webglcontextrestored',onRestored);env.dispose();shadow.geometry.dispose();(shadow.material as T.Material).dispose();renderer.dispose();renderer.forceContextLoss();}};
 }
