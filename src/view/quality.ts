@@ -1,6 +1,6 @@
 /** Central GPU budget.  Keeps the 1920×1080 composition, but caps backing-store
  * resolution on memory-constrained mobile WebKit independently of orientation. */
-import {mobileDebug} from '../mobileDebug';
+import {mobileDebug} from '../mobileDebug';import {safe} from '../platform/safeMode';
 import * as T from 'three';
 import {RoomEnvironment} from 'three/examples/jsm/environments/RoomEnvironment.js';
 export const isMobile = () => typeof matchMedia === 'undefined' ? false : matchMedia('(pointer: coarse)').matches || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -22,6 +22,12 @@ export function createEnvironment(gl: T.WebGLRenderer) {
   const pm = new T.PMREMGenerator(gl), room = new RoomEnvironment(), tex = pm.fromScene(room, .04).texture;
   room.traverse(o => { const m = o as T.Mesh; if (m.isMesh) { m.geometry.dispose(); (Array.isArray(m.material) ? m.material : [m.material]).forEach(x => x.dispose()); } });
   pm.dispose(); return tex;
+}
+/** Sets the scene's lighting environment. Where PMREM is disabled (phones, see platform/safeMode) a flat ambient light of similar strength replaces it.
+ *  Returns the generated texture (to dispose) or null. */
+export function applyEnvironment(scene: T.Scene, gl: T.WebGLRenderer, intensity: number) {
+  if (!safe.ibl) { scene.add(new T.AmbientLight('#cdbfff', 0.9 + intensity * 1.6)); mobileDebug.step('env:skipped'); return null; }
+  mobileDebug.step('env:pmrem-start'); const tex = createEnvironment(gl); scene.environment = tex; scene.environmentIntensity = intensity; mobileDebug.step('env:pmrem-done'); return tex;
 }
 
 /** Coalesce resize/orientation/visualViewport bursts into one allocation pass. */

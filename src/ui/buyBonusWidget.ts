@@ -1,6 +1,6 @@
 import * as T from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
-import {createEnvironment,createGlRenderer} from '../view/quality';
+import {symbolUrl,artUrl} from '../view/assets';import {safe} from '../platform/safeMode';import {applyEnvironment,createGlRenderer,isMobile} from '../view/quality';
 import type {BuyBonusAdapter} from '../engine/buyBonus';import {cue} from '../audio/cues';import {BONUS_UI} from './bonusAssets';import {artAttr,deferSrc,loadDeferredArt} from './deferredArt';import {BUY_FRAME as F,pctRect,pctDisc,medalImgStyle} from './bonusAnchors';import {createBabySkullPortrait} from './babySkullPortrait';
 /**
  * BUY BONUS entry point: the original 3D chest (same GLB as the bonus screen) standing on the lower-right plinth, outside the reels and every control.
@@ -46,7 +46,7 @@ export function createBuyBonusWidget(d:BuyWidgetDeps){
  /** Focus after close: back to SPIN when a new round is possible, otherwise nothing keeps focus (a stale focus must never re-trigger Buy Bonus). */
  dlg.addEventListener('close',()=>{portrait.stop();queueMicrotask(()=>{const a=document.activeElement as HTMLElement|null;if(d.canOpen())document.querySelector<HTMLElement>('#spin')?.focus({preventScroll:true});else a?.blur?.();refresh();});});
  dlg.addEventListener('cancel',e=>{if(submitting)e.preventDefault();});   // Escape is inert while a purchase is in flight
- btn.addEventListener('click',()=>{if(btn.disabled||dlg.open||submitting||!d.canOpen())return;void ready();void loadDeferredArt();refresh();dlg.showModal();portrait.start();cancel.focus();});
+ btn.addEventListener('click',()=>{if(btn.disabled||dlg.open||submitting||!d.canOpen())return;void ready();void loadDeferredArt();refresh();dlg.showModal();if(safe.bonus3d)portrait.start();else void flatPortrait();cancel.focus();});
  cancel.addEventListener('click',()=>{if(!submitting)dlg.close();});qs('.bm-close').addEventListener('click',()=>{if(!submitting)dlg.close();});
  for(const [sel,delta] of [['.bd-minus',-1],['.bd-plus',1]] as const)qs(sel).addEventListener('click',()=>{if(submitting||!d.canOpen())return;d.changeBet(delta);refresh();});
  okBtn.addEventListener('click',async()=>{if(okBtn.disabled||submitting||!d.canOpen())return;submitting=true;okBtn.disabled=true;cancel.disabled=true;let r;try{r=await d.adapter.purchase();}catch(e){r={ok:false as const,reason:e instanceof Error?e.message:'Purchase could not be completed'};}
@@ -56,7 +56,7 @@ export function createBuyBonusWidget(d:BuyWidgetDeps){
  let renderer:T.WebGLRenderer|undefined,scene:T.Scene,cam:T.OrthographicCamera,model:T.Group,t=0,hover=0,hoverTarget=0,loadP:Promise<void>|undefined,visible=true;
  async function load(){
   const gl=createGlRenderer('buy',canvas);renderer=gl;
-  scene=new T.Scene();scene.environment=createEnvironment(gl);scene.environmentIntensity=.6;
+  scene=new T.Scene();applyEnvironment(scene,gl,.6);
   scene.add(new T.HemisphereLight('#9a8cff','#4a3050',.9));const key=new T.DirectionalLight('#ffb36b',3);key.position.set(-300,500,700);const rim=new T.DirectionalLight('#7b5cff',2.6);rim.position.set(400,200,-400);const fill=new T.DirectionalLight('#ff8f4a',.9);fill.position.set(400,-100,600);scene.add(key,rim,fill);
   cam=new T.OrthographicCamera(-W/2,W/2,H/2,-H/2,-1000,1000);cam.position.set(0,0,500);
   const g=await new GLTFLoader().loadAsync(d.glbUrl);const m=g.scene;m.traverse(o=>{if((o as T.Mesh).isMesh)o.frustumCulled=false;});
@@ -64,8 +64,13 @@ export function createBuyBonusWidget(d:BuyWidgetDeps){
   model=new T.Group();model.add(m);model.position.y=-H/2+14;scene.add(model);resize();
  }
  function resize(){if(!renderer)return;const s=Math.max(1,Math.min(2,d.renderScale()*1.5));renderer.setPixelRatio(1);renderer.setSize(Math.round(W*s),Math.round(H*s),false);}
- const ready=()=>loadP??=load().catch(e=>{console.error('[buy-bonus] chest model unavailable',e);root.classList.add('no3d');});
- void ready(); // The chest is the Buy Bonus affordance, so render it before any pointer/focus interaction.
+ // Phones: the Baby Skull portrait is the static render of the model (one 2D draw, no WebGL).
+ let flatDone=false;async function flatPortrait(){if(flatDone)return;const cv=dlg.querySelector<HTMLCanvasElement>('canvas.bm-skull');if(!cv)return;const im=new Image();im.decoding='async';im.src=artUrl('skull-static');try{await im.decode();}catch{return;}const dpr=Math.min(2,devicePixelRatio||1),w=Math.max(2,Math.round(cv.clientWidth*dpr)),h=Math.max(2,Math.round(cv.clientHeight*dpr)),c=cv.getContext('2d');if(!c)return;cv.width=w;cv.height=h;const k=im.naturalWidth/600,sx=165*k,sy=262*k,sw=270*k,sh=sw*h/w;c.drawImage(im,sx,sy,sw,sh,0,0,w,h);flatDone=true;}
+ // Safe mode: the same chest as the reel symbol, drawn once on a 2D canvas (no WebGL context, no GLB, no PMREM).
+ async function flat(){const i=new Image();i.decoding='async';i.src=symbolUrl('CHEST_BONUS');try{await i.decode();}catch{return;}const c=canvas.getContext('2d');if(!c)return;const s=Math.min(W/i.naturalWidth,H/i.naturalHeight)*.95;c.drawImage(i,(W-i.naturalWidth*s)/2,H-i.naturalHeight*s-6,i.naturalWidth*s,i.naturalHeight*s);}
+ const ready=()=>loadP??=(safe.buy3d?load():flat()).catch(e=>{console.error('[buy-bonus] chest model unavailable',e);root.classList.add('no3d');});
+ // The chest is the Buy Bonus affordance and stays visible. On phones its WebGL context + GLB are created once the game is already playable (not inside the boot peak).
+ if(isMobile())window.setTimeout(()=>void ready(),2500);else void ready();
  btn.addEventListener('pointerenter',()=>{hoverTarget=1;void ready();});btn.addEventListener('pointerleave',()=>{hoverTarget=0;});btn.addEventListener('focus',()=>{hoverTarget=1;void ready();});btn.addEventListener('blur',()=>{hoverTarget=0;});
  return {
   root,refresh,

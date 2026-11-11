@@ -11,7 +11,9 @@
     "typecheck": "tsc --noEmit",
     "simulate": "tsx scripts/simulate.ts",
     "preview:lan": "vite preview --host 0.0.0.0 --port 4180 --strictPort",
-    "test:mobile": "node scripts/mobile-spin-test.mjs --scenario basic --spins 20"
+    "test:mobile": "node scripts/mobile-spin-test.mjs --scenario basic --spins 30",
+    "test:mobile:land": "node scripts/mobile-spin-test.mjs --scenario basic --spins 30 --landscape",
+    "optimize:art": "python3 scripts/optimize-art.py"
   },
   "dependencies": {
     "three": "^0.180.0"

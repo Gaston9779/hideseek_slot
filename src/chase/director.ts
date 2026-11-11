@@ -5,7 +5,7 @@ import {DESIGN,FRAME,HUD,PANEL,SKULL,SKULL_ANCHOR} from '../layout';
 import {CHASE,HOLO_INTRO,HOLO_INTRO_TOTAL} from '../config/chase';import {cue} from '../audio/cues';import {HologramMaterialization,HoloBeamFx,introState} from './hologram';
 import {RigPoser} from './rigPose';
 import * as P from './poses';
-import {mobileDebug} from '../mobileDebug';import {createEnvironment,createGlRenderer} from '../view/quality';
+import {mobileDebug} from '../mobileDebug';import {safe} from '../platform/safeMode';import {applyEnvironment,createGlRenderer,isMobile} from '../view/quality';
 /**
  * 3D "Seeker chase" gag. One extra transparent WebGL canvas covering the whole 1920×1080 design space (1 unit = 1 design px, y up),
  * driven by the existing main loop (no second rAF). Occlusion is explicit and depth-based:
@@ -80,7 +80,7 @@ export interface Chase{
  scrub(time:number,dt?:number,crate?:boolean):Promise<void>;update(dt:number):void;resize():void;inspect():unknown;dispose():void;
 }
 export function createChase(d:{world:HTMLElement,skullCanvas:HTMLCanvasElement,renderScale:()=>number,skullTemplate:()=>{scene:T.Object3D,animations:T.AnimationClip[]},frameImg:HTMLImageElement,panelImg:HTMLImageElement,seekerUrl:string,skullHeight:number,crateUrl?:string}):Chase{
- const canvas=document.createElement('canvas');canvas.id='chase';canvas.setAttribute('aria-hidden','true');d.world.appendChild(canvas);
+ let canvas=document.createElement('canvas');canvas.id='chase';canvas.setAttribute('aria-hidden','true');d.world.appendChild(canvas);
  const hole=HUD.spin;const R=hole.r*1.04;const mask=`radial-gradient(circle at ${hole.cx}px ${hole.cy}px, transparent ${R}px, #000 ${R+1.5}px)`;
  canvas.style.cssText=`position:absolute;left:0;top:0;width:${DESIGN.w}px;height:${DESIGN.h}px;z-index:5;pointer-events:none;visibility:hidden;-webkit-mask-image:${mask};mask-image:${mask}`;
  let renderer:T.WebGLRenderer|undefined,scene:T.Scene,cam:T.OrthographicCamera,skull:Actor,seeker:Actor,occluders:T.Mesh[]=[],tex:T.Texture[]=[],loading:Promise<void>|undefined,loaded=false;
@@ -94,8 +94,9 @@ export function createChase(d:{world:HTMLElement,skullCanvas:HTMLCanvasElement,r
  const isolated=import.meta.env.DEV&&new URLSearchParams(location.search).has('debugNoChase');
  async function load(){
   if(isolated){mobileDebug.event('chase:isolated');return;}
+  if(!safe.bonus3d){mobileDebug.step('chase:disabled-by-mode');return;}
   const gl=createGlRenderer('chase',canvas);renderer=gl;
-  scene=new T.Scene();scene.environment=createEnvironment(gl);scene.environmentIntensity=.55;
+  scene=new T.Scene();applyEnvironment(scene,gl,.55);
   cam=new T.OrthographicCamera(0,DESIGN.w,DESIGN.h,0,-2000,2000);cam.position.set(0,0,1000);
   // identical lighting recipe as the in-slot Skull so the two stay visually matched
   lights.push(new T.HemisphereLight('#9a8cff','#4a3050',.9));const key=new T.DirectionalLight('#ffb36b',3.1);key.position.set(-500,600,700);const rim=new T.DirectionalLight('#7b5cff',3.2);rim.position.set(500,300,-500);const fill=new T.DirectionalLight('#ff8f4a',.8);fill.position.set(600,-200,600);lights.push(key,rim,fill);scene.add(...lights);
@@ -183,6 +184,11 @@ export function createChase(d:{world:HTMLElement,skullCanvas:HTMLCanvasElement,r
   once('look',.5,()=>cue.voice('searching'));once('scared',1.5,()=>cue.voice('scared'));
   once('run',2.5,()=>cue.skullRun(true));once('runOff',6.0,()=>cue.skullRun(false));once('fall',TUMBLE.t0,()=>cue.skullFall());}
  function marks(){const at={crateDrop:{x:CRATE_X,y:YF-20},impact:{x:CRATE_X-30,y:YF-70},skullHome:{x:HOME.x,y:HOME.y-120}};for(const k of Object.keys(CHASE_MARKS) as ChaseMark[])if(!fired.has(k)&&t>=CHASE_MARKS[k]){fired.add(k);opts.onMark?.(k,at[k]);}}
+ /** Phones: the chase owns a full-frame WebGL context, the Seeker/crate GLBs and two 6 MB occluder textures. When it has been idle it is released (context force-lost,
+  *  canvas replaced by a clean copy, references dropped) and rebuilt by the next ready(). Nothing shared with the in-slot Skull is disposed. */
+ let idle=0;const RELEASE_AFTER_S=4;
+ function release(){idle=0;if(!isMobile()||!loaded||running||celeb||scrubbing||!renderer)return;holo.end();const r=renderer;renderer=undefined;loaded=false;loading=undefined;occluders=[];tex=[];lights.length=0;beamFx=undefined;crate=undefined;
+  try{r.dispose();r.forceContextLoss();}catch{/* already gone */}const fresh=canvas.cloneNode(false) as HTMLCanvasElement;canvas.replaceWith(fresh);canvas=fresh;mobileDebug.event('chase:released');}
  function end(ok:boolean){running=false;aud.clear();if(!ok)cue.cinematicAbort();holo.end();beamFx?.setVisible(false);if(crate)crate.visible=false;scrubbing=false;canvas.style.visibility='hidden';d.skullCanvas.style.visibility='';skull?.setVisible(false);seeker?.setVisible(false);for(const a of [skull,seeker]){a?.poser.reset();a?.alert?.stop();a?.mixer?.stopAllAction();}alertStarted=false;alertFaded=false;const r=resolveRun;resolveRun=undefined;r?.(ok);}
  function driveCelebration(dt:number){
   const c=celeb!;c.t+=Math.min(dt,.05);const t=c.t,enter=Math.min(1,t/.4),ease=1-Math.pow(1-enter,3);
@@ -208,7 +214,8 @@ export function createChase(d:{world:HTMLElement,skullCanvas:HTMLCanvasElement,r
   abort(){if(running){scrubbing=false;end(false);}},
   get running(){return running;},
   update(dt){
-   if(celeb&&renderer&&!running){driveCelebration(dt);return;}
+   if(celeb&&renderer&&!running){idle=0;driveCelebration(dt);return;}
+   if(!running&&loaded)idle+=dt;else idle=0;if(idle>RELEASE_AFTER_S)release();
    if(!running||!renderer||scrubbing)return;const sdt=Math.min(dt,.05)*speed;t+=sdt;
    // skull's alert clip runs through the AnimationMixer (real GLB clip "afraid"); procedural poses take over afterwards
    const seg=pick(SKULLSEG,t);if(seg?.anim==='alert'&&skull.alert&&!alertStarted){skull.alert.reset().fadeIn(.15).play();alertStarted=true;}

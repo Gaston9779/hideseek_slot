@@ -1,12 +1,12 @@
-import {cue} from '../audio/cues';import {medalFor} from '../ui/bonusAssets';import {ChestBonusController,type BonusPorts,type ChestBonusRound} from './controller';
+import {cue} from '../audio/cues';import {isMobile} from '../view/quality';import {mobileDebug} from '../mobileDebug';import {medalFor} from '../ui/bonusAssets';import {ChestBonusController,type BonusPorts,type ChestBonusRound} from './controller';
 import {PreviewAdapter,TestRoundProvider} from './provider';
-import {createBonusScene,type BonusScene} from './bonusScene';
+import {createBonusScene,type BonusScene} from './bonusScene';import {createFlatBonusScene} from './flatBonusScene';import {safe} from '../platform/safeMode';
 import {BONUS_IMG,LABEL_UP,PEDESTALS,SUMMARY_RECT} from './bonusLayout';
 
 /** DOM glue for both the production engine-backed chest round and the explicit no-credit visual preview. */
 export function createBonusOverlay(d:{celebration?:(banner:HTMLElement)=>number,root:HTMLElement,chestUrl:string,skullUrl:string,renderScale:()=>number,reduced:boolean,onClosed:()=>void,burst?:()=>void}){
  const $=<T extends HTMLElement>(s:string)=>d.root.querySelector<T>(s)!;
- const canvas=$('#bonus-canvas') as HTMLCanvasElement,prizesEl=$('#bonus-prizes'),banner=$('#bonus-banner'),summary=$('#bonus-summary'),live=$('#bonus-live'),loading=$('#bonus-loading');
+ let canvas=$('#bonus-canvas') as HTMLCanvasElement;const prizesEl=$('#bonus-prizes'),banner=$('#bonus-banner'),summary=$('#bonus-summary'),live=$('#bonus-live'),loading=$('#bonus-loading');
  const previewProvider=new TestRoundProvider(),previewAdapter=new PreviewAdapter();let provider:{nextRound():ChestBonusRound}=previewProvider,adapter:{award(id:string,prize:number):boolean;awards?:{roundId:string,prize:number}[]}=previewAdapter;let real=false;
  let scene:BonusScene|undefined,controller:ChestBonusController|undefined,opening=false,timers=new Set<number>(),isOpen=false;
  const celebrateMs=(import.meta.env.DEV&&Number(new URLSearchParams(location.search).get('bonusCelebrateMs')))||3200;   // QA only: lets screenshots catch the celebration
@@ -50,13 +50,17 @@ export function createBonusOverlay(d:{celebration?:(banner:HTMLElement)=>number,
   async open(){
    if(isOpen||opening)return;opening=true;resetUi();d.root.classList.add('show');isOpen=true;api.onOpenChange?.(true);
    try{
-    if(!scene){loading.hidden=false;scene=await createBonusScene({canvas,chestUrl:d.chestUrl,skullUrl:d.skullUrl,renderScale:d.renderScale,onPick:i=>{controller?.select(i);}});loading.hidden=true;}
+    if(!scene){loading.hidden=false;scene=safe.bonus3d?await createBonusScene({canvas,chestUrl:d.chestUrl,skullUrl:d.skullUrl,renderScale:d.renderScale,onPick:i=>{controller?.select(i);}}):createFlatBonusScene({root:d.root,canvas,reduced:d.reduced,onPick:i=>{controller?.select(i);}});loading.hidden=true;}
     if(!isOpen){return;}                                 // closed while loading
     scene.reset();scene.resize();const round=provider.nextRound();controller=new ChestBonusController(round,makePorts(round),adapter);scene.start();live.textContent='Pick one of the three chests';
    }catch(e){console.error('[bonus] failed to start',e);loading.textContent='Could not load the bonus preview';}
    finally{opening=false;}
   },
-  close(){if(!isOpen)return;isOpen=false;api.onOpenChange?.(false);controller?.close();controller=undefined;resetUi();scene?.stop();scene?.reset();d.root.classList.remove('show');d.onClosed();},
+  close(){if(!isOpen)return;isOpen=false;api.onOpenChange?.(false);controller?.close();controller=undefined;resetUi();scene?.stop();scene?.reset();d.root.classList.remove('show');
+   // Phones keep at most the slot's own GL contexts alive between bonuses: the chest scene (context + 3 chests + Skull) is released and rebuilt on the next open.
+   // A canvas whose context was force-lost cannot get a new one, so it is replaced by a clean copy.
+   if(isMobile()&&scene){scene.dispose();scene=undefined;const fresh=canvas.cloneNode(false) as HTMLCanvasElement;canvas.replaceWith(fresh);canvas=fresh;mobileDebug.event('bonus:scene-released');}
+   d.onClosed();},
   /** keyboard access: 1 / 2 / 3 */
   pick(i:number){return controller?.select(i)??false;},
   dispose(){api.close();scene?.dispose();scene=undefined;},

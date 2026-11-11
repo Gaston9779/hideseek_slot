@@ -185,3 +185,20 @@ body:not([data-ready]) #orientation{display:none!important}
 
 /* chest-opening medals are transparent PNGs: the old per-multiplier rings were box-shadows on the rectangular label element (higher specificity than the later reset) */
 #bonus-prizes .bprize.x1,#bonus-prizes .bprize.x2,#bonus-prizes .bprize.x5,#bonus-prizes .bprize.selected,#bonus-prizes .bprize.unselected{background:none;border:0;box-shadow:none;outline:0}
+
+/* Crash-loop paint levels (platform/safeMode.ts): each death of the page raises the level, removing the most expensive compositing features first. */
+html[data-paint="1"] #world,html[data-paint="1"] #world.ready,html[data-paint="1"] #loading{transition:none!important}
+html[data-paint="2"] *,html[data-paint="3"] *{filter:none!important;-webkit-filter:none!important;mix-blend-mode:normal!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;-webkit-mask-image:none!important;mask-image:none!important;text-shadow:none!important;box-shadow:none!important}
+html[data-paint="2"] #world,html[data-paint="2"] #loading,html[data-paint="3"] #world,html[data-paint="3"] #loading{transition:none!important}
+html[data-paint="3"] #atmo,html[data-paint="3"] #fx,html[data-paint="3"] .ba,html[data-paint="3"] #flash{display:none!important}
+
+/* Phones: 2D chest picker (src/bonus/flatBonusScene.ts). transform/opacity only. */
+.fc-wrap{position:absolute;inset:0;pointer-events:none;z-index:2}
+.fc{position:absolute;width:calc(300px*var(--k,1));aspect-ratio:1;transform:translate(-50%,-88%);background:none;border:0;padding:0;pointer-events:none;transition:transform .25s ease-out,opacity .25s}
+.fc img{width:100%;height:100%;object-fit:contain;display:block;-webkit-user-drag:none;pointer-events:none}
+.fc.on{pointer-events:auto;cursor:pointer}
+.fc.sel,.fc.open{transform:translate(-50%,-94%) scale(1.1)}
+.fc.dim{opacity:.5}
+.fc.open img{animation:fcOpen .45s ease-out}
+.fc.best::after{content:"";position:absolute;inset:-12%;border-radius:50%;background:radial-gradient(circle,#ffd36a99,#ffd36a00 65%);z-index:-1}
+@keyframes fcOpen{0%{transform:scale(1)}40%{transform:scale(1.12) rotate(-3deg)}100%{transform:scale(1)}}

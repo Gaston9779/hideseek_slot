@@ -27,7 +27,16 @@ const q=`debugMobile=1${seed?`&qa&seed=${seed}`:''}`;const url=base+(base.includ
 const shot=n=>page.screenshot({path:`${SHOTS}/${scenario}-${landscape?'land':'port'}-${n}.png`}).catch(()=>{});
 const snap=()=>page.evaluate(()=>({heap:Math.round((performance.memory?.usedJSHeapSize||0)/1048576),canvases:[...document.querySelectorAll('canvas')].map(c=>`${c.id||c.className}:${c.width}x${c.height}`).join(' '),balance:document.querySelector('#balance')?.textContent,win:document.querySelector('#win')?.textContent,status:document.querySelector('#status')?.textContent,loadingDone:document.querySelector('#loading')?.classList.contains('done'),gl:window.__glCount}));
 await page.addInitScript(()=>{window.__glCount=0;const o=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(t,...a){if(String(t).includes('webgl'))window.__glCount++;return o.call(this,t,...a);};});
-const idle=()=>page.waitForFunction(()=>{const b=document.querySelector('#spin');return b&&!b.disabled&&!b.classList.contains('busy')&&!document.querySelector('dialog[open]')&&!document.body.dataset.cine;},null,{timeout:90000});
+const isIdle=()=>page.evaluate(()=>{const b=document.querySelector('#spin');return !!b&&!b.disabled&&!b.classList.contains('busy')&&!document.querySelector('dialog[open]')&&!document.body.dataset.cine&&!document.querySelector('.fs-summary.show,.cf.on,#bonus-overlay.show,#fs-overlay.show');});
+// A natural bonus can trigger during the plain-spin scenario (the production build has no seeded RNG): play it out like a player (summary button, tap on the finale, pick a chest) and count it.
+let bonusesSeen=0;
+const idle=async()=>{const t=Date.now();let seen=false;while(Date.now()-t<240000){if(await isIdle())return;
+  const act=await page.evaluate(()=>{const q=s=>document.querySelector(s);if(q('.fs-summary.show .fsm-go')){q('.fs-summary.show .fsm-go').click();return 'summary';}if(q('.cf.on'))return 'finale';if(q('#fs-overlay.show'))return 'fs-intro';if(q('#bonus-overlay.show'))return 'chest';return '';});
+  if(act&&!seen){seen=true;bonusesSeen++;}
+  if(act==='finale'||act==='fs-intro')await page.mouse.click(vp.width/2,vp.height/2);
+  if(act==='chest'){const box=await page.locator('#bonus-canvas').boundingBox();if(box)await page.mouse.click(box.x+box.width*.5,box.y+box.height*.6);}
+  await page.waitForTimeout(500);}
+ throw new Error('game did not return to idle within 240 s');};
 const sound=async()=>page.evaluate(()=>{const b=document.querySelector('#audio'),r=b.getBoundingClientRect(),s=b.querySelector('svg').getBoundingClientRect(),q=document.querySelector('#quick').getBoundingClientRect(),sp=document.querySelector('#spin').getBoundingClientRect();return {btn:`${Math.round(r.width)}x${Math.round(r.height)}`,icon:`${Math.round(s.width)}x${Math.round(s.height)}`,quickW:Math.round(q.width),spinW:Math.round(sp.width),inView:r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight,overlapsQuick:!(r.right<=q.left||r.left>=q.right),pressed:b.getAttribute('aria-pressed'),vw:innerWidth,vh:innerHeight};});
 const result={scenario,engine,viewport:vp,url,checks:{}};let ok=true;const check=(k,v,pass=v===true)=>{result.checks[k]=pass?'PASS':`FAIL (${JSON.stringify(v)})`;if(!pass)ok=false;};
 const t0=Date.now();await page.goto(url,{waitUntil:'commit'});
@@ -45,9 +54,9 @@ if(scenario==='basic'){
   const win=Number(String(s.win).replace(/,/g,''))||0;if(b<prev-1.0001||b>prev-1+win+0.0001+999999)balanceOk=false;prev=b;
   if(page.isClosed())break;}
  check(`${SPINS} consecutive spins completed`,rows.length===SPINS);check('balance accounting plausible (never below prev - bet)',balanceOk);
- result.spinMs={first:rows[0]?.ms,median:rows.map(r=>r.ms).sort((a,b)=>a-b)[Math.floor(rows.length/2)],max:Math.max(...rows.map(r=>r.ms))};result.heapMB={start:s0.heap,afterSpin1:rows[0]?.heap,end:rows.at(-1)?.heap};
+ result.naturalBonusesPlayed=bonusesSeen;result.spinMs={first:rows[0]?.ms,median:rows.map(r=>r.ms).sort((a,b)=>a-b)[Math.floor(rows.length/2)],max:Math.max(...rows.map(r=>r.ms))};result.heapMB={start:s0.heap,afterSpin1:rows[0]?.heap,end:rows.at(-1)?.heap};
  const sa=await sound();result.sound=sa;check('Sound button sized with the art (icon ≤ 1.25× quick button, button fits, no overlap with Quick)',sa.inView&&!sa.overlapsQuick&&Number(sa.icon.split('x')[0])<=sa.quickW*1.25,sa.inView&&!sa.overlapsQuick&&Number(sa.icon.split('x')[0])<=sa.quickW*1.25);
- await page.tap('#audio');const p1=(await sound()).pressed;await page.tap('#audio');const p2=(await sound()).pressed;check('Sound button toggles aria-pressed and back',p1!==p2&&p2===sa.pressed,p1!==p2&&p2===sa.pressed);
+ if(!/mode=A/.test(url)){await page.tap('#audio');const p1=(await sound()).pressed;await page.tap('#audio');const p2=(await sound()).pressed;check('Sound button toggles aria-pressed and back',p1!==p2&&p2===sa.pressed,p1!==p2&&p2===sa.pressed);}else result.checks['Sound button toggle']='SKIPPED (mode A has no audio by design)';
  // orientation / resize transitions while idle and during a spin
  const other=landscape?portrait:land;await page.setViewportSize(other);await page.waitForTimeout(800);const so=await sound();result.soundOtherOrientation=so;await shot('rotated');
  check('rotation: Sound button still inside the viewport',so.inView);
