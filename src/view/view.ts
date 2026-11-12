@@ -32,7 +32,8 @@ export async function createView(onProgress:(s:string)=>void){
  startup.mark('shell-art-ready');
  const symbols=await loadSymbolImages();startup.mark('reel-art-ready');
  mobileDebug.step('boot:symbols-done',{safe:safe.level});
- const skullPromise=safe.skull3d?createSkull(sk,skullUrl,firstScale):Promise.resolve(createSkullStub(sk));
+ // The Skull is decoration: if its model cannot be loaded (slow/blocked network, CDN hiccup) the game still starts, with the static render of the character.
+ const skullPromise=safe.skull3d?createSkull(sk,skullUrl,firstScale).catch(error=>{console.warn('[view] Skull model unavailable, using the static Skull',error);mobileDebug.error('skull-fallback',error);return createSkullStub(sk);}):Promise.resolve(createSkullStub(sk));
  const fxLayersPromise=(safe.symbolFx?loadFxLayers(LAYER_FILES):Promise.resolve(null)).catch(error=>{console.warn('[view] optional symbol FX unavailable',error);return null;});
  const bg=$<HTMLImageElement>('#bg');bg.src=bgImg.src;place(bg,BG.x,BG.y,BG.src[0]*BG.scale,BG.src[1]*BG.scale);
  const frame=$<HTMLImageElement>('#frame');frame.src=frameImg.src;place(frame,FRAME.x,FRAME.y,FRAME.src[0]*FRAME.scale,FRAME.src[1]*FRAME.scale);

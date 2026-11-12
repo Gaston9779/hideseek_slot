@@ -12,7 +12,7 @@ const symbolUrls=import.meta.glob('../../assets-2d/optimized/symbols/*.webp',{ea
 export const symbolUrl=(id:SymbolId)=>Object.entries(symbolUrls).find(([k])=>k.endsWith(`/${SYMBOL_ART[id].file}.webp`))?.[1]??'';
 export const urls={bg,frame,panel,logo,bonus,freeSpins};
 /** A request which neither loads nor errors used to hold the loading screen forever. */
-export function loadImage(src:string,timeoutMs=15_000){return new Promise<HTMLImageElement>((res,rej)=>{const i=new Image();let done=false;const name=src.split('/').pop()!.split('?')[0]!;mobileDebug.asset(name,'start');
+export function loadImage(src:string,timeoutMs=40_000){return new Promise<HTMLImageElement>((res,rej)=>{const i=new Image();let done=false;const name=src.split('/').pop()!.split('?')[0]!;mobileDebug.asset(name,'start');
  const finish=(fn:()=>void)=>{if(done)return;done=true;mobileDebug.asset(name,i.complete&&i.naturalWidth?'success':'failure');clearTimeout(timeout);i.onload=null;i.onerror=null;fn();};
  const timeout=window.setTimeout(()=>finish(()=>rej(new Error(`Timed out loading image: ${src}`))),timeoutMs);
  i.decoding='async';i.onload=()=>finish(()=>res(i));i.onerror=()=>finish(()=>rej(new Error(`Missing asset: ${src}`)));i.src=src;

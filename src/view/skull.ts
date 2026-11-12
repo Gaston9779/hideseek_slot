@@ -23,10 +23,10 @@ export async function createSkull(canvas:HTMLCanvasElement,glbUrl:string,renderS
  // A static public URL can be served as a partial response after a CDN deploy. Validate the
  // GLB envelope before passing it to GLTFLoader so an invalid response has a useful error and
  // a bounded failure instead of an unhandled JSON.parse rejection.
- const controllerAbort=new AbortController();const timeout=window.setTimeout(()=>controllerAbort.abort(),15_000);
+ const controllerAbort=new AbortController();const timeout=window.setTimeout(()=>controllerAbort.abort(),40_000);   // slow networks: the model is cosmetic, see the static fallback in view.ts
  let bytes:ArrayBuffer;
  try{mobileDebug.asset('Skull_Horned_Creature_Rigged.glb','start');const response=await fetch(glbUrl,{signal:controllerAbort.signal});if(!response.ok)throw new Error(`Skull model request failed: HTTP ${response.status}`);bytes=await response.arrayBuffer();mobileDebug.asset('Skull_Horned_Creature_Rigged.glb','success',{bytes:bytes.byteLength});}
- catch(error){mobileDebug.asset('Skull_Horned_Creature_Rigged.glb','failure');throw new Error(`Skull model unavailable (${glbUrl}): ${error instanceof Error?error.message:String(error)}`);}
+ catch(error){mobileDebug.asset('Skull_Horned_Creature_Rigged.glb','failure');try{renderer.dispose();renderer.forceContextLoss();env?.dispose();}catch{/* already gone */}throw new Error(`Skull model unavailable (${glbUrl}): ${error instanceof Error?error.message:String(error)}`);}
  finally{clearTimeout(timeout);}
  if(bytes.byteLength<20)throw new Error(`Skull model is truncated (${bytes.byteLength} bytes)`);
  const header=new DataView(bytes);if(header.getUint32(0,true)!==0x46546c67||header.getUint32(4,true)!==2||header.getUint32(8,true)!==bytes.byteLength)throw new Error(`Skull model has an invalid GLB header (${bytes.byteLength} bytes)`);
